@@ -1,0 +1,97 @@
+area_geofencing|character varying
+bairro|character varying
+banco_agencia|character varying
+banco_conta|character varying
+banco_nome|character varying
+biometria|text
+biometria_facial|text
+carga_horaria|character varying
+cargo_funcao|character varying
+cartao_sus|character varying
+carteira_conselheiro|character varying
+celular|character varying
+cep|character varying
+cidade|character varying
+cnh_categoria|character varying
+cnh_numero|character varying
+cnh_validade|date
+codigo_qr|text
+cpf|character varying
+created_at|timestamp without time zone
+ctps_data_emissao|date
+ctps_numero|character varying
+ctps_serie|character varying
+ctps_uf|character
+data_admissao|date
+data_exercicio|date
+data_nascimento|date
+data_nascimento_conjuge|date
+deficiencia|boolean
+deficiencia_cid|character varying
+deficiencia_tipo|character varying
+deficiente|boolean
+dependentes_ir|jsonb
+distancia_max_permitida|integer
+email|character varying
+endereco|character varying
+endereco_bairro|character varying
+endereco_cep|character varying
+endereco_complemento|character varying
+endereco_email|character varying
+endereco_municipio|character varying
+endereco_numero|character varying
+endereco_uf|character
+escolaridade|character varying
+estado_civil|character varying
+facial_descriptor|jsonb
+filhos_menores|jsonb
+foto_perfil|text
+id|integer
+id_cargo|integer
+id_dia_da_semana|integer
+id_horario|integer
+lat_permitida|numeric
+long_permitida|numeric
+mae|character varying
+matricula|character varying
+metodos_acesso|jsonb
+nacionalidade|character varying
+nacionalidade_conjuge|character varying
+naturalidade|character varying
+naturalidade_conjuge|character varying
+naturalidade_uf|character
+naturalidade_uf_conjuge|character
+nome|character varying
+nome_conjuge|character varying
+nome_mae|character varying
+nome_pai|character varying
+nome_social|character varying
+numero|character varying
+observacoes_complementares|text
+pai|character varying
+pis_pasep|character varying
+raca_cor|character varying
+reservista_numero|character varying
+reservista_serie|character varying
+rg|character varying
+rg_data_emissao|date
+rg_numero|character varying
+rg_orgao|character varying
+rua|character varying
+senha|text
+setor|character varying
+sexo|character varying
+telefone_fixo|character varying
+tipo_contratacao|character varying
+tipo_sanguineo|character varying
+titulo_eleitor|character varying
+titulo_eleitor_numero|character varying
+titulo_eleitor_secao|character varying
+titulo_eleitor_zona|character varying
+turno_trabalho|character varying
+uf|character varying
+unidade_trabalho|character varying
+updated_at|timestamp without time zone
+webauthn_counter|integer
+webauthn_id|text
+webauthn_pk|text

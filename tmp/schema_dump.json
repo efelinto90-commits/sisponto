@@ -1,0 +1,345 @@
+[
+    {
+        "table_name": "funcionarios",
+        "column_name": "area_geofencing",
+        "data_type": "character varying",
+        "numeric_precision": null,
+        "numeric_scale": null
+    },
+    {
+        "table_name": "funcionarios",
+        "column_name": "bairro",
+        "data_type": "character varying",
+        "numeric_precision": null,
+        "numeric_scale": null
+    },
+    {
+        "table_name": "funcionarios",
+        "column_name": "biometria",
+        "data_type": "text",
+        "numeric_precision": null,
+        "numeric_scale": null
+    },
+    {
+        "table_name": "funcionarios",
+        "column_name": "biometria_facial",
+        "data_type": "text",
+        "numeric_precision": null,
+        "numeric_scale": null
+    },
+    {
+        "table_name": "funcionarios",
+        "column_name": "carga_horaria",
+        "data_type": "character varying",
+        "numeric_precision": null,
+        "numeric_scale": null
+    },
+    {
+        "table_name": "funcionarios",
+        "column_name": "cartao_sus",
+        "data_type": "character varying",
+        "numeric_precision": null,
+        "numeric_scale": null
+    },
+    {
+        "table_name": "funcionarios",
+        "column_name": "celular",
+        "data_type": "character varying",
+        "numeric_precision": null,
+        "numeric_scale": null
+    },
+    {
+        "table_name": "funcionarios",
+        "column_name": "cep",
+        "data_type": "character varying",
+        "numeric_precision": null,
+        "numeric_scale": null
+    },
+    {
+        "table_name": "funcionarios",
+        "column_name": "cidade",
+        "data_type": "character varying",
+        "numeric_precision": null,
+        "numeric_scale": null
+    },
+    {
+        "table_name": "funcionarios",
+        "column_name": "codigo_qr",
+        "data_type": "character varying",
+        "numeric_precision": null,
+        "numeric_scale": null
+    },
+    {
+        "table_name": "funcionarios",
+        "column_name": "cpf",
+        "data_type": "character varying",
+        "numeric_precision": null,
+        "numeric_scale": null
+    },
+    {
+        "table_name": "funcionarios",
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "numeric_precision": null,
+        "numeric_scale": null
+    },
+    {
+        "table_name": "funcionarios",
+        "column_name": "data_nascimento",
+        "data_type": "date",
+        "numeric_precision": null,
+        "numeric_scale": null
+    },
+    {
+        "table_name": "funcionarios",
+        "column_name": "deficiente",
+        "data_type": "boolean",
+        "numeric_precision": null,
+        "numeric_scale": null
+    },
+    {
+        "table_name": "funcionarios",
+        "column_name": "distancia_max_permitida",
+        "data_type": "integer",
+        "numeric_precision": 32,
+        "numeric_scale": 0
+    },
+    {
+        "table_name": "funcionarios",
+        "column_name": "email",
+        "data_type": "character varying",
+        "numeric_precision": null,
+        "numeric_scale": null
+    },
+    {
+        "table_name": "funcionarios",
+        "column_name": "estado_civil",
+        "data_type": "character varying",
+        "numeric_precision": null,
+        "numeric_scale": null
+    },
+    {
+        "table_name": "funcionarios",
+        "column_name": "facial_descriptor",
+        "data_type": "text",
+        "numeric_precision": null,
+        "numeric_scale": null
+    },
+    {
+        "table_name": "funcionarios",
+        "column_name": "foto_perfil",
+        "data_type": "text",
+        "numeric_precision": null,
+        "numeric_scale": null
+    },
+    {
+        "table_name": "funcionarios",
+        "column_name": "id",
+        "data_type": "integer",
+        "numeric_precision": 32,
+        "numeric_scale": 0
+    },
+    {
+        "table_name": "funcionarios",
+        "column_name": "id_cargo",
+        "data_type": "integer",
+        "numeric_precision": 32,
+        "numeric_scale": 0
+    },
+    {
+        "table_name": "funcionarios",
+        "column_name": "id_dia_da_semana",
+        "data_type": "integer",
+        "numeric_precision": 32,
+        "numeric_scale": 0
+    },
+    {
+        "table_name": "funcionarios",
+        "column_name": "id_horario",
+        "data_type": "integer",
+        "numeric_precision": 32,
+        "numeric_scale": 0
+    },
+    {
+        "table_name": "funcionarios",
+        "column_name": "lat_permitida",
+        "data_type": "numeric",
+        "numeric_precision": 10,
+        "numeric_scale": 8
+    },
+    {
+        "table_name": "funcionarios",
+        "column_name": "long_permitida",
+        "data_type": "numeric",
+        "numeric_precision": 11,
+        "numeric_scale": 8
+    },
+    {
+        "table_name": "funcionarios",
+        "column_name": "mae",
+        "data_type": "character varying",
+        "numeric_precision": null,
+        "numeric_scale": null
+    },
+    {
+        "table_name": "funcionarios",
+        "column_name": "matricula",
+        "data_type": "character varying",
+        "numeric_precision": null,
+        "numeric_scale": null
+    },
+    {
+        "table_name": "funcionarios",
+        "column_name": "metodos_acesso",
+        "data_type": "text",
+        "numeric_precision": null,
+        "numeric_scale": null
+    },
+    {
+        "table_name": "funcionarios",
+        "column_name": "nome",
+        "data_type": "character varying",
+        "numeric_precision": null,
+        "numeric_scale": null
+    },
+    {
+        "table_name": "funcionarios",
+        "column_name": "numero",
+        "data_type": "character varying",
+        "numeric_precision": null,
+        "numeric_scale": null
+    },
+    {
+        "table_name": "funcionarios",
+        "column_name": "pai",
+        "data_type": "character varying",
+        "numeric_precision": null,
+        "numeric_scale": null
+    },
+    {
+        "table_name": "funcionarios",
+        "column_name": "pis_pasep",
+        "data_type": "character varying",
+        "numeric_precision": null,
+        "numeric_scale": null
+    },
+    {
+        "table_name": "funcionarios",
+        "column_name": "rg",
+        "data_type": "character varying",
+        "numeric_precision": null,
+        "numeric_scale": null
+    },
+    {
+        "table_name": "funcionarios",
+        "column_name": "rua",
+        "data_type": "character varying",
+        "numeric_precision": null,
+        "numeric_scale": null
+    },
+    {
+        "table_name": "funcionarios",
+        "column_name": "senha",
+        "data_type": "text",
+        "numeric_precision": null,
+        "numeric_scale": null
+    },
+    {
+        "table_name": "funcionarios",
+        "column_name": "setor",
+        "data_type": "character varying",
+        "numeric_precision": null,
+        "numeric_scale": null
+    },
+    {
+        "table_name": "funcionarios",
+        "column_name": "sexo",
+        "data_type": "character varying",
+        "numeric_precision": null,
+        "numeric_scale": null
+    },
+    {
+        "table_name": "funcionarios",
+        "column_name": "titulo_eleitor",
+        "data_type": "character varying",
+        "numeric_precision": null,
+        "numeric_scale": null
+    },
+    {
+        "table_name": "funcionarios",
+        "column_name": "uf",
+        "data_type": "character varying",
+        "numeric_precision": null,
+        "numeric_scale": null
+    },
+    {
+        "table_name": "funcionarios",
+        "column_name": "updated_at",
+        "data_type": "timestamp without time zone",
+        "numeric_precision": null,
+        "numeric_scale": null
+    },
+    {
+        "table_name": "funcionarios",
+        "column_name": "webauthn_counter",
+        "data_type": "integer",
+        "numeric_precision": 32,
+        "numeric_scale": 0
+    },
+    {
+        "table_name": "funcionarios",
+        "column_name": "webauthn_id",
+        "data_type": "text",
+        "numeric_precision": null,
+        "numeric_scale": null
+    },
+    {
+        "table_name": "funcionarios",
+        "column_name": "webauthn_pk",
+        "data_type": "text",
+        "numeric_precision": null,
+        "numeric_scale": null
+    },
+    {
+        "table_name": "geofencing_presets",
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "numeric_precision": null,
+        "numeric_scale": null
+    },
+    {
+        "table_name": "geofencing_presets",
+        "column_name": "distancia_max",
+        "data_type": "integer",
+        "numeric_precision": 32,
+        "numeric_scale": 0
+    },
+    {
+        "table_name": "geofencing_presets",
+        "column_name": "id",
+        "data_type": "integer",
+        "numeric_precision": 32,
+        "numeric_scale": 0
+    },
+    {
+        "table_name": "geofencing_presets",
+        "column_name": "latitude",
+        "data_type": "numeric",
+        "numeric_precision": 11,
+        "numeric_scale": 8
+    },
+    {
+        "table_name": "geofencing_presets",
+        "column_name": "longitude",
+        "data_type": "numeric",
+        "numeric_precision": 11,
+        "numeric_scale": 8
+    },
+    {
+        "table_name": "geofencing_presets",
+        "column_name": "nome_area",
+        "data_type": "character varying",
+        "numeric_precision": null,
+        "numeric_scale": null
+    }
+]

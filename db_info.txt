@@ -1,0 +1,115 @@
+USERS:
+Array
+(
+    [0] => Array
+        (
+            [name] => JACIRA.DIAS
+            [level] => 3
+        )
+
+    [1] => Array
+        (
+            [name] => suporte
+            [level] => 1
+        )
+
+    [2] => Array
+        (
+            [name] => RAFAEL.COELHO
+            [level] => 2
+        )
+
+    [3] => Array
+        (
+            [name] => edilson
+            [level] => 2
+        )
+
+    [4] => Array
+        (
+            [name] => zuleide
+            [level] => 2
+        )
+
+    [5] => Array
+        (
+            [name] => admin_temp
+            [level] => 1
+        )
+
+)
+
+COLS:
+Array
+(
+    [0] => id
+    [1] => name
+    [2] => email
+    [3] => email_verified_at
+    [4] => password
+    [5] => remember_token
+    [6] => created_at
+    [7] => updated_at
+    [8] => data_cadastro
+    [9] => excluido
+    [10] => id
+    [11] => name
+    [12] => email
+    [13] => email_verified_at
+    [14] => password
+    [15] => remember_token
+    [16] => created_at
+    [17] => updated_at
+    [18] => data_cadastro
+    [19] => excluido
+    [20] => id
+    [21] => name
+    [22] => email
+    [23] => email_verified_at
+    [24] => password
+    [25] => remember_token
+    [26] => created_at
+    [27] => updated_at
+    [28] => data_cadastro
+    [29] => excluido
+    [30] => id
+    [31] => name
+    [32] => email
+    [33] => email_verified_at
+    [34] => password
+    [35] => remember_token
+    [36] => created_at
+    [37] => updated_at
+    [38] => data_cadastro
+    [39] => excluido
+    [40] => id
+    [41] => name
+    [42] => email
+    [43] => email_verified_at
+    [44] => password
+    [45] => remember_token
+    [46] => created_at
+    [47] => updated_at
+    [48] => data_cadastro
+    [49] => excluido
+    [50] => id
+    [51] => name
+    [52] => email
+    [53] => email_verified_at
+    [54] => password
+    [55] => remember_token
+    [56] => created_at
+    [57] => updated_at
+    [58] => data_cadastro
+    [59] => excluido
+    [60] => id
+    [61] => name
+    [62] => email
+    [63] => email_verified_at
+    [64] => password
+    [65] => level
+    [66] => remember_token
+    [67] => created_at
+    [68] => updated_at
+    [69] => permissoes
+)
