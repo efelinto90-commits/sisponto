@@ -1,0 +1,15 @@
+# Garantir que os arquivos de modelos e shards sejam servidos corretamente
+<IfModule mod_mime.c>
+    AddType application/octet-stream .shard1
+    AddType application/octet-stream .shard2
+    AddType application/json .json
+</IfModule>
+
+# Permitir acesso aos arquivos
+<IfModule mod_authz_core.c>
+    Require all granted
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Order allow,deny
+    Allow from all
+</IfModule>

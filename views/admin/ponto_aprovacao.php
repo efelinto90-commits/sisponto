@@ -73,20 +73,61 @@ if (!$is_crh) {
         </div>
     </div>
 
+    <!-- Seção de Afastamentos Pendentes -->
+    <div id="sectionAfastamentos" class="bg-amber-50 border-b border-amber-100 hidden">
+        <div onclick="toggleAfastamentos()" class="px-6 py-3 flex items-center justify-between cursor-pointer hover:bg-amber-100/50 transition-colors select-none">
+            <div class="flex items-center gap-3">
+                <svg id="afastArrow" class="w-5 h-5 text-amber-600 transition-transform duration-300 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+                <h2 class="text-base font-bold text-amber-800 flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    Afastamentos Aguardando Análise
+                </h2>
+                <span id="badgeAfastCount" class="bg-amber-200 text-amber-800 text-[10px] font-black px-2 py-0.5 rounded-full">0 Pendentes</span>
+            </div>
+            <span class="text-[9px] font-bold text-amber-600 uppercase tracking-widest hidden md:block">Clique para expandir/recolher</span>
+        </div>
+        
+        <div id="afastContent" class="px-6 pb-5 hidden">
+            <div class="rounded-xl border border-amber-200 shadow-sm bg-white overflow-hidden">
+                <div class="overflow-x-auto overflow-y-auto max-h-72" style="scrollbar-width: thin; scrollbar-color: #f59e0b #fef3c7;">
+                    <table class="w-full text-left text-sm border-collapse">
+                        <thead class="bg-amber-100/80 text-amber-900 font-bold uppercase text-[10px] tracking-wider border-b border-amber-200 sticky top-0 z-10">
+                            <tr>
+                                <th class="px-4 py-2">Solicitação</th>
+                                <th class="px-4 py-2">Colaborador</th>
+                                <th class="px-4 py-2">Período</th>
+                                <th class="px-4 py-2">Tipo / Motivo</th>
+                                <th class="px-4 py-2">Anexo</th>
+                                <th class="px-4 py-2 text-right">Ação CRH</th>
+                            </tr>
+                        </thead>
+                        <tbody id="afastamentosBody" class="divide-y divide-amber-100">
+                            <!-- Carregado via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
     <div class="p-6 flex-1 overflow-auto">
-        <table class="w-full text-left text-sm border-collapse">
+        <table class="w-full text-left text-sm border-collapse table-fixed">
             <thead class="bg-indigo-50/50 text-slate-500 font-semibold uppercase text-xs sticky top-0 z-10">
                 <tr>
-                    <th class="px-4 py-3 rounded-l-lg border-b border-slate-100 whitespace-nowrap">Data</th>
-                    <th class="px-4 py-3 border-b border-slate-100">Colaborador</th>
-                    <th class="px-4 py-3 text-center border-b border-slate-100 whitespace-nowrap">Batidas Originais</th>
-                    <th class="px-4 py-3 border-b border-slate-100">Justificativa do Gestor</th>
-                    <th class="px-4 py-3 text-right rounded-r-lg border-b border-slate-100 whitespace-nowrap">Ação CRH</th>
+                    <th class="px-4 py-3 rounded-l-lg border-b border-slate-100 whitespace-nowrap w-[8%] min-w-[80px]">Data</th>
+                    <th class="px-4 py-3 border-b border-slate-100 w-[22%] min-w-[200px]">Colaborador</th>
+                    <th class="px-4 py-3 text-center border-b border-slate-100 whitespace-nowrap w-[17%] min-w-[150px]">Batidas Originais</th>
+                    <th class="px-4 py-3 border-b border-slate-100 w-[22%] min-w-[200px]">Justificativa do Funcionário</th>
+                    <th class="px-4 py-3 border-b border-slate-100 w-[18%] min-w-[170px]">Justificativa do Gestor</th>
+                    <th class="px-4 py-3 text-right rounded-r-lg border-b border-slate-100 whitespace-nowrap w-[13%] min-w-[120px]">Ação CRH</th>
                 </tr>
             </thead>
             <tbody id="pontoBody" class="divide-y divide-slate-100">
                 <tr>
-                    <td colspan="5" class="text-center py-20 text-slate-400">Carregando dados...</td>
+                    <td colspan="6" class="text-center py-20 text-slate-400">Carregando dados...</td>
                 </tr>
             </tbody>
         </table>
@@ -103,9 +144,37 @@ if (!$is_crh) {
                           ['corsin', 'crh'].includes(CURRENT_USER_NAME) || 
                           ['corsin', 'crh'].includes(CURRENT_USER_SETOR);
 
+    function toggleAfastamentos() {
+        const content = document.getElementById('afastContent');
+        const arrow = document.getElementById('afastArrow');
+        if (content.classList.contains('hidden')) {
+            content.classList.remove('hidden');
+            arrow.classList.add('rotate-180');
+        } else {
+            content.classList.add('hidden');
+            arrow.classList.remove('rotate-180');
+        }
+    }
+
     function esc(s) {
         if (s == null) return '';
         return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    }
+
+    function renderizarAnexosLista(json) {
+        if (!json) return '<span class="text-slate-300 text-[10px]">Sem anexo</span>';
+        let anexos = [];
+        try {
+            anexos = JSON.parse(json);
+            if (!Array.isArray(anexos)) anexos = [json];
+        } catch(e) { anexos = [json]; }
+        
+        return anexos.map((path, idx) => `
+            <a href="../../${path}" target="_blank" class="p-1.5 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 inline-flex items-center gap-1 text-[10px] font-bold transition-all" title="Ver Arquivo ${idx+1}">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
+                #${idx+1}
+            </a>
+        `).join('');
     }
 
     function mostrarMotivo(texto) {
@@ -118,6 +187,127 @@ if (!$is_crh) {
             confirmButtonColor: '#3085d6',
             confirmButtonText: 'Entendido'
         });
+    }
+
+    async function loadAfastamentosPendentes() {
+        const body = document.getElementById('afastamentosBody');
+        const section = document.getElementById('sectionAfastamentos');
+        const badge = document.getElementById('badgeAfastCount');
+
+        try {
+            const res = await fetch('../../api/ferias.php', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ action: 'list_pending' })
+            });
+            const json = await res.json();
+
+            if (!json.success) {
+                console.warn('[Afastamentos Pendentes] API retornou erro:', json.message || 'Sem mensagem');
+                console.warn('[Afastamentos Pendentes] Nível do usuário:', CURRENT_USER_LEVEL, '| Nome:', CURRENT_USER_NAME, '| Setor:', CURRENT_USER_SETOR);
+                // Exibe seção com mensagem de aviso em vez de ocultar silenciosamente
+                section.classList.remove('hidden');
+                badge.textContent = 'Erro';
+                body.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-red-500 font-semibold text-sm">Não foi possível carregar os afastamentos pendentes: ${esc(json.message || 'Permissão negada')}. Verifique o console para mais detalhes.</td></tr>`;
+                return;
+            }
+
+            if (json.success && json.data.length > 0) {
+                section.classList.remove('hidden');
+                badge.textContent = `${json.data.length} Pendente(s)`;
+                body.innerHTML = json.data.map(a => `
+                    <tr class="hover:bg-amber-50/50 transition-colors">
+                        <td class="px-4 py-3 text-[11px] text-slate-500">${new Date(a.created_at).toLocaleString('pt-BR')}</td>
+                        <td class="px-4 py-3">
+                            <div class="font-bold text-slate-800">${esc(a.nome_funcionario)}</div>
+                            <div class="text-[10px] text-slate-500 uppercase tracking-tight">Matrícula: ${esc(a.matricula)}</div>
+                        </td>
+                        <td class="px-4 py-3">
+                            <div class="font-black text-amber-700 text-xs">${a.data_inicio.split('-').reverse().join('/')} até ${a.data_fim.split('-').reverse().join('/')}</div>
+                        </td>
+                        <td class="px-4 py-3">
+                            <span class="text-[10px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded border border-amber-200 uppercase">${esc(a.tipo_afastamento || 'Afastamento')}</span>
+                            <div class="text-[11px] text-slate-600 mt-1 max-w-[200px] truncate" title="${esc(a.motivo_especifico || a.observacao || '')}">${esc(a.motivo_especifico || a.observacao || '-')}</div>
+                            ${a.gestor_solicitante ? `<div class="text-[10px] text-slate-500 mt-1">Solicitado por: <strong>${esc(a.gestor_solicitante)}</strong>${a.gestor_setor ? ` - ${esc(a.gestor_setor)}` : ''}</div>` : ''}
+                        </td>
+                        <td class="px-4 py-3">
+                            <div class="flex flex-wrap gap-1">
+                                ${renderizarAnexosLista(a.anexo)}
+                            </div>
+                        </td>
+                        <td class="px-4 py-3 text-right">
+                            <div class="flex items-center justify-end gap-2">
+                                <button onclick="decidirAfastamento(${a.id}, 'approve')" class="px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-[10px] font-black uppercase hover:bg-emerald-700 shadow-sm transition-all flex items-center gap-1">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg> Deferir
+                                </button>
+                                <button onclick="decidirAfastamento(${a.id}, 'deny')" class="px-3 py-1.5 bg-red-600 text-white rounded-lg text-[10px] font-black uppercase hover:bg-red-700 shadow-sm transition-all flex items-center gap-1">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg> Indeferir
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            } else {
+                // Nenhum pendente, oculta a seção
+                section.classList.add('hidden');
+            }
+        } catch (e) {
+            console.error('[Afastamentos Pendentes] Erro de comunicação com servidor:', e);
+            // Em caso de erro de rede, exibe aviso na seção
+            section.classList.remove('hidden');
+            badge.textContent = 'Erro';
+            body.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-red-500 font-semibold text-sm">Erro ao conectar ao servidor. Verifique o console (F12) para detalhes.</td></tr>`;
+        }
+    }
+
+    async function decidirAfastamento(id, action) {
+        let motivo = null;
+        if (action === 'deny') {
+            const { value: text } = await Swal.fire({
+                title: 'Motivo do Indeferimento',
+                input: 'textarea',
+                inputLabel: 'Informe por que o afastamento foi recusado',
+                inputPlaceholder: 'Ex: Documentação incompleta...',
+                inputAttributes: { 'aria-label': 'Motivo do indeferimento' },
+                showCancelButton: true,
+                confirmButtonText: 'Confirmar Recusa',
+                cancelButtonText: 'Voltar',
+                confirmButtonColor: '#dc2626',
+                inputValidator: (value) => {
+                    if (!value) return 'Você precisa informar um motivo!';
+                }
+            });
+            if (text === undefined) return;
+            motivo = text;
+        } else {
+            const result = await Swal.fire({
+                title: 'Confirmar Deferimento',
+                text: "O afastamento será aprovado e aparecerá no cartão de ponto.",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Sim, Deferir',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#059669'
+            });
+            if (!result.isConfirmed) return;
+        }
+
+        try {
+            const res = await fetch('../../api/ferias.php', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ action, id, motivo })
+            });
+            const json = await res.json();
+            if (json.success) {
+                Swal.fire({ icon: 'success', title: 'Sucesso!', text: json.message, timer: 1500, showConfirmButton: false });
+                loadAfastamentosPendentes();
+            } else {
+                Swal.fire('Erro', json.message, 'error');
+            }
+        } catch (e) {
+            Swal.fire('Erro', 'Falha na comunicação com o servidor', 'error');
+        }
     }
 
     document.addEventListener('DOMContentLoaded', function () {
@@ -135,6 +325,7 @@ if (!$is_crh) {
     });
 
     async function loadPontoAprovacao() {
+        loadAfastamentosPendentes();
         const tbody = document.getElementById('pontoBody');
         tbody.innerHTML = '<tr><td colspan="5" class="text-center py-20 text-slate-500"><svg class="animate-spin h-8 w-8 mx-auto mb-3 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Buscando pendências...</td></tr>';
 
@@ -151,7 +342,7 @@ if (!$is_crh) {
             const json = await res.json();
 
             if (!json.success) {
-                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-20 text-red-500">${esc(json.message)}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-20 text-red-500">${esc(json.message)}</td></tr>`;
                 return;
             }
 
@@ -162,7 +353,7 @@ if (!$is_crh) {
             });
 
             if (filtered.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-20 text-slate-400">Nenhum registro encontrado para a aprovação nesta categoria.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-20 text-slate-400">Nenhum registro encontrado para a aprovação nesta categoria.</td></tr>';
                 return;
             }
 
@@ -180,7 +371,7 @@ if (!$is_crh) {
 
                 // Colaborador
                 const tdNome = document.createElement('td');
-                tdNome.className = 'px-4 py-4 border-b border-slate-100';
+                tdNome.className = 'px-4 py-4 border-b border-slate-100 whitespace-normal break-words';
                 tdNome.innerHTML = `<div class="font-bold text-slate-800">${esc(r.nome)}</div><div class="text-xs text-slate-500 flex gap-2"><span>Matrícula: ${esc(r.matricula)}</span>&bull;<span>Setor: ${esc(r.setor || '-')}</span></div>`;
                 tr.appendChild(tdNome);
 
@@ -188,7 +379,7 @@ if (!$is_crh) {
                 const hasGlobalJust = r.tipo_justificativa && r.tipo_justificativa !== 'null' && String(r.tipo_justificativa).trim() !== '';
 
                 // Batidas Originais (Resumo Simples)
-                const formatResumo = (hora, hasHorario, label, statusCrh, hasIndivJust, atrasou, faltaAuto) => {
+                const formatResumo = (hora, hasHorario, label, statusCrh, justIndividual, atrasou, faltaAuto) => {
                     if (r.em_ferias) {
                         return `<span class="text-[10px] font-black bg-amber-50 text-amber-700 px-1.5 py-1 rounded border border-amber-200 mr-1 uppercase" title="Afastamento Programado: ${r.motivo_afastamento || 'Afastado'}">📅 ${r.motivo_afastamento || 'AFASTADO'}</span>`;
                     }
@@ -196,7 +387,7 @@ if (!$is_crh) {
                     const isFaltaAuto = !hora || hora === 'FALTA' || hora === 'falta';
                     const isIndeferido = statusCrh === 'indeferido';
                     const isDeferido = statusCrh === 'deferido';
-                    const hasJust = hasIndivJust;
+                    const hasJust = justIndividual && justIndividual !== 'null' && String(justIndividual).trim() !== '';
                     
                     // Se houver qualquer justificativa individual na linha, a global não deve "auto-justificar" as outras batidas sozinhas
                     const hasAnyIndiv = (r.just_ent1 && String(r.just_ent1).trim() !== '' && r.just_ent1 !== 'null') || 
@@ -206,16 +397,22 @@ if (!$is_crh) {
 
                     const hasAnyJust = hasJust || (hasGlobalJust && !hasAnyIndiv && (atrasou || isFaltaAuto || faltaAuto));
                     
+                    const isIndividualDeferido = justIndividual === 'Deferido';
+                    const isIndividualIndeferido = justIndividual === 'Indeferido';
+
+                    const isDeferidoFinal = (isIndividualDeferido || (isDeferido && hasAnyJust)) && !isIndividualIndeferido;
+                    const isIndeferidoFinal = (isIndividualIndeferido || (isIndeferido && hasAnyJust)) && !isIndividualDeferido;
+                    
                     const time = isFaltaAuto ? 'Falta' : String(hora).substring(0, 5);
                     const valJust = r.justificativa ? r.justificativa.replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, " ") : '';
 
                     // 1. DEFERIDO (Verde)
-                    if (isDeferido && hasAnyJust) {
+                    if (isDeferidoFinal && hasAnyJust) {
                         return `<span class="text-[10px] font-bold bg-emerald-50 text-emerald-700 px-1.5 py-1 rounded border border-emerald-200 mr-1" title="Justificativa aprovada pelo RH">✔ Justificado</span>`;
                     }
 
                     // 2. INDEFERIDO (Vermelho com Motivo)
-                    if (isIndeferido && hasAnyJust) {
+                    if (isIndeferidoFinal && hasAnyJust) {
                         const l = isFaltaAuto ? `⛔ Falta` : `⛔ Falta (${time})`;
                         return `<span class="text-[10px] font-bold bg-red-50 text-red-700 px-1.5 py-1 rounded border border-red-300 mr-1 cursor-pointer hover:bg-red-100 transition-colors" 
                                       onclick="mostrarMotivo('${valJust}')"
@@ -241,19 +438,91 @@ if (!$is_crh) {
                     // 5. NORMAL OK
                     return `<span class="text-[10px] font-bold bg-slate-100 text-slate-700 px-1.5 py-1 rounded border border-slate-100 mr-1">${time}</span>`;
                 };
-                resHtml += formatResumo(r.primeiro_ponto, !!r.primeiro_horario, 'E1', r.status_crh, !!r.just_ent1, r.atrasou_primeiro_ponto, r.falta_turno1_entrada);
-                resHtml += formatResumo(r.segundo_ponto, !!r.segundo_horario, 'S1', r.status_crh, !!r.just_sai1, r.atrasou_segundo_ponto, r.falta_turno1_saida);
-                resHtml += formatResumo(r.terceiro_ponto, !!r.terceiro_horario, 'E2', r.status_crh, !!r.just_ent2, r.atrasou_terceiro_ponto, r.falta_turno2_entrada);
-                resHtml += formatResumo(r.quarto_ponto, !!r.quarto_horario, 'S2', r.status_crh, !!r.just_sai2, r.atrasou_quarto_ponto, r.falta_turno2_saida);
+                resHtml += formatResumo(r.primeiro_ponto, !!r.primeiro_horario, 'E1', r.status_crh, r.just_ent1, r.atrasou_primeiro_ponto, r.falta_turno1_entrada);
+                resHtml += formatResumo(r.segundo_ponto, !!r.segundo_horario, 'S1', r.status_crh, r.just_sai1, r.atrasou_segundo_ponto, r.falta_turno1_saida);
+                resHtml += formatResumo(r.terceiro_ponto, !!r.terceiro_horario, 'E2', r.status_crh, r.just_ent2, r.atrasou_terceiro_ponto, r.falta_turno2_entrada);
+                resHtml += formatResumo(r.quarto_ponto, !!r.quarto_horario, 'S2', r.status_crh, r.just_sai2, r.atrasou_quarto_ponto, r.falta_turno2_saida);
                 
                 const tdBat = document.createElement('td');
                 tdBat.className = 'px-4 py-4 text-center border-b border-slate-100 whitespace-nowrap';
                 tdBat.innerHTML = resHtml || '<span class="text-slate-300">-</span>';
                 tr.appendChild(tdBat);
+                
+                // Justificativa do Funcionário (Comunicado e PWA)
+                const tdCom = document.createElement('td');
+                tdCom.className = 'px-4 py-4 border-b border-slate-100 whitespace-normal break-words';
+                
+                let employeeJustHtml = '';
+                
+                if (r.comunicado && r.comunicado !== 'null') {
+                    let attachmentsCom = '';
+                    if (r.anexo_comunicado && r.anexo_comunicado !== 'null') {
+                        let paths = [];
+                        try {
+                            const parsed = JSON.parse(r.anexo_comunicado);
+                            paths = Array.isArray(parsed) ? parsed : [r.anexo_comunicado];
+                        } catch(e) {
+                            paths = [r.anexo_comunicado];
+                        }
+                        attachmentsCom = `<div class="flex flex-wrap gap-1 mt-2">` + paths.map(p => `
+                            <a href="../../${esc(p)}" target="_blank" class="inline-flex items-center gap-1 px-1.5 py-1 bg-emerald-50 text-emerald-700 rounded border border-emerald-100 text-[9px] font-bold hover:bg-emerald-100 transition-all">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg> Doc
+                            </a>`).join('') + `</div>`;
+                    }
+                    employeeJustHtml += `<div class="text-[11px] text-slate-600 bg-amber-50/50 p-2 rounded-lg border border-amber-100/50 italic leading-relaxed mb-2">
+                        <span class="not-italic font-bold text-amber-700 block mb-1 text-[9px] uppercase tracking-wider">Relatado pelo Colaborador:</span>
+                        "${esc(r.comunicado)}"
+                        ${attachmentsCom}
+                    </div>`;
+                }
+
+                // Mostrar Justificativas do Funcionário (funadponto / PWA)
+                if (r.justificativas_funcionario && Object.keys(r.justificativas_funcionario).length > 0) {
+                    Object.keys(r.justificativas_funcionario).forEach(campo => {
+                        const j = r.justificativas_funcionario[campo];
+                        if (j && j.texto && String(j.texto).trim() !== '' && j.texto !== 'null') {
+                            const labels = {
+                                'primeiro_ponto': 'Entrada 1',
+                                'segundo_ponto': 'Saída 1',
+                                'terceiro_ponto': 'Entrada 2',
+                                'quarto_ponto': 'Saída 2'
+                            };
+                            const labelCampo = labels[campo] || campo;
+                            
+                            let pathListHtml = '';
+                            if (j.anexos) {
+                                try {
+                                    const paths = JSON.parse(j.anexos);
+                                    if (Array.isArray(paths)) {
+                                        paths.forEach((p, idx) => {
+                                            pathListHtml += `
+                                                <a href="../../${esc(p)}" target="_blank" class="flex items-center gap-1 mt-1 text-orange-700 font-bold hover:underline hover:text-orange-950 transition-all text-[9px]">
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
+                                                    Ver Comprovante ${paths.length > 1 ? idx + 1 : ''}
+                                                </a>
+                                            `;
+                                        });
+                                    }
+                                } catch(e) {}
+                            }
+                            
+                            employeeJustHtml += `
+                                <div class="mt-2 p-2 bg-orange-50 border border-orange-200 rounded-lg text-[10px] leading-relaxed text-orange-950 shadow-sm relative group" title="${esc(j.texto)}">
+                                    <span class="font-black uppercase text-[9px] text-orange-700 block mb-0.5 tracking-wider">Justificativa do Servidor (${labelCampo} - ${esc(j.tipo_justificativa)}):</span>
+                                    <div class="font-medium">"${esc(j.texto)}"</div>
+                                    ${pathListHtml}
+                                </div>
+                            `;
+                        }
+                    });
+                }
+
+                tdCom.innerHTML = employeeJustHtml || '<span class="text-[11px] text-slate-300 italic">Nenhum aviso enviado</span>';
+                tr.appendChild(tdCom);
 
                 // Justificativa do Gestor
                 const tdSt = document.createElement('td');
-                tdSt.className = 'px-4 py-4 max-w-[400px] border-b border-slate-100';
+                tdSt.className = 'px-4 py-4 border-b border-slate-100 whitespace-normal break-words';
                 
                 let indivJusts = [];
                 if (r.just_ent1) indivJusts.push(`<b class="text-indigo-600">E1:</b> ${esc(r.just_ent1)}`);
@@ -262,11 +531,20 @@ if (!$is_crh) {
                 if (r.just_sai2) indivJusts.push(`<b class="text-indigo-600">S2:</b> ${esc(r.just_sai2)}`);
 
                 let justifyContent = '';
-                const hasJust = (r.tipo_justificativa && r.tipo_justificativa !== 'null') || (r.justificativa && r.justificativa !== 'null') || indivJusts.length > 0;
+                const hasJust = (r.tipo_justificativa && r.tipo_justificativa !== 'null') || 
+                                (r.justificativa && r.justificativa !== 'null') || 
+                                (r.anexo_justificativa && r.anexo_justificativa !== 'null' && r.anexo_justificativa !== '[]' && r.anexo_justificativa !== '') ||
+                                indivJusts.length > 0;
                 
                 if (hasJust) {
                     const badgeText = r.tipo_justificativa && r.tipo_justificativa !== 'null' ? esc(r.tipo_justificativa) : 'Justificado';
-                    const descText = r.justificativa && r.justificativa !== 'null' ? esc(r.justificativa) : '';
+                    
+                    const rawJust = r.justificativa && r.justificativa !== 'null' ? r.justificativa : '';
+                    const splitJust = rawJust.split('[INDEFERIDO PELO CRH]:');
+                    const originalObs = splitJust[0].trim();
+                    const crhReason = splitJust[1] ? splitJust[1].trim() : '';
+                    
+                    const descText = originalObs ? esc(originalObs) : '';
                     let attachment = '';
                     if (r.anexo_justificativa) {
                         let paths = [];
@@ -286,10 +564,17 @@ if (!$is_crh) {
                     
                     let indivHtml = indivJusts.length > 0 ? `<div class="text-[10px] text-slate-600 mt-2 p-2 bg-indigo-50/50 rounded-lg border border-indigo-100/50 space-y-1">${indivJusts.join('<br>')}</div>` : '';
 
-                    justifyContent = `<div class="flex flex-col gap-1 items-start whitespace-normal">
-                        <span class="text-[11px] font-bold bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded border border-indigo-200">${badgeText}</span>
-                        ${descText ? `<div class="text-[11px] text-slate-500 font-medium italic mt-1 leading-relaxed">${descText}</div>` : ''}
+                    justifyContent = `<div class="flex flex-col gap-1 items-start whitespace-normal w-full">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="text-[10px] font-bold bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-lg border border-indigo-200">${badgeText}</span>
+                        </div>
+                        ${descText ? `<div class="text-[11px] text-slate-600 font-medium italic mt-1 leading-relaxed bg-slate-50 p-2 rounded-lg border border-slate-100 w-full"><b class="text-indigo-600 not-italic">Obs do Gestor:</b> ${descText}</div>` : ''}
+                        ${crhReason ? `<div class="text-[11px] text-red-600 font-bold mt-1 bg-red-50 p-2 rounded-lg border border-red-100 w-full flex gap-2">
+                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <div><span class="uppercase text-[9px] block opacity-70">Motivo da Recusa CRH:</span>${esc(crhReason)}</div>
+                        </div>` : ''}
                         ${indivHtml}
+                        ${r.gestor_nome ? `<div class="mt-2 pt-2 border-t border-slate-100/50 text-[9px] text-slate-400 font-black uppercase tracking-tighter leading-none">Justificativa enviada por: <span class="text-indigo-500">${esc(r.gestor_nome)} ${r.gestor_setor ? `- ${esc(r.gestor_setor)}` : ''}</span></div>` : ''}
                         ${attachment}
                     </div>`;
                 } else {
@@ -299,7 +584,8 @@ if (!$is_crh) {
                 tr.appendChild(tdSt);
 
                 // Ação Tabela
-                const tdAc = document.createElement('td'); tdAc.className = 'px-4 py-4 text-right border-b border-slate-100 whitespace-nowrap';
+                const tdAc = document.createElement('td'); 
+                tdAc.className = 'px-4 py-4 text-right border-b border-slate-100 whitespace-normal break-words';
                 
                 const buttonsHtml = `
                     <div class="flex items-center justify-end gap-2">
@@ -328,8 +614,12 @@ if (!$is_crh) {
                                     const dateH = h.timestamp ? h.timestamp.split(' ')[0].split('-').reverse().join('/') + ' ' + h.timestamp.split(' ')[1].substring(0, 5) : '-';
                                     const badge = h.action === 'deferido' ? '✔' : '✘';
                                     const color = h.action === 'deferido' ? 'text-emerald-500' : 'text-red-500';
+                                    const descAction = h.action === 'deferido' ? 'Deferido' : 'Indeferido';
+                                    const horarioText = h.horario ? ` [${h.horario}]` : '';
+                                    const setorText = h.setor ? ` (${esc(h.setor)})` : '';
+                                    
                                     auditHtml += `<div class="${idx === 0 ? 'font-bold text-slate-500' : ''}" title="${h.motivo ? 'Motivo: ' + h.motivo : ''}">
-                                        <span class="${color}">${badge}</span> ${esc(h.user)} - ${dateH}
+                                        <span class="${color}">${badge}</span> ${descAction}${horarioText} por ${esc(h.user)}${setorText} - ${dateH}
                                     </div>`;
                                 });
                                 auditHtml += '</div>';
@@ -455,7 +745,15 @@ if (!$is_crh) {
                 else if (r.status_crh === 'indeferido') stLabel = '<span class="text-[9px] font-black text-red-600">INDEFERIDO</span>';
                 else stLabel = '<span class="text-[9px] font-black text-orange-600">PENDENTE</span>';
 
-                const just = (r.justificativa || r.tipo_justificativa || (r.liberacao ? r.liberacao.descricao : '-'));
+                let justs = [];
+                if (r.em_ferias && r.motivo_afastamento) justs.push(r.motivo_afastamento.toUpperCase());
+                if (r.tipo_justificativa && r.tipo_justificativa !== 'null') justs.push(r.tipo_justificativa);
+                if (r.justificativa && r.justificativa !== 'null') {
+                    const cleanJust = r.justificativa.split('[INDEFERIDO PELO CRH]:')[0].trim();
+                    if (cleanJust) justs.push(cleanJust);
+                }
+                if (r.liberacao) justs.push(r.liberacao.descricao);
+                const just = justs.length > 0 ? justs.join(' | ') : '-';
 
                 tableHtml += `<tr class="hover:bg-slate-50 transition-colors">
                     <td class="px-4 py-3 text-slate-600">${day}</td>
@@ -464,7 +762,7 @@ if (!$is_crh) {
                         <div class="text-[10px] text-slate-500 uppercase">${esc(r.setor || '-')}</div>
                     </td>
                     <td class="px-4 py-3 text-slate-700 font-medium">${batidas}</td>
-                    <td class="px-4 py-3 max-w-[250px] truncate text-slate-500" title="${esc(r.justificativa || '')}">${esc(just)}</td>
+                    <td class="px-4 py-3 max-w-[350px] text-slate-500">${esc(just)}</td>
                     <td class="px-4 py-3 text-center">${stLabel}</td>
                 </tr>`;
             });

@@ -78,6 +78,14 @@
                 </select>
             </div>
 
+            <div class="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-slate-200 shadow-sm">
+                <span class="text-xs font-semibold text-slate-500 whitespace-nowrap">Data:</span>
+                <select id="dailyCardSortOrder" onchange="loadDailyCardData()" class="text-sm focus:ring-0 text-slate-700 font-medium bg-transparent outline-none cursor-pointer">
+                    <option value="desc">Mais recentes primeiro</option>
+                    <option value="asc">Mais antigos primeiro</option>
+                </select>
+            </div>
+
             <button onclick="loadDailyCardData()"
                 class="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm font-semibold hover:bg-slate-700 transition-colors shadow-sm inline-flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -91,17 +99,17 @@
     </div>
 
     <div class="p-6 flex-1 overflow-auto">
-        <table class="w-full text-left text-sm border-collapse">
+        <table class="w-full text-left text-sm border-collapse table-fixed">
             <thead class="bg-slate-50 text-slate-500 font-semibold uppercase text-xs sticky top-0 z-10">
                 <tr>
-                    <th class="px-4 py-3 rounded-l-lg border-b border-slate-100 whitespace-nowrap">Data</th>
-                    <th class="px-4 py-3 border-b border-slate-100">Colaborador</th>
-                    <th class="px-4 py-3 text-center border-b border-slate-100 whitespace-nowrap">Ent 1</th>
-                    <th class="px-4 py-3 text-center border-b border-slate-100 whitespace-nowrap">Sai 1</th>
-                    <th class="px-4 py-3 text-center border-b border-slate-100 whitespace-nowrap">Ent 2</th>
-                    <th class="px-4 py-3 text-center border-b border-slate-100 whitespace-nowrap">Sai 2</th>
-                    <th class="px-4 py-3 border-b border-slate-100 whitespace-nowrap">Status</th>
-                    <th class="px-4 py-3 border-b border-slate-100 rounded-r-lg">Comunicado</th>
+                    <th class="px-4 py-3 rounded-l-lg border-b border-slate-100 whitespace-nowrap w-[8%] min-w-[80px]">Data</th>
+                    <th class="px-4 py-3 border-b border-slate-100 w-[22%] min-w-[180px]">Colaborador</th>
+                    <th class="px-4 py-3 text-center border-b border-slate-100 whitespace-nowrap w-[10%] min-w-[90px]">Ent 1</th>
+                    <th class="px-4 py-3 text-center border-b border-slate-100 whitespace-nowrap w-[10%] min-w-[90px]">Sai 1</th>
+                    <th class="px-4 py-3 text-center border-b border-slate-100 whitespace-nowrap w-[10%] min-w-[90px]">Ent 2</th>
+                    <th class="px-4 py-3 text-center border-b border-slate-100 whitespace-nowrap w-[10%] min-w-[90px]">Sai 2</th>
+                    <th class="px-4 py-3 border-b border-slate-100 whitespace-nowrap w-[15%] min-w-[130px]">Status</th>
+                    <th class="px-4 py-3 border-b border-slate-100 rounded-r-lg w-[15%] min-w-[130px]">Comunicado</th>
                 </tr>
             </thead>
             <tbody id="dailyCardBody" class="divide-y divide-slate-100">
@@ -151,7 +159,7 @@
     async function carregarListaFuncionariosDaily() {
         const select = document.getElementById('dailyCardFuncId');
         try {
-            const res  = await fetch('../../api/funcionarios.php');
+            const res  = await fetch('../../api/funcionarios.php?status=todos');
             const data = await res.json();
             if (data.success) {
                 data.data.forEach(f => {
@@ -211,6 +219,17 @@
             window._pontoData = {};
             tbody.innerHTML = '';
 
+            // Ordenação local
+            const sortOrder = document.getElementById('dailyCardSortOrder').value;
+            json.data.sort((a, b) => {
+                const dateA = a.data || '';
+                const dateB = b.data || '';
+                if (dateA === dateB) {
+                    return (a.nome || '').localeCompare(b.nome || '');
+                }
+                return sortOrder === 'asc' ? dateA.localeCompare(dateB) : dateB.localeCompare(dateA);
+            });
+
             json.data.forEach(r => {
                 window._pontoData[r.id] = r;
 
@@ -224,7 +243,7 @@
 
                 // — Coluna Colaborador —
                 const tdNome = document.createElement('td');
-                tdNome.className = 'px-4 py-4';
+                tdNome.className = 'px-4 py-4 whitespace-normal break-words';
                 const hasJustificativa = (r.tipo_justificativa && r.tipo_justificativa !== 'null' && String(r.tipo_justificativa).trim() !== '') ||
                                          (r.justificativa && r.justificativa !== 'null' && String(r.justificativa).trim() !== '') ||
                                          (r.just_ent1 && r.just_ent1 !== 'null' && String(r.just_ent1).trim() !== '') || 
@@ -248,7 +267,9 @@
                 // — Helper de horário —
                 function pontoHtml(hora, atrasou, faltaAuto, justIndividual, statusCrh, tipoJustificativa, justificativaGlobal, horarioProgramado, emFerias, motivo, liberacao, pIndex) {
                     if (emFerias) {
-                        return `<span class="text-[10px] font-black bg-amber-500 text-white px-2 py-0.5 rounded shadow-sm uppercase border border-amber-600 tracking-tighter" title="Afastamento Programado">${esc(motivo)}</span>`;
+                        const statusLabel = statusCrh === 'pendente' ? ' (Pendente)' : '';
+                        const bgClass = statusCrh === 'pendente' ? 'bg-amber-400' : 'bg-amber-500';
+                        return `<span class="text-[10px] font-black ${bgClass} text-white px-2 py-0.5 rounded shadow-sm uppercase border border-amber-600 tracking-tighter" title="Afastamento Programado${statusLabel}">${esc(motivo)}${statusLabel}</span>`;
                     }
 
                     const isFaltaAuto = !hora || hora === 'FALTA' || hora === 'falta';
@@ -342,9 +363,11 @@
                 // — Helper de status —
                 function statusHtml(rec) {
                     if (rec.em_ferias) {
-                        return `<span class="text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-lg flex items-center gap-1">
+                        const statusLabel = rec.status_afastamento === 'pendente' ? ' (Pendente)' : '';
+                        const bgClass = rec.status_afastamento === 'pendente' ? 'bg-amber-100 text-amber-600 border-amber-300' : 'bg-amber-50 text-amber-700 border-amber-200';
+                        return `<span class="text-[11px] font-bold ${bgClass} border px-2 py-0.5 rounded-lg flex items-center gap-1">
                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                                    Afastado
+                                    ${esc(rec.motivo_afastamento)}${statusLabel}
                                 </span>`;
                     }
 
@@ -419,14 +442,18 @@
                     return '<span class="text-[11px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-lg">✓ OK</span>';
                 }
 
-                const p1 = document.createElement('td'); p1.className = 'px-4 py-4 text-center whitespace-nowrap'; p1.innerHTML = pontoHtml(r.primeiro_ponto, r.atrasou_primeiro_ponto, r.falta_turno1_entrada, r.just_ent1, r.status_crh, r.tipo_justificativa, r.justificativa, r.primeiro_horario, r.em_ferias, r.motivo_afastamento, r.liberacao, 1);
-                const p2 = document.createElement('td'); p2.className = 'px-4 py-4 text-center whitespace-nowrap'; p2.innerHTML = pontoHtml(r.segundo_ponto,  r.atrasou_segundo_ponto,  r.falta_turno1_saida,   r.just_sai1, r.status_crh, r.tipo_justificativa, r.justificativa, r.segundo_horario, r.em_ferias, r.motivo_afastamento, r.liberacao, 2);
-                const p3 = document.createElement('td'); p3.className = 'px-4 py-4 text-center whitespace-nowrap'; p3.innerHTML = pontoHtml(r.terceiro_ponto, r.atrasou_terceiro_ponto, r.falta_turno2_entrada, r.just_ent2, r.status_crh, r.tipo_justificativa, r.justificativa, r.terceiro_horario, r.em_ferias, r.motivo_afastamento, r.liberacao, 3);
-                const p4 = document.createElement('td'); p4.className = 'px-4 py-4 text-center whitespace-nowrap'; p4.innerHTML = pontoHtml(r.quarto_ponto,   r.atrasou_quarto_ponto,   r.falta_turno2_saida,   r.just_sai2, r.status_crh, r.tipo_justificativa, r.justificativa, r.quarto_horario, r.em_ferias, r.motivo_afastamento, r.liberacao, 4);
+                const p1 = document.createElement('td'); p1.className = 'px-4 py-4 text-center whitespace-nowrap'; p1.innerHTML = pontoHtml(r.primeiro_ponto, r.atrasou_primeiro_ponto, r.falta_turno1_entrada, r.just_ent1, r.status_crh || r.status_afastamento, r.tipo_justificativa, r.justificativa, r.primeiro_horario, r.em_ferias, r.motivo_afastamento, r.liberacao, 1);
+                const p2 = document.createElement('td'); p2.className = 'px-4 py-4 text-center whitespace-nowrap'; p2.innerHTML = pontoHtml(r.segundo_ponto,  r.atrasou_segundo_ponto,  r.falta_turno1_saida,   r.just_sai1, r.status_crh || r.status_afastamento, r.tipo_justificativa, r.justificativa, r.segundo_horario, r.em_ferias, r.motivo_afastamento, r.liberacao, 2);
+                const p3 = document.createElement('td'); p3.className = 'px-4 py-4 text-center whitespace-nowrap'; p3.innerHTML = pontoHtml(r.terceiro_ponto, r.atrasou_terceiro_ponto, r.falta_turno2_entrada, r.just_ent2, r.status_crh || r.status_afastamento, r.tipo_justificativa, r.justificativa, r.terceiro_horario, r.em_ferias, r.motivo_afastamento, r.liberacao, 3);
+                const p4 = document.createElement('td'); p4.className = 'px-4 py-4 text-center whitespace-nowrap'; p4.innerHTML = pontoHtml(r.quarto_ponto,   r.atrasou_quarto_ponto,   r.falta_turno2_saida,   r.just_sai2, r.status_crh || r.status_afastamento, r.tipo_justificativa, r.justificativa, r.quarto_horario, r.em_ferias, r.motivo_afastamento, r.liberacao, 4);
 
-                const tdSt = document.createElement('td'); tdSt.className = 'px-4 py-4 max-w-[180px] whitespace-nowrap'; tdSt.innerHTML = statusHtml(r);
+                const tdSt = document.createElement('td'); 
+                tdSt.className = 'px-4 py-4 whitespace-normal break-words'; 
+                tdSt.innerHTML = statusHtml(r);
                 
-                const tdCom = document.createElement('td'); tdCom.className = 'px-4 py-4 text-[10px] italic text-slate-500 min-w-[150px] whitespace-normal'; tdCom.textContent = r.comunicado || '-';
+                const tdCom = document.createElement('td'); 
+                tdCom.className = 'px-4 py-4 text-[10px] italic text-slate-500 whitespace-normal break-words'; 
+                tdCom.textContent = r.comunicado || '-';
 
                 tr.append(tdData, tdNome, p1, p2, p3, p4, tdSt, tdCom);
                 tbody.appendChild(tr);

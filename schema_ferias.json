@@ -1,0 +1,498 @@
+[
+    {
+        "column_name": "codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "servidor_codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "ano",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "inicio",
+        "data_type": "date"
+    },
+    {
+        "column_name": "termino",
+        "data_type": "date"
+    },
+    {
+        "column_name": "data_cadastro",
+        "data_type": "timestamp without time zone"
+    },
+    {
+        "column_name": "operador_cadastro",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "data_alteracao",
+        "data_type": "timestamp without time zone"
+    },
+    {
+        "column_name": "operador_alteracao",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "excluido",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "data_exclusao",
+        "data_type": "timestamp without time zone"
+    },
+    {
+        "column_name": "operador_exclusao",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "autorizado",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "motivo",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "inicio_comp",
+        "data_type": "date"
+    },
+    {
+        "column_name": "termino_comp",
+        "data_type": "date"
+    },
+    {
+        "column_name": "obs",
+        "data_type": "text"
+    },
+    {
+        "column_name": "operador_autorizacao",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "servidor_codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "ano",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "inicio",
+        "data_type": "date"
+    },
+    {
+        "column_name": "termino",
+        "data_type": "date"
+    },
+    {
+        "column_name": "data_cadastro",
+        "data_type": "timestamp without time zone"
+    },
+    {
+        "column_name": "operador_cadastro",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "data_alteracao",
+        "data_type": "timestamp without time zone"
+    },
+    {
+        "column_name": "operador_alteracao",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "excluido",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "data_exclusao",
+        "data_type": "timestamp without time zone"
+    },
+    {
+        "column_name": "operador_exclusao",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "autorizado",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "motivo",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "inicio_comp",
+        "data_type": "date"
+    },
+    {
+        "column_name": "termino_comp",
+        "data_type": "date"
+    },
+    {
+        "column_name": "obs",
+        "data_type": "text"
+    },
+    {
+        "column_name": "operador_autorizacao",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "servidor_codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "ano",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "inicio",
+        "data_type": "date"
+    },
+    {
+        "column_name": "termino",
+        "data_type": "date"
+    },
+    {
+        "column_name": "data_cadastro",
+        "data_type": "timestamp without time zone"
+    },
+    {
+        "column_name": "operador_cadastro",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "data_alteracao",
+        "data_type": "timestamp without time zone"
+    },
+    {
+        "column_name": "operador_alteracao",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "excluido",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "data_exclusao",
+        "data_type": "timestamp without time zone"
+    },
+    {
+        "column_name": "operador_exclusao",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "autorizado",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "motivo",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "inicio_comp",
+        "data_type": "date"
+    },
+    {
+        "column_name": "termino_comp",
+        "data_type": "date"
+    },
+    {
+        "column_name": "obs",
+        "data_type": "text"
+    },
+    {
+        "column_name": "operador_autorizacao",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "servidor_codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "ano",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "inicio",
+        "data_type": "date"
+    },
+    {
+        "column_name": "termino",
+        "data_type": "date"
+    },
+    {
+        "column_name": "data_cadastro",
+        "data_type": "timestamp without time zone"
+    },
+    {
+        "column_name": "operador_cadastro",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "data_alteracao",
+        "data_type": "timestamp without time zone"
+    },
+    {
+        "column_name": "operador_alteracao",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "excluido",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "data_exclusao",
+        "data_type": "timestamp without time zone"
+    },
+    {
+        "column_name": "operador_exclusao",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "autorizado",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "motivo",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "inicio_comp",
+        "data_type": "date"
+    },
+    {
+        "column_name": "termino_comp",
+        "data_type": "date"
+    },
+    {
+        "column_name": "obs",
+        "data_type": "text"
+    },
+    {
+        "column_name": "operador_autorizacao",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "servidor_codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "ano",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "inicio",
+        "data_type": "date"
+    },
+    {
+        "column_name": "termino",
+        "data_type": "date"
+    },
+    {
+        "column_name": "data_cadastro",
+        "data_type": "timestamp without time zone"
+    },
+    {
+        "column_name": "operador_cadastro",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "data_alteracao",
+        "data_type": "timestamp without time zone"
+    },
+    {
+        "column_name": "operador_alteracao",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "excluido",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "data_exclusao",
+        "data_type": "timestamp without time zone"
+    },
+    {
+        "column_name": "operador_exclusao",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "autorizado",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "motivo",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "inicio_comp",
+        "data_type": "date"
+    },
+    {
+        "column_name": "termino_comp",
+        "data_type": "date"
+    },
+    {
+        "column_name": "obs",
+        "data_type": "text"
+    },
+    {
+        "column_name": "operador_autorizacao",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "servidor_codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "ano",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "inicio",
+        "data_type": "date"
+    },
+    {
+        "column_name": "termino",
+        "data_type": "date"
+    },
+    {
+        "column_name": "data_cadastro",
+        "data_type": "timestamp without time zone"
+    },
+    {
+        "column_name": "operador_cadastro",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "data_alteracao",
+        "data_type": "timestamp without time zone"
+    },
+    {
+        "column_name": "operador_alteracao",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "excluido",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "data_exclusao",
+        "data_type": "timestamp without time zone"
+    },
+    {
+        "column_name": "operador_exclusao",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "autorizado",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "motivo",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "inicio_comp",
+        "data_type": "date"
+    },
+    {
+        "column_name": "termino_comp",
+        "data_type": "date"
+    },
+    {
+        "column_name": "obs",
+        "data_type": "text"
+    },
+    {
+        "column_name": "operador_autorizacao",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "id",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "id_funcionario",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "data_inicio",
+        "data_type": "date"
+    },
+    {
+        "column_name": "data_fim",
+        "data_type": "date"
+    },
+    {
+        "column_name": "observacao",
+        "data_type": "text"
+    },
+    {
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone"
+    },
+    {
+        "column_name": "updated_at",
+        "data_type": "timestamp without time zone"
+    },
+    {
+        "column_name": "tipo_afastamento",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "motivo_especifico",
+        "data_type": "text"
+    },
+    {
+        "column_name": "anexo",
+        "data_type": "text"
+    },
+    {
+        "column_name": "status",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "motivo_indeferimento",
+        "data_type": "text"
+    },
+    {
+        "column_name": "setor_solicitante",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "gestor_solicitante",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "periodo_aquisitivo",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "gestor_setor",
+        "data_type": "character varying"
+    }
+]

@@ -49,6 +49,15 @@ try {
                     Novo Usuário
                 </button>
             <?php endif; ?>
+            <!-- Biometria Facial do Usuário Logado -->
+            <button onclick="abrirModalCadastroFacial()"
+                class="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl transition-all shadow-sm"
+                title="Cadastrar minha biometria facial para login">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Minha Biometria
+            </button>
         </div>
     </div>
 
@@ -238,6 +247,59 @@ try {
                     <button type="button" onclick="salvarPresets()"
                         class="px-5 py-2.5 bg-brand-600 text-white rounded-xl font-semibold shadow-sm">Salvar Padrões</button>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Cadastro Biometria Facial -->
+<script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+<div id="modalCadFacial" class="fixed inset-0 z-[999] hidden" role="dialog">
+    <div class="fixed inset-0 bg-black/70 backdrop-blur-md" onclick="fecharModalCadFacial()"></div>
+    <div class="fixed inset-0 z-10 flex items-center justify-center p-4">
+        <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden border border-slate-100" style="max-height:600px">
+            <div class="h-1 bg-gradient-to-r from-emerald-500 to-teal-400"></div>
+            <div class="px-5 py-3.5 flex items-center justify-between border-b border-slate-100">
+                <div>
+                    <p class="text-sm font-black text-slate-800">Cadastrar Biometria Facial</p>
+                    <p class="text-[10px] text-slate-400 mt-0.5">Sua face será usada para login no painel</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span id="cadFacialStatus" class="hidden text-[10px] font-bold px-2 py-1 rounded-full"></span>
+                    <button onclick="fecharModalCadFacial()" class="p-2 text-slate-400 hover:bg-slate-100 rounded-xl">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="p-4 flex flex-col gap-3">
+                <div id="cadFacialBox" class="relative bg-slate-900 rounded-2xl overflow-hidden" style="height:260px">
+                    <video id="cadFacialVideo" autoplay playsinline muted class="absolute inset-0 w-full h-full object-cover hidden" style="transform:scaleX(-1)"></video>
+                    <canvas id="cadFacialCanvas" class="absolute inset-0 w-full h-full object-cover hidden" style="transform:scaleX(-1)"></canvas>
+                    <div id="cadFacialLoading" class="absolute inset-0 flex flex-col items-center justify-center gap-3">
+                        <div class="w-10 h-10 relative"><div class="absolute inset-0 rounded-full border-2 border-slate-700"></div><div class="absolute inset-0 rounded-full border-2 border-emerald-500 border-t-transparent animate-spin"></div></div>
+                        <span id="cadFacialLoadTxt" class="text-slate-400 text-[10px] font-black uppercase tracking-widest">Iniciando câmera...</span>
+                    </div>
+                    <div class="absolute inset-0 z-20 pointer-events-none">
+                        <svg class="absolute inset-0 w-full h-full" viewBox="0 0 300 260" preserveAspectRatio="xMidYMid slice">
+                            <defs><mask id="ovalMaskCad"><rect width="300" height="260" fill="white"/><ellipse cx="150" cy="125" rx="78" ry="100" fill="black"/></mask></defs>
+                            <rect width="300" height="260" fill="rgba(0,0,0,0.4)" mask="url(#ovalMaskCad)"/>
+                            <ellipse id="cadOvalBorder" cx="150" cy="125" rx="78" ry="100" fill="none" stroke="rgba(148,163,184,.5)" stroke-width="1.5" stroke-dasharray="5 4"/>
+                            <ellipse id="cadArc" cx="150" cy="125" rx="78" ry="100" fill="none" stroke="transparent" stroke-width="4" stroke-dasharray="528" stroke-dashoffset="528" stroke-linecap="round" transform="rotate(-90 150 125)" style="transition:stroke-dashoffset .3s,stroke .3s"/>
+                        </svg>
+                        <div id="cadFaceStatusBox" class="absolute bottom-3 left-0 right-0 flex justify-center">
+                            <span class="bg-black/60 text-white text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest border border-white/10" style="min-width:10rem;text-align:center">Aguardando...</span>
+                        </div>
+                    </div>
+                </div>
+                <button id="btnCadCapturar" onclick="capturarParaCadastro()"
+                    class="w-full py-3 font-black text-white text-sm rounded-xl flex items-center justify-center gap-2"
+                    style="background:linear-gradient(135deg,#059669,#10b981)">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    Capturar e Salvar Biometria
+                </button>
+                <button id="btnRemoverFacial" onclick="removerBiometria()" class="w-full py-2.5 font-semibold text-red-600 text-sm rounded-xl border border-red-100 bg-red-50 hover:bg-red-100 transition-all">
+                    Remover Biometria Cadastrada
+                </button>
             </div>
         </div>
     </div>
@@ -491,6 +553,118 @@ try {
             input.type = 'password';
             icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />`;
         }
+    }
+
+    // ---- Cadastro de Biometria Facial ----
+    let cadStream=null, cadModels=false, cadDetLoop=false, cadProcessing=false;
+    let cadBlink=0, cadPrevEar=false, cadLiveness=false, cadSince=null, cadBaseline=null, cadBuf=[];
+
+    function cadEAR(pos,idx){const p=idx.map(i=>pos[i]);const v1=Math.hypot(p[1].x-p[5].x,p[1].y-p[5].y);const v2=Math.hypot(p[2].x-p[4].x,p[2].y-p[4].y);const h=Math.hypot(p[0].x-p[3].x,p[0].y-p[3].y);return h>0?(v1+v2)/(2*h):0.3;}
+    function cadBase(e){cadBuf.push(e);if(cadBuf.length>12)cadBuf.shift();const s=[...cadBuf].sort((a,b)=>b-a);const t=s.slice(0,Math.max(1,Math.ceil(s.length*0.6)));cadBaseline=t.reduce((a,v)=>a+v,0)/t.length;}
+    function cadArc(pct,ok){const a=document.getElementById('cadArc'),b=document.getElementById('cadOvalBorder');if(!a)return;const c=Math.min(Math.max(pct,0),1);a.setAttribute('stroke-dashoffset',528*(1-c));if(c>0.05){a.setAttribute('stroke',ok?'rgba(16,185,129,.95)':'rgba(251,191,36,.9)');if(b)b.setAttribute('stroke',ok?'rgba(16,185,129,.35)':'rgba(251,191,36,.3)');}else{a.setAttribute('stroke','transparent');if(b)b.setAttribute('stroke','rgba(148,163,184,.5)');}}
+
+    async function abrirModalCadastroFacial(){
+        document.getElementById('modalCadFacial').classList.remove('hidden');
+        cadBlink=0;cadPrevEar=false;cadLiveness=false;cadSince=null;cadBaseline=null;cadBuf=[];
+        cadArc(0,false);
+        const statusEl=document.querySelector('#cadFaceStatusBox span');
+        const loading=document.getElementById('cadFacialLoading');
+        const loadTxt=document.getElementById('cadFacialLoadTxt');
+        const video=document.getElementById('cadFacialVideo');
+        loading.classList.remove('hidden'); video.classList.add('hidden');
+        document.getElementById('cadFacialCanvas').classList.add('hidden');
+        // Verificar status atual
+        try{const r=await fetch('../../api/auth.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'get_facial_status'})});const d=await r.json();const statusBadge=document.getElementById('cadFacialStatus');if(statusBadge){statusBadge.classList.remove('hidden');if(d.tem_facial){statusBadge.textContent='✓ Cadastrada';statusBadge.className='text-[10px] font-bold px-2 py-1 rounded-full bg-emerald-100 text-emerald-700';}else{statusBadge.textContent='Não cadastrada';statusBadge.className='text-[10px] font-bold px-2 py-1 rounded-full bg-slate-100 text-slate-500';}}}catch(e){}
+        if(!cadModels){if(loadTxt)loadTxt.textContent='Carregando IA...';try{await faceapi.tf.setBackend('webgl');await faceapi.tf.ready();}catch(e){}const CDN='https://justadudewhohacks.github.io/face-api.js/models';try{await Promise.all([faceapi.nets.tinyFaceDetector.loadFromUri(CDN),faceapi.nets.faceLandmark68Net.loadFromUri(CDN),faceapi.nets.faceRecognitionNet.loadFromUri(CDN)]);cadModels=true;}catch(e){if(loadTxt)loadTxt.textContent='Erro ao carregar IA';return;}}
+        try{
+            cadStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:640},height:{ideal:480}}});
+            video.srcObject=cadStream;await video.play();
+            loading.classList.add('hidden');video.classList.remove('hidden');
+            if(statusEl)statusEl.textContent='Aguardando Face...';
+            cadDetLoop=true;cadProcessing=false;cadLoop();
+        }catch(err){if(loadTxt)loadTxt.textContent='Erro câmera: '+err.message;}
+    }
+
+    function fecharModalCadFacial(){
+        document.getElementById('modalCadFacial').classList.add('hidden');
+        cadDetLoop=false;cadProcessing=false;
+        if(cadStream){cadStream.getTracks().forEach(t=>t.stop());cadStream=null;}
+        cadArc(0,false);
+    }
+
+    async function cadLoop(){
+        const statusEl=document.querySelector('#cadFaceStatusBox span');
+        if(!cadDetLoop||cadProcessing){if(cadDetLoop)setTimeout(cadLoop,66);return;}
+        const video=document.getElementById('cadFacialVideo');
+        if(!video||video.paused||video.ended){if(cadDetLoop)setTimeout(cadLoop,66);return;}
+        try{
+            const det=await faceapi.detectSingleFace(video,new faceapi.TinyFaceDetectorOptions({inputSize:160,scoreThreshold:0.5})).withFaceLandmarks();
+            if(det){
+                const pos=det.landmarks.positions;
+                const ear=(cadEAR(pos,[36,37,38,39,40,41])+cadEAR(pos,[42,43,44,45,46,47]))/2;
+                cadBase(ear);
+                const thr=cadBaseline?cadBaseline*0.70:0.20;
+                if(ear<thr){if(!cadPrevEar){cadBlink++;cadPrevEar=true;}}else{cadPrevEar=false;}
+                if(cadBlink>=1)cadLiveness=true;
+                if(!cadSince)cadSince=Date.now();
+                if(!cadLiveness&&(Date.now()-cadSince)>=2500)cadLiveness=true;
+                cadArc(det.detection.score/0.85,cadLiveness);
+                if(statusEl){if(cadLiveness){statusEl.textContent='Face Validada ✓';statusEl.className='bg-emerald-500/80 text-white text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest border border-white/10';}else{const r=Math.max(0,Math.ceil((2500-(Date.now()-cadSince))/1000));statusEl.textContent=r>0?`Pisque ou aguarde ${r}s`:'Validando…';statusEl.className='bg-amber-500/80 text-white text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest border border-white/10';}}
+                if(det.detection.score>0.85&&!cadProcessing&&cadLiveness){capturarParaCadastro();return;}
+            }else{
+                cadSince=null;cadArc(0,false);
+                if(statusEl){statusEl.textContent='Posicione seu Rosto';statusEl.className='bg-black/65 text-white text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest border border-white/10';}
+            }
+        }catch(e){}
+        if(cadDetLoop)setTimeout(cadLoop,66);
+    }
+
+    async function capturarParaCadastro(){
+        if(!cadStream||cadProcessing)return;
+        if(!cadLiveness){alert('Pisque os olhos para confirmar vivacidade.');return;}
+        cadProcessing=true;
+        const video=document.getElementById('cadFacialVideo');
+        const canvas=document.getElementById('cadFacialCanvas');
+        const btn=document.getElementById('btnCadCapturar');
+        const statusEl=document.querySelector('#cadFaceStatusBox span');
+        canvas.width=video.videoWidth;canvas.height=video.videoHeight;
+        canvas.getContext('2d').drawImage(video,0,0);
+        video.classList.add('hidden');canvas.classList.remove('hidden');
+        if(btn){btn.innerHTML='Analisando...';btn.disabled=true;}
+        if(statusEl)statusEl.textContent='Analisando…';
+        try{
+            const det=await faceapi.detectSingleFace(canvas,new faceapi.TinyFaceDetectorOptions({inputSize:224,scoreThreshold:0.35})).withFaceLandmarks().withFaceDescriptor();
+            if(!det){Swal.fire('Atenção','Face não detectada. Tente novamente.','warning');cadProcessing=false;canvas.classList.add('hidden');video.classList.remove('hidden');if(btn){btn.innerHTML='Capturar e Salvar Biometria';btn.disabled=false;}if(cadDetLoop)cadLoop();return;}
+            const res=await fetch('../../api/auth.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'save_facial',facial_descriptor:Array.from(det.descriptor)})});
+            const data=await res.json();
+            if(data.success){
+                Swal.fire({toast:true,position:'top-end',icon:'success',title:'Biometria cadastrada com sucesso!',showConfirmButton:false,timer:3000});
+                const b=document.getElementById('cadFacialStatus');if(b){b.textContent='✓ Cadastrada';b.className='text-[10px] font-bold px-2 py-1 rounded-full bg-emerald-100 text-emerald-700';}
+                fecharModalCadFacial();
+            }else{
+                Swal.fire('Erro',data.message,'error');
+                cadProcessing=false;canvas.classList.add('hidden');video.classList.remove('hidden');
+                if(btn){btn.innerHTML='Capturar e Salvar Biometria';btn.disabled=false;}
+                if(cadDetLoop)cadLoop();
+            }
+        }catch(e){
+            Swal.fire('Erro','Falha na comunicação com o servidor.','error');
+            cadProcessing=false;canvas.classList.add('hidden');video.classList.remove('hidden');
+            if(btn){btn.innerHTML='Capturar e Salvar Biometria';btn.disabled=false;}
+        }
+    }
+
+    async function removerBiometria(){
+        const r=await Swal.fire({title:'Remover Biometria?',text:'Você não poderá mais usar o login facial.',icon:'warning',showCancelButton:true,confirmButtonColor:'#ef4444',cancelButtonColor:'#64748b',confirmButtonText:'Sim, remover',cancelButtonText:'Cancelar'});
+        if(!r.isConfirmed)return;
+        try{
+            const res=await fetch('../../api/auth.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'remove_facial'})});
+            const data=await res.json();
+            if(data.success){
+                Swal.fire({toast:true,position:'top-end',icon:'success',title:'Biometria removida!',showConfirmButton:false,timer:2000});
+                const b=document.getElementById('cadFacialStatus');if(b){b.textContent='Não cadastrada';b.className='text-[10px] font-bold px-2 py-1 rounded-full bg-slate-100 text-slate-500';}
+            }else{Swal.fire('Erro',data.message,'error');}
+        }catch(e){Swal.fire('Erro','Falha na comunicação.','error');}
     }
 </script>
 

@@ -16,6 +16,11 @@
                     <option value="">Todos os Funcionários</option>
                 </select>
             </div>
+            <div class="w-[200px]">
+                <select id="setor" class="w-full">
+                    <option value="">Todos os Setores</option>
+                </select>
+            </div>
             <div class="flex items-center gap-2">
                 <input type="date" id="start_date"
                     class="border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 shadow-sm focus:ring-1 focus:ring-brand-500">
@@ -154,12 +159,37 @@
         }
 
         carregarListaFuncionarios();
+        carregarListaSetores();
         initTable();
     });
 
+    async function carregarListaSetores() {
+        try {
+            const res = await fetch('../../api/relatorios.php?action=get_setores');
+            const data = await res.json();
+            if (data.success) {
+                const select = document.getElementById('setor');
+                data.data.forEach(s => {
+                    const opt = document.createElement('option');
+                    opt.value = s;
+                    opt.textContent = s;
+                    select.appendChild(opt);
+                });
+                
+                if ($.fn.select2) {
+                    $('#setor').select2({
+                        placeholder: "Todos os Setores",
+                        allowClear: true,
+                        width: '100%'
+                    });
+                }
+            }
+        } catch (e) { console.error("Erro ao carregar lista de setores"); }
+    }
+
     async function carregarListaFuncionarios() {
         try {
-            const res = await fetch('../../api/funcionarios.php');
+            const res = await fetch('../../api/funcionarios.php?status=todos');
             const data = await res.json();
             if (data.success) {
                 const select = document.getElementById('func_id');
@@ -186,6 +216,7 @@
         const start = $('#start_date').val();
         const end = $('#end_date').val();
         const funcId = $('#func_id').val();
+        const setor = $('#setor').val();
 
         if ($.fn.DataTable.isDataTable('#tabelaRelatorios')) {
             $('#tabelaRelatorios').DataTable().destroy();
@@ -193,7 +224,7 @@
 
         tableRel = $('#tabelaRelatorios').DataTable({
             ajax: {
-                url: `../../api/relatorios.php?start_date=${start}&end_date=${end}&func_id=${funcId}`,
+                url: `../../api/relatorios.php?start_date=${start}&end_date=${end}&func_id=${funcId}&setor=${encodeURIComponent(setor || '')}`,
                 dataSrc: function (json) {
                     window._relData = {};
                     if(json && json.data) {
@@ -230,6 +261,7 @@
                     data: 'justificativa', className: 'text-center max-w-[200px] truncate',
                     render: (data, type, row) => {
                         let rawJusts = [];
+                        if (row.em_ferias && row.motivo_afastamento) rawJusts.push(row.motivo_afastamento.toUpperCase());
                         if (row.tipo_justificativa && row.tipo_justificativa !== 'null') rawJusts.push(row.tipo_justificativa.trim());
                         if (row.just_ent1 && row.just_ent1 !== 'null') rawJusts.push(row.just_ent1.trim());
                         if (row.just_sai1 && row.just_sai1 !== 'null') rawJusts.push(row.just_sai1.trim());
@@ -391,7 +423,14 @@
 
     // Helper: Formata a célula do ponto (destaca em vermelho se for atraso ou falta)
     function formatPonto(hora, isAtraso, isFalta, justIndividual, statusCrh, tipoJustificativa, justificativaGlobal, row, horarioProgramado, pIndex) {
+        if (row.em_ferias) statusCrh = statusCrh || row.status_afastamento;
         const isFaltaAuto = !hora || hora === 'FALTA' || hora === 'falta';
+        
+        if (row.em_ferias && isFaltaAuto) {
+            const statusLabel = row.status_afastamento === 'pendente' ? ' (Pendente)' : '';
+            const badgeClass = row.status_afastamento === 'pendente' ? 'bg-amber-400' : 'bg-amber-500';
+            return `<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-black ${badgeClass} text-white uppercase tracking-tighter" title="Afastamento Programado${statusLabel}">${esc(row.motivo_afastamento)}${statusLabel}</span>`;
+        }
 
         // --- Lógica de Ponto Liberado (Feriado, Facultativo, Liberação Antecipada) ---
         if (row.liberacao && isFaltaAuto) {

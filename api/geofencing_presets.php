@@ -1,6 +1,8 @@
 <?php
 session_start();
 header('Content-Type: application/json');
+// Libera o bloqueio da sessão imediatamente - as informações já foram lidas
+session_write_close();
 require_once '../config/Database.php';
 
 use Config\Database;

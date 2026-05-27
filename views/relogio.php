@@ -1,9 +1,193 @@
-<?php include 'layout/header.php'; ?>
+<?php
+require_once '../config/Database.php';
+include 'layout/header.php';
+?>
 
 <style>
-/* Ocultar barra de rolagem mas manter funcionalidade */
-.no-scrollbar::-webkit-scrollbar { display: none; }
-.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    /* Ocultar barra de rolagem mas manter funcionalidade */
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+
+    .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    /* Micro-interações e Scanner */
+    @keyframes scan-glow {
+
+        0%,
+        100% {
+            opacity: 0.3;
+            transform: scaleY(1);
+        }
+
+        50% {
+            opacity: 0.8;
+            transform: scaleY(1.2);
+        }
+    }
+
+    @keyframes particle-flow {
+        0% {
+            transform: translateY(-100%) translateX(0);
+            opacity: 0;
+        }
+
+        20% {
+            opacity: 1;
+        }
+
+        80% {
+            opacity: 1;
+        }
+
+        100% {
+            transform: translateY(1000%) translateX(20px);
+            opacity: 0;
+        }
+    }
+
+    .scanner-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        overflow: hidden;
+    }
+
+    .scanner-beam {
+        position: absolute;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, transparent, rgba(6, 182, 212, 0.8), transparent);
+        box-shadow: 0 0 15px rgba(6, 182, 212, 0.5);
+        z-index: 20;
+        animation: scan 3s ease-in-out infinite;
+    }
+
+    .scanner-particle {
+        position: absolute;
+        width: 2px;
+        height: 8px;
+        background: rgba(6, 182, 212, 0.6);
+        border-radius: 4px;
+        animation: particle-flow 2s linear infinite;
+    }
+
+    @keyframes shake {
+
+        0%,
+        100% {
+            transform: translateX(0);
+        }
+
+        25% {
+            transform: translateX(-5px);
+        }
+
+        50% {
+            transform: translateX(5px);
+        }
+
+        75% {
+            transform: translateX(-5px);
+        }
+    }
+
+    .animate-shake {
+        animation: shake 0.4s cubic-bezier(.36, .07, .19, .97) both;
+    }
+
+    @keyframes pulse-white {
+
+        0%,
+        100% {
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+        }
+
+        50% {
+            border-color: rgba(255, 255, 255, 0.6);
+            box-shadow: 0 0 20px 0 rgba(255, 255, 255, 0.6);
+        }
+    }
+
+    .pulse-white {
+        animation: pulse-white 2s infinite;
+    }
+
+    @keyframes ripple-green {
+        0% {
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6), inset 0 0 0 0 rgba(16, 185, 129, 0.6);
+        }
+
+        100% {
+            box-shadow: 0 0 0 40px rgba(16, 185, 129, 0), inset 0 0 0 20px rgba(16, 185, 129, 0);
+            border-color: #10b981;
+        }
+    }
+
+    .ripple-green {
+        animation: ripple-green 1s ease-out;
+    }
+
+    /* Estilos Glassmorphism Premium */
+    .glass-status {
+        background: rgba(15, 23, 42, 0.7) !important;
+        backdrop-filter: blur(12px) saturate(160%) !important;
+        -webkit-backdrop-filter: blur(12px) saturate(160%) !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3) !important;
+    }
+
+    .glass-status-success {
+        background: rgba(16, 185, 129, 0.5) !important;
+        backdrop-filter: blur(10px) saturate(180%) !important;
+        -webkit-backdrop-filter: blur(10px) saturate(180%) !important;
+        border: 1px solid rgba(255, 255, 255, 0.3) !important;
+        box-shadow: 0 8px 32px 0 rgba(16, 185, 129, 0.2) !important;
+    }
+
+    .glass-status-error {
+        background: rgba(239, 68, 68, 0.5) !important;
+        backdrop-filter: blur(10px) saturate(180%) !important;
+        -webkit-backdrop-filter: blur(10px) saturate(180%) !important;
+        border: 1px solid rgba(255, 255, 255, 0.3) !important;
+        box-shadow: 0 8px 32px 0 rgba(239, 68, 68, 0.2) !important;
+    }
+
+    .glass-status-info {
+        background: rgba(14, 165, 233, 0.5) !important;
+        backdrop-filter: blur(10px) saturate(180%) !important;
+        -webkit-backdrop-filter: blur(10px) saturate(180%) !important;
+        border: 1px solid rgba(255, 255, 255, 0.3) !important;
+        box-shadow: 0 8px 32px 0 rgba(14, 165, 233, 0.2) !important;
+    }
+
+    @keyframes pulse-cyan {
+        0% {
+            box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.4);
+            border-color: rgba(6, 182, 212, 0.4);
+        }
+
+        70% {
+            box-shadow: 0 0 0 15px rgba(6, 182, 212, 0);
+            border-color: rgba(6, 182, 212, 0.8);
+        }
+
+        100% {
+            box-shadow: 0 0 0 0 rgba(6, 182, 212, 0);
+            border-color: rgba(6, 182, 212, 0.4);
+        }
+    }
+
+    .neon-pulse-cyan {
+        animation: pulse-cyan 2s infinite;
+    }
 </style>
 
 <!-- Fundo interativo do relógio -->
@@ -16,7 +200,8 @@
     </div>
 
     <div class="w-full max-w-lg relative z-10 px-4">
-        <div class="glass rounded-3xl p-10 shadow-2xl relative overflow-hidden border border-white/20 min-h-[580px] flex flex-col pt-16">
+        <div
+            class="glass rounded-3xl p-10 shadow-2xl relative overflow-hidden border border-white/20 min-h-[580px] flex flex-col pt-16">
             <!-- Header Card -->
             <div class="text-center">
                 <h1
@@ -33,177 +218,99 @@
 
             <title>Relógio de Ponto - Biometria</title>
             <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
-            
+
             <!-- Central Content (Relógio + Ações) -->
             <div class="flex-1 flex flex-col justify-center gap-6 mt-6 mb-6">
                 <div class="text-center">
                     <div id="liveClock"
                         class="text-6xl sm:text-7xl font-black text-brand-600 tracking-tighter tabular-nums drop-shadow-sm transition-all">
                         00:00:00</div>
-                    <div id="liveDate" class="text-sm font-medium text-slate-500 mt-2 uppercase tracking-widest">Segunda, 01
+                    <div id="liveDate" class="text-sm font-medium text-slate-500 mt-2 uppercase tracking-widest">
+                        Segunda, 01
                         de Janeiro</div>
                 </div>
 
                 <!-- Input de Matrícula -->
-            <form id="pontoForm" onsubmit="registrarPonto(event)" class="space-y-6">
-                <!-- Campo de Matrícula oculto conforme solicitação (exclusivo biometria/identificação automática) -->
-                <input type="hidden" id="matricula" name="matricula" value="">
-                <div id="matriculaSugestoes" class="hidden"></div>
+                <form id="pontoForm" onsubmit="registrarPonto(event)" class="space-y-6 hidden">
+                    <!-- Campo de Matrícula oculto conforme solicitação (exclusivo biometria/identificação automática) -->
+                    <input type="hidden" id="matricula" name="matricula" value="">
+                    <div id="matriculaSugestoes" class="hidden"></div>
 
-                <div id="containerSenhaRelogio" class="mb-6 hidden">
-                    <label for="senha" class="sr-only">Senha</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg class="h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
-                                </path>
-                            </svg>
+                    <div id="containerSenhaRelogio" class="mb-6 hidden">
+                        <label for="senha" class="sr-only">Senha</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg class="h-5 w-5 text-slate-400" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
+                                    </path>
+                                </svg>
+                            </div>
+                            <input type="password" id="senha" name="senha"
+                                class="block w-full pl-10 pr-12 py-4 border border-slate-200 rounded-xl leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 sm:text-lg font-medium transition-colors shadow-sm text-center tracking-widest"
+                                placeholder="SUA SENHA" autocomplete="current-password">
+                            <button type="button" onclick="togglePassword('senha', this)"
+                                class="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-brand-600 transition-colors focus:outline-none">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                            </button>
                         </div>
-                        <input type="password" id="senha" name="senha"
-                            class="block w-full pl-10 pr-12 py-4 border border-slate-200 rounded-xl leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 sm:text-lg font-medium transition-colors shadow-sm text-center tracking-widest"
-                            placeholder="SUA SENHA" autocomplete="current-password">
-                        <button type="button" onclick="togglePassword('senha', this)"
-                            class="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-brand-600 transition-colors focus:outline-none">
+                    </div>
+
+                    <button type="submit" id="btnSubmit"
+                        class="w-full flex justify-center py-4 px-4 border border-transparent rounded-xl shadow-md text-lg font-bold text-white bg-brand-600 hover:bg-brand-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 transition-all hover:-translate-y-0.5 transform active:translate-y-0 relative overflow-hidden group">
+                        <span class="relative z-10 flex items-center gap-2">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
-                        </button>
+                            Registrar Ponto
+                        </span>
+                        <div
+                            class="absolute inset-0 h-full w-full opacity-0 group-hover:opacity-20 bg-white transition-opacity">
+                        </div>
+                    </button>
+                </form>
+
+                <div id="containerBiometria" class="hidden">
+                    <div class="relative flex py-4 items-center">
+                        <div class="flex-grow border-t border-slate-200"></div>
+                        <span
+                            class="flex-shrink-0 mx-4 text-slate-400 text-xs font-semibold uppercase tracking-widest">ou</span>
+                        <div class="flex-grow border-t border-slate-200"></div>
                     </div>
+
+                    <button type="button" id="btnBiometria" onclick="abrirModalBiometria()"
+                        class="w-full flex justify-center py-4 px-4 border border-brand-500 rounded-xl shadow-sm text-lg font-bold text-brand-600 bg-brand-50 hover:bg-brand-100 focus:outline-none transition-all outline-none">
+                        <span class="flex items-center gap-2">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4">
+                                </path>
+                            </svg>
+                            Usar Biometria
+                        </span>
+                    </button>
                 </div>
-
-                <button type="submit" id="btnSubmit"
-                    class="w-full flex justify-center py-4 px-4 border border-transparent rounded-xl shadow-md text-lg font-bold text-white bg-brand-600 hover:bg-brand-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 transition-all hover:-translate-y-0.5 transform active:translate-y-0 relative overflow-hidden group">
-                    <span class="relative z-10 flex items-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        Registrar Ponto
-                    </span>
-                    <div
-                        class="absolute inset-0 h-full w-full opacity-0 group-hover:opacity-20 bg-white transition-opacity">
-                    </div>
-                </button>
-            </form>
-
-            <div id="containerBiometria" class="hidden">
-                <div class="relative flex py-4 items-center">
-                    <div class="flex-grow border-t border-slate-200"></div>
-                    <span
-                        class="flex-shrink-0 mx-4 text-slate-400 text-xs font-semibold uppercase tracking-widest">ou</span>
-                    <div class="flex-grow border-t border-slate-200"></div>
-                </div>
-
-                <button type="button" id="btnBiometria" onclick="abrirModalBiometria()"
-                    class="w-full flex justify-center py-4 px-4 border border-brand-500 rounded-xl shadow-sm text-lg font-bold text-brand-600 bg-brand-50 hover:bg-brand-100 focus:outline-none transition-all outline-none">
-                    <span class="flex items-center gap-2">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4">
-                            </path>
-                        </svg>
-                        Usar Biometria
-                    </span>
-                </button>
-            </div>
             </div> <!-- Fim do Central Content -->
 
-            <!-- Modal Biometria Unificado -->
-            <div id="modalBiometria" class="fixed inset-0 z-[999] hidden" aria-labelledby="modal-title" role="dialog"
-                aria-modal="true">
-                <div class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm transition-opacity"
-                    onclick="fecharModalBiometria()"></div>
-                <div class="fixed inset-0 z-10 overflow-hidden no-scrollbar">
-                    <div class="flex min-h-full items-center justify-center p-4 text-center">
-                        <div
-                            class="relative transform overflow-hidden rounded-3xl bg-white text-left shadow-2xl transition-all w-full max-w-md min-h-[640px] border border-slate-100 p-0 flex flex-col">
 
-                            <div
-                                class="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
-                                <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
-                                    <svg class="w-5 h-5 text-brand-500" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4">
-                                        </path>
-                                    </svg>
-                                    Acesso Biométrico
-                                </h3>
-                                <button onclick="fecharModalBiometria()"
-                                    class="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-200 rounded-lg transition-colors">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M6 18L18 6M6 6l12 12"></path>
-                                    </svg>
-                                </button>
-                            </div>
 
-                            <!-- Tabs -->
-                            <div class="px-5 pt-4 flex gap-2">
-                                <button id="tabFacial" onclick="mudarModoBiometria('facial')"
-                                    class="flex-1 py-2 text-xs font-bold rounded-xl transition-all border border-transparent bg-brand-50 text-brand-600 border-brand-100">
-                                    Biometria Facial
-                                </button>
-                            </div>
-
-                            <input type="hidden" id="bio_modo" value="facial">
-                            <input type="hidden" id="bio_matricula" value="">
-
-                            <div class="p-8 flex-1 flex flex-col items-center justify-center">
-                                <!-- Area Facial -->
-                                <div id="areaFacial" class="w-full flex-1 flex flex-col items-center justify-center">
-                                    <div class="relative w-64 h-80 bg-black rounded-[50%] overflow-hidden shadow-inner mb-8 flex items-center justify-center border-4 border-brand-400"
-                                        id="videoContainer">
-                                        <video id="videoFeed" autoplay playsinline muted
-                                            class="absolute h-full w-full object-cover z-10 hidden" style="transform: scaleX(-1);"></video>
-                                        <canvas id="videoCanvas" class="absolute h-full w-full object-cover z-10 hidden" style="transform: scaleX(-1);"></canvas>
-                                        <div id="guideFacial"
-                                            class="absolute inset-0 z-20 pointer-events-none flex items-center justify-center">
-                                            <div
-                                                class="w-40 h-56 border-[3px] border-dashed border-brand-400/60 rounded-[50%] animate-pulse shadow-[0_0_20px_rgba(14,165,233,0.3)]">
-                                            </div>
-                                            <!-- Novos indicadores de precisão -->
-                                            <div id="faceStatus" class="absolute bottom-4 left-0 right-0 text-center">
-                                                <span class="bg-black/60 backdrop-blur-md text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest border border-white/10">Aguardando Face...</span>
-                                            </div>
-                                        </div>
-                                        <div id="camLoading"
-                                            class="absolute z-0 flex flex-col items-center justify-center text-slate-400">
-                                            <svg class="animate-spin h-6 w-6" xmlns="http://www.w3.org/2000/svg"
-                                                fill="none" viewBox="0 0 24 24">
-                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                                                    stroke-width="4"></circle>
-                                                <path class="opacity-75" fill="currentColor"
-                                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                                                </path>
-                                            </svg>
-                                        </div>
-                                    </div>
-                                    <button onclick="tirarFotoFacial()" id="btnCapturarFacial"
-                                        class="w-full py-4 bg-brand-600 hover:bg-brand-500 text-white rounded-2xl font-bold shadow-lg shadow-brand-200 transition-all flex justify-center items-center gap-2">
-                                        Capturar Facial
-                                    </button>
-                                </div>
-
-                                <!-- Area Digital Removida -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
             <!-- Links de Rodapé -->
             <div class="mt-auto pt-6 flex items-center justify-center gap-6 border-t border-slate-100">
                 <a href="#" onclick="abrirMeuAcesso(event)"
                     class="text-sm font-bold text-brand-600 hover:text-brand-700 transition-colors flex items-center justify-center gap-1.5 px-3 py-1.5 bg-brand-50 rounded-lg border border-brand-100 shadow-sm hover:shadow-md active:scale-95 transition-all">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
-                    Meu Acesso
+                    Meus Pontos
                 </a>
                 <a href="#" onclick="pedirAcessoAdmin(event)"
                     class="text-sm font-semibold text-slate-500 hover:text-slate-700 transition-colors flex items-center justify-center gap-1">
@@ -221,17 +328,45 @@
 </div>
 
 <script>
-    // Atualização em Tempo Real do Relógio
+    // Sincronização com o horário do BANCO DE DADOS (para garantir paridade com o registro)
+    <?php
+    $dbConn = Config\Database::getConnection();
+    $dbRes = $dbConn->query("SELECT (EXTRACT(EPOCH FROM NOW()) * 1000) as ts")->fetch();
+    $dbTimestamp = $dbRes['ts'];
+    ?>
+    const _serverTimeAtLoad = <?php echo $dbTimestamp; ?>;
+    const _clientTimeAtLoad = Date.now();
+    const _serverTimeOffset = _serverTimeAtLoad - _clientTimeAtLoad;
+
     function updateClock() {
-        const now = new Date();
-        const dFormat = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'full' }).format(now);
+        // Calcula o horário UTC atual baseado no offset do servidor
+        const now = new Date(Date.now() + _serverTimeOffset);
 
-        let hh = String(now.getHours()).padStart(2, '0');
-        let mm = String(now.getMinutes()).padStart(2, '0');
-        let ss = String(now.getSeconds()).padStart(2, '0');
+        // Formata para o fuso horário oficial (Brasília)
+        const dFormat = new Intl.DateTimeFormat('pt-BR', {
+            dateStyle: 'full',
+            timeZone: 'America/Sao_Paulo'
+        }).format(now);
+        const tFormat = new Intl.DateTimeFormat('pt-BR', {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false,
+            timeZone: 'America/Sao_Paulo'
+        }).formatToParts(now);
 
-        document.getElementById('liveClock').textContent = `${hh}:${mm}:${ss}`;
+        const parts = {};
+        tFormat.forEach(p => parts[p.type] = p.value);
+
+        const timeStr = `${parts.hour}:${parts.minute}:${parts.second}`;
+        document.getElementById('liveClock').textContent = timeStr;
         document.getElementById('liveDate').textContent = dFormat;
+
+        // Atualizar relógio no modal de biometria
+        const bioClock = document.getElementById('bioClock');
+        if (bioClock) bioClock.textContent = timeStr;
+        const bioDate = document.getElementById('bioDate');
+        if (bioDate) bioDate.textContent = now.toLocaleDateString('pt-BR');
     }
 
     // ---- Autocomplete Matrícula ----
@@ -242,26 +377,28 @@
             const res = await fetch('../api/horarios.php');
             const json = await res.json();
             if (json.success) listaHorarios = json.data;
-        } catch (e) { console.error("Erro carregando horarios", e); }
+        } catch (e) {
+            console.error("Erro carregando horarios", e);
+        }
     }
 
     window.selecionarHorarioRelogio = function(select) {
         const id = select.value;
         const day = select.dataset.updDay;
         if (!id) return;
-        
+
         const horario = listaHorarios.find(h => h.id == id);
         if (horario) {
             const p1 = document.querySelector(`input[data-upd-day="${day}"][data-upd-p="p1"]`);
             const p2 = document.querySelector(`input[data-upd-day="${day}"][data-upd-p="p2"]`);
             const p3 = document.querySelector(`input[data-upd-day="${day}"][data-upd-p="p3"]`);
             const p4 = document.querySelector(`input[data-upd-day="${day}"][data-upd-p="p4"]`);
-            
+
             if (p1) p1.value = horario.primeiro_horario ? horario.primeiro_horario.substring(0, 5) : '';
             if (p2) p2.value = horario.segundo_horario ? horario.segundo_horario.substring(0, 5) : '';
             if (p3) p3.value = horario.terceiro_horario ? horario.terceiro_horario.substring(0, 5) : '';
             if (p4) p4.value = horario.quarto_horario ? horario.quarto_horario.substring(0, 5) : '';
-            
+
             // Feedback
             const card = document.querySelector(`[data-upd-day-card="${day}"]`);
             if (card) {
@@ -279,21 +416,31 @@
             const res = await fetch('../api/funcionarios.php');
             const json = await res.json();
             if (json.success) _todosFunc = json.data;
-        } catch (e) { _todosFunc = []; }
+        } catch (e) {
+            _todosFunc = [];
+        }
         return _todosFunc || [];
     }
 
     async function buscarMatriculas(valor) {
         const dropdown = document.getElementById('matriculaSugestoes');
         valor = valor.toUpperCase().trim();
-        if (valor.length < 1) { dropdown.classList.add('hidden'); dropdown.innerHTML = ''; return; }
+        if (valor.length < 1) {
+            dropdown.classList.add('hidden');
+            dropdown.innerHTML = '';
+            return;
+        }
 
         const lista = await _carregarFuncionarios();
         const filtrados = lista.filter(f =>
             f.matricula.toUpperCase().includes(valor) || f.nome.toUpperCase().includes(valor)
         ).slice(0, 8);
 
-        if (filtrados.length === 0) { dropdown.classList.add('hidden'); dropdown.innerHTML = ''; return; }
+        if (filtrados.length === 0) {
+            dropdown.classList.add('hidden');
+            dropdown.innerHTML = '';
+            return;
+        }
 
         dropdown.innerHTML = filtrados.map(f => `
             <button type="button"
@@ -319,7 +466,9 @@
         input.value = matricula;
         fecharSugestoes();
         // Dispara verificação dos métodos de acesso
-        registrarPonto({ preventDefault: () => { } }, true);
+        registrarPonto({
+            preventDefault: () => {}
+        }, true);
     }
 
     function fecharSugestoes() {
@@ -339,18 +488,39 @@
                 resolve(null);
                 return;
             }
-            navigator.geolocation.getCurrentPosition(
-                (pos) => {
-                    const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-                    _geoCache = loc;
-                    resolve(loc);
-                },
-                (err) => {
-                    console.warn("Erro ao obter localização:", err.message);
+
+            // Tenta primeiro com alta precisão (GPS), depois fallback para rede/wifi
+            const optionsHigh = {
+                enableHighAccuracy: true,
+                timeout: 30000,
+                maximumAge: 60000
+            };
+            const optionsLow = {
+                enableHighAccuracy: false,
+                timeout: 15000,
+                maximumAge: 60000
+            };
+
+            const success = (pos) => {
+                const loc = {
+                    lat: pos.coords.latitude,
+                    lng: pos.coords.longitude
+                };
+                _geoCache = loc;
+                console.log("GPS OK:", loc.lat + ", " + loc.lng + " (Precisão: " + pos.coords.accuracy + "m)");
+                resolve(loc);
+            };
+
+            const error = (err) => {
+                console.warn("GPS Erro [" + err.code + "]: " + err.message);
+                // Fallback para localização por rede/wifi se o satélite demorar
+                navigator.geolocation.getCurrentPosition(success, (err2) => {
+                    console.warn("GPS Fallback Erro [" + err2.code + "]: " + err2.message);
                     resolve(null);
-                },
-                { enableHighAccuracy: true, timeout: 5000 }
-            );
+                }, optionsLow);
+            };
+
+            navigator.geolocation.getCurrentPosition(success, error, optionsHigh);
         });
     }
 
@@ -359,8 +529,8 @@
         const dLat = (lat2 - lat1) * Math.PI / 180;
         const dLon = (lon2 - lon1) * Math.PI / 180;
         const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                  Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return R * c;
     }
@@ -368,14 +538,28 @@
     let currentFlow = 'identificacao'; // 'identificacao' ou 'autenticacao'
     let metodosPermitidos = [];
     let temWebAuthn = false;
+    window.currentFuncionarioNome = ''; // Global para guardar o nome após identificação
 
-    window.toggleSenhaVisualRelogio = function () {
+    window.getMsgComNome = function(msg) {
+        if (!window.currentFuncionarioNome || !msg) return msg;
+        const nomeCurto = window.formatarNomeCurto(window.currentFuncionarioNome);
+
+        // Evita duplicidade se o nome já estiver no início da mensagem
+        const msgClean = msg.trim();
+        if (msgClean.startsWith(nomeCurto) || msgClean.startsWith(window.currentFuncionarioNome)) {
+            return msgClean;
+        }
+
+        return nomeCurto + ", " + msgClean;
+    };
+
+    window.toggleSenhaVisualRelogio = function() {
         const input = document.getElementById('senha');
         input.type = input.type === 'password' ? 'text' : 'password';
     };
 
     // Resetar fluxo se a matrícula mudar
-    document.getElementById('matricula').addEventListener('input', function () {
+    document.getElementById('matricula').addEventListener('input', function() {
         if (currentFlow === 'autenticacao') {
             resetarFluxo();
         }
@@ -383,6 +567,7 @@
 
     function resetarFluxo() {
         currentFlow = 'identificacao';
+        window.currentFuncionarioNome = ''; // Limpar nome para evitar persistência
         document.getElementById('containerSenhaRelogio').classList.add('hidden');
         document.getElementById('containerBiometria').classList.add('hidden');
         const btn = document.getElementById('btnSubmit');
@@ -404,14 +589,14 @@
 
         // Se matrícula vazia e não estamos em um fluxo de autenticação, abre biometria direto
         if (!matricula && currentFlow === 'identificacao') {
-            window.abrirModalBiometria();
+            // window.abrirModalBiometria(); // Oculto conforme solicitação
             return;
         }
 
         if (currentFlow === 'identificacao') {
             btn.disabled = true;
             btn.innerHTML = "Verificando...";
-            
+
             const success = await window.obterDadosFuncionario(matricula);
             btn.disabled = false;
 
@@ -428,7 +613,7 @@
                     document.getElementById('containerBiometria').classList.remove('hidden');
                     mostrouAlgo = true;
                     if (metodosPermitidos.includes('facial')) {
-                        window.abrirModalBiometria();
+                        // window.abrirModalBiometria(); // Oculto conforme solicitação
                     }
                 }
 
@@ -450,7 +635,8 @@
                 }
 
                 if (!mostrouAlgo) {
-                    Swal.fire('Atenção!', 'Nenhum método de acesso configurado.', 'warning'); resetarFluxo();
+                    Swal.fire('Atenção!', 'Nenhum método de acesso configurado.', 'warning');
+                    resetarFluxo();
                 }
             }
         } else {
@@ -462,21 +648,50 @@
         }
     }
 
-    window.obterDadosFuncionario = async function (matricula) {
+    window.obterDadosFuncionario = async function(matricula) {
         if (!matricula) return false;
         try {
             const res = await fetch('../api/ponto.php', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'get_metodos', matricula })
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    action: 'get_metodos',
+                    matricula
+                })
             });
             const data = await res.json();
+
+            // Tenta capturar o nome do funcionário mesmo em caso de erro (ex: todos pontos batidos)
+            if (data.funcionario || data.nome) {
+                window.currentFuncionarioNome = data.funcionario || data.nome;
+            }
+
             if (data.success) {
                 // Verificar se a ficha está incompleta
                 if (data.ficha_incompleta) {
+                    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                    const msgFicha = isLocal ?
+                        'O ponto não pode ser batido nos Quiosques de Ponto Fixo da FUNAD. Use outro meio de acesso para completar sua ficha.' :
+                        'Sua ficha está incompleta. Clique em atualizar para abrir o formulário de atualização.';
+
+                    if (isLocal) {
+                        await Swal.fire({
+                            title: window.getMsgComNome('Atualização Necessária'),
+                            text: msgFicha,
+                            icon: 'warning',
+                            confirmButtonText: 'Entendido',
+                            confirmButtonColor: '#94a3b8'
+                        });
+                        currentFlow = 'identificacao';
+                        resetarFluxo();
+                        return false;
+                    }
+
                     await Swal.fire({
                         title: 'Atualização Cadastral',
-                        text: 'Sua ficha está incompleta. Clique em atualizar para abrir o formulário de atualização.',
+                        text: msgFicha,
                         icon: 'info',
                         confirmButtonText: 'Atualizar',
                         confirmButtonColor: '#0ea5e9'
@@ -491,33 +706,64 @@
 
                 metodosPermitidos = data.metodos;
                 temWebAuthn = !!data.has_webauthn;
+                window.currentFuncionarioNome = data.nome || data.funcionario || '';
 
                 // ---- Validação de Geofencing (Novo) ----
                 if (data.geofencing) {
-                    const loc = await obterLocalizacao();
-                    if (!loc) {
-                        Swal.fire('Geolocalização Necessária', 'Ative seu GPS para validar o acesso nesta área.', 'warning');
-                        resetarFluxo();
-                        return false;
+                    const loc = _geoCache || await obterLocalizacao();
+                    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+
+                    if (!loc && !isLocal) {
+                        // Bypass de GPS se o reconhecimento foi muito preciso (distancia < 0.22)
+                        // Isso ajuda em máquinas de mesa (Quiosque) sem sinal GPS
+                        if (data.distancia && data.distancia < 0.22) {
+                            console.warn("GPS falhou, mas reconhecimento é de alta confiança. Permitindo...");
+                        } else {
+                            const nomeCurto = window.formatarNomeCurto(window.currentFuncionarioNome);
+                            const msg = `${nomeCurto}, não conseguimos localizar seu sinal de GPS. Por favor, verifique se a localização está permitida nas configurações do seu navegador (no ícone do cadeado).`;
+                            Swal.fire({
+                                title: 'Sinal de GPS não encontrado',
+                                text: msg,
+                                icon: 'warning',
+                                confirmButtonColor: '#0ea5e9'
+                            });
+                            await window.falarTexto(msg);
+                            resetarFluxo();
+                            return false;
+                        }
                     }
-                    const dist = haversineDistance(data.geofencing.lat, data.geofencing.lng, loc.lat, loc.lng);
-                    if (dist > data.geofencing.dist) {
-                        Swal.fire({
-                            title: 'Fora da Área!',
-                            html: `Você está a <b>${Math.round(dist)}m</b> da área <b>[${data.geofencing.nome}]</b>.<br>O acesso é permitido apenas em um raio de <b>${data.geofencing.dist}m</b>.`,
-                            icon: 'error',
-                            confirmButtonColor: '#0ea5e9'
-                        });
-                        resetarFluxo();
-                        return false;
+
+                    if (loc) {
+                        const dist = haversineDistance(data.geofencing.lat, data.geofencing.lng, loc.lat, loc.lng);
+
+                        if (dist > data.geofencing.dist && !isLocal) {
+                            const nomeCurto = window.formatarNomeCurto(window.currentFuncionarioNome);
+                            const distExibir = dist > 1000 ? (dist / 1000).toFixed(1) + "km" : Math.round(dist) + " metros";
+                            const msg = `${nomeCurto}, você está a ${distExibir} do centro de trabalho, mas o limite é ${data.geofencing.dist} metros. Por favor, locomova-se para mais próximo do centro de sua área de trabalho.`;
+
+                            Swal.fire({
+                                title: 'Fora do Raio',
+                                html: `<b>${nomeCurto}</b>, você está a <b>${distExibir}</b> do centro de trabalho, mas o limite é <b>${data.geofencing.dist} metros</b>. Por favor, locomova-se para mais próximo do centro de sua área de trabalho.`,
+                                icon: 'error',
+                                confirmButtonColor: '#0ea5e9'
+                            });
+                            await window.falarTexto(msg);
+                            resetarFluxo();
+                            return false;
+                        }
+                        console.log(`Geofencing OK: ${Math.round(dist)}m de ${data.geofencing.nome}`);
                     }
-                    console.log(`Geofencing OK: ${Math.round(dist)}m de ${data.geofencing.nome}`);
                 }
 
                 currentFlow = 'autenticacao';
                 return true;
             } else {
-                Swal.fire({ title: 'Ops!', text: data.message, icon: 'error', confirmButtonColor: '#0ea5e9' });
+                Swal.fire({
+                    title: window.getMsgComNome('Ops!'),
+                    text: data.message,
+                    icon: 'error',
+                    confirmButtonColor: '#0ea5e9'
+                });
                 return false;
             }
         } catch (err) {
@@ -526,14 +772,16 @@
         }
     };
 
-    window.abrirModalFichaIncompleta = async function (data) {
+    window.abrirModalFichaIncompleta = async function(data) {
         if (listaHorarios.length === 0) await _carregarHorarios();
-        
+
         return new Promise(async (resolve) => {
             const func = data;
-            
 
-            const { value: formValues } = await Swal.fire({
+
+            const {
+                value: formValues
+            } = await Swal.fire({
                 title: 'Atualização Necessária',
                 html: `
                     <p class="text-[11px] text-slate-500 mb-6 uppercase tracking-wider font-bold">Por favor, complete sua ficha para conformidade com o E-Social.</p>
@@ -908,16 +1156,16 @@
                                 <div class="space-y-3">
                                     <div class="group">
                                         <label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-1">Órgão/Entidade</label>
-                                        <input id="upd_termo_orgao" class="w-full px-4 py-2 bg-white border border-slate-100 rounded-xl text-xs font-bold outline-none" value="${(() => { try { const t = typeof func.termo_dados === 'string' ? JSON.parse(func.termo_dados) : func.termo_dados; return t?.orgao || 'FUNAD – CENTRO INTEGRADO DE APOIO À PESSOA COM DEFICIÊNCIA'; } catch(e) { return 'FUNAD – CENTRO INTEGRADO DE APOIO À PESSOA COM DEFICIÊNCIA'; } })()}">
+                                        <input id="upd_termo_orgao" class="w-full px-4 py-2 bg-white border border-slate-100 rounded-xl text-xs font-bold outline-none" value="${(() => { try { const t = typeof func.termo_dados === 'string' ? JSON.parse(func.termo_dados) : func.termo_dados; return t?.orgao || 'FUNAD – CENTRO INTEGRADO DE APOIO À PESSOA COM DEFICIÊNCIA'; } catch (e) { return 'FUNAD – CENTRO INTEGRADO DE APOIO À PESSOA COM DEFICIÊNCIA'; } })()}">
                                     </div>
                                     <div class="grid grid-cols-2 gap-4">
                                         <div class="group">
                                             <label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-1">CNPJ</label>
-                                            <input id="upd_termo_cnpj" class="w-full px-4 py-2 bg-white border border-slate-100 rounded-xl text-xs font-bold outline-none" value="${(() => { try { const t = typeof func.termo_dados === 'string' ? JSON.parse(func.termo_dados) : func.termo_dados; return t?.cnpj || '24.507.865/0001-07'; } catch(e) { return '24.507.865/0001-07'; } })()}">
+                                            <input id="upd_termo_cnpj" class="w-full px-4 py-2 bg-white border border-slate-100 rounded-xl text-xs font-bold outline-none" value="${(() => { try { const t = typeof func.termo_dados === 'string' ? JSON.parse(func.termo_dados) : func.termo_dados; return t?.cnpj || '24.507.865/0001-07'; } catch (e) { return '24.507.865/0001-07'; } })()}">
                                         </div>
                                         <div class="group">
                                             <label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-1">Contato DPO</label>
-                                            <input id="upd_termo_dpo_contato" class="w-full px-4 py-2 bg-white border border-slate-100 rounded-xl text-[10px] font-bold outline-none" value="${(() => { try { const t = typeof func.termo_dados === 'string' ? JSON.parse(func.termo_dados) : func.termo_dados; return t?.dpo_contato || 'lgpd@funad.pb.gov.br'; } catch(e) { return 'lgpd@funad.pb.gov.br'; } })()}">
+                                            <input id="upd_termo_dpo_contato" class="w-full px-4 py-2 bg-white border border-slate-100 rounded-xl text-[10px] font-bold outline-none" value="${(() => { try { const t = typeof func.termo_dados === 'string' ? JSON.parse(func.termo_dados) : func.termo_dados; return t?.dpo_contato || 'lgpd@funad.pb.gov.br'; } catch (e) { return 'lgpd@funad.pb.gov.br'; } })()}">
                                         </div>
                                     </div>
                                 </div>
@@ -988,8 +1236,20 @@
                         nome_conjuge: document.getElementById('upd_conjuge').value,
                         naturalidade_conjuge: document.getElementById('upd_conjuge_nat').value,
                         naturalidade_uf_conjuge: document.getElementById('upd_conjuge_nat_uf').value.toUpperCase(),
-                        filhos_menores: Array.from({length: parseInt(document.getElementById('upd_filhos_menores').value) || 0}, () => ({nome: '', nasc: '', cpf: ''})),
-                        dependentes_ir: Array.from({length: parseInt(document.getElementById('upd_dependentes_ir').value) || 0}, () => ({nome: '', nasc: '', cpf: ''})),
+                        filhos_menores: Array.from({
+                            length: parseInt(document.getElementById('upd_filhos_menores').value) || 0
+                        }, () => ({
+                            nome: '',
+                            nasc: '',
+                            cpf: ''
+                        })),
+                        dependentes_ir: Array.from({
+                            length: parseInt(document.getElementById('upd_dependentes_ir').value) || 0
+                        }, () => ({
+                            nome: '',
+                            nasc: '',
+                            cpf: ''
+                        })),
                         banco_nome: document.getElementById('upd_banco').value,
                         banco_agencia: document.getElementById('upd_agencia').value,
                         banco_conta: document.getElementById('upd_conta').value,
@@ -1010,14 +1270,16 @@
                             return false;
                         }
                     }
-                    
+
                     const confirmBtn = Swal.getConfirmButton();
                     window.setLoading(confirmBtn, true);
 
                     try {
                         const updRes = await fetch('../api/funcionarios.php', {
                             method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
                             body: JSON.stringify({
                                 action: 'update_ficha',
                                 id: data.id,
@@ -1058,25 +1320,32 @@
     window.consultarCEPRelogio = async function() {
         const cepInput = document.getElementById('upd_cep');
         if (!cepInput) return;
-        
+
         let cep = cepInput.value.replace(/\D/g, '');
         if (cep.length !== 8) {
-            Swal.fire({ toast: true, position: 'top-end', icon: 'warning', title: 'CEP inválido', showConfirmButton: false, timer: 3000 });
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'warning',
+                title: 'CEP inválido',
+                showConfirmButton: false,
+                timer: 3000
+            });
             return;
         }
 
         cepInput.classList.add('ring-2', 'ring-brand-500/50');
-        
+
         try {
             const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
             const data = await res.json();
-            
+
             if (!data.erro) {
                 document.getElementById('upd_endereco').value = data.logradouro || '';
                 document.getElementById('upd_bairro').value = data.bairro || '';
                 document.getElementById('upd_municipio').value = data.localidade || '';
                 document.getElementById('upd_uf').value = data.uf || '';
-                
+
                 // Feedback visual
                 ['upd_endereco', 'upd_bairro', 'upd_municipio', 'upd_uf'].forEach(id => {
                     const el = document.getElementById(id);
@@ -1085,14 +1354,28 @@
                         setTimeout(() => el.classList.remove('ring-2', 'ring-emerald-500/50'), 2000);
                     }
                 });
-                
+
                 document.getElementById('upd_numero').focus();
             } else {
-                Swal.fire({ toast: true, position: 'top-end', icon: 'error', title: 'CEP não encontrado', showConfirmButton: false, timer: 3000 });
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'error',
+                    title: 'CEP não encontrado',
+                    showConfirmButton: false,
+                    timer: 3000
+                });
             }
         } catch (e) {
             console.error("Erro ao buscar CEP:", e);
-            Swal.fire({ toast: true, position: 'top-end', icon: 'error', title: 'Falha na conexão', showConfirmButton: false, timer: 3000 });
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'error',
+                title: 'Falha na conexão',
+                showConfirmButton: false,
+                timer: 3000
+            });
         } finally {
             cepInput.classList.remove('ring-2', 'ring-brand-500/50');
         }
@@ -1122,12 +1405,12 @@
     window.toggleSeccaoRelogio = function(id) {
         const el = document.getElementById(id);
         if (!el) return;
-        
+
         const isHidden = el.classList.contains('hidden');
         const icon = document.getElementById('upd_icon_' + id.split('_').pop());
-        
+
         // Oculta todas as outras se forem do mesmo container (opcional, vamos fazer apenas toggle por enquanto)
-        
+
         if (isHidden) {
             el.classList.remove('hidden');
             if (icon) icon.classList.add('rotate-180');
@@ -1145,15 +1428,25 @@
             const loc = await _geoCache ? Promise.resolve(_geoCache) : obterLocalizacao();
             const res = await fetch('../api/ponto.php', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'ponto_matricula', matricula, senha, lat: loc?.lat, lng: loc?.lng })
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    action: 'ponto_matricula',
+                    matricula,
+                    senha,
+                    lat: loc?.lat,
+                    lng: loc?.lng
+                })
             });
             const data = await res.json();
 
             if (data.success) {
+                const msgSucesso = `Ponto registrado com sucesso.`;
+                await window.falarTexto(msgSucesso);
                 Swal.fire({
                     title: 'Marcado!',
-                    html: `<b>${data.funcionario}</b><br>Seu ponto foi registrado às ${data.hora}`,
+                    html: `<b>${data.funcionario}</b><br>${msgSucesso} em <b>${data.data_ponto}</b> às <b>${data.hora}</b>`,
                     icon: 'success',
                     showConfirmButton: true,
                     confirmButtonText: 'Fechar',
@@ -1164,9 +1457,11 @@
                 resetarFluxo();
             } else {
                 if (data.ficha_incompleta) {
+                    const msg = data.message;
+                    await window.falarTexto(msg);
                     Swal.fire({
-                        title: 'Ficha Incompleta',
-                        text: data.message,
+                        title: window.getMsgComNome('Ficha Incompleta'),
+                        text: msg,
                         icon: 'warning',
                         confirmButtonText: 'Atualizar Agora',
                         confirmButtonColor: '#0ea5e9'
@@ -1174,7 +1469,15 @@
                         window.abrirModalFichaIncompleta(data);
                     });
                 } else {
-                    Swal.fire({ title: 'Aviso', text: data.message, icon: 'error', confirmButtonColor: '#0ea5e9' });
+                    const nomeCurto = window.formatarNomeCurto(window.currentFuncionarioNome);
+                    const personalizedMsg = `${nomeCurto}, ${data.message}`;
+                    await window.falarTexto(personalizedMsg);
+                    Swal.fire({
+                        title: 'Aviso de Registro',
+                        text: personalizedMsg,
+                        icon: 'error',
+                        confirmButtonColor: '#0ea5e9'
+                    });
                 }
             }
         } catch (err) {
@@ -1199,7 +1502,12 @@
     let modelsLoaded = false;
     let isProcessingFacial = false;
     let detectionLoopActive = false;
-    
+
+    // Novas variáveis para o Smart Reset (Reset automático ao mudar de pessoa)
+    window.lastSuccessDescriptor = null;
+    window.isStatusCooldown = false;
+    window.cooldownTimer = null;
+
     // Variáveis para detecção de vivacidade (Liveness)
     let landmarkHistory = [];
     const MAX_HISTORY = 5; // Reduzido: menos frames para confirmar vivacidade
@@ -1213,13 +1521,12 @@
         const MODEL_URL = 'https://justadudewhohacks.github.io/face-api.js/models';
         try {
             await Promise.all([
-                
                 faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
                 faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
                 faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
             ]);
             modelsLoaded = true;
-            console.log("Modelos Face-API carregados.");
+            console.log("Modelos Face-API (Detecção e Reconhecimento) carregados.");
         } catch (e) {
             console.error("Erro ao carregar modelos Face-API:", e);
             const statusEl = document.querySelector('#faceStatus span');
@@ -1229,7 +1536,9 @@
 
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-    window.abrirModalBiometria = async function () {
+    window.abrirModalBiometria = async function() {
+        return; // Desativado conforme solicitação
+        window.falarBiometria("Iniciando câmera, por favor aguarde", true);
         const inputMatricula = document.getElementById('matricula');
         const matricula = inputMatricula.value.trim();
         document.getElementById('bio_matricula').value = matricula;
@@ -1251,16 +1560,16 @@
         // Filtrar abas baseadas nos métodos permitidos
         const tFacial = document.getElementById('tabFacial');
         const tDigital = document.getElementById('tabDigital');
-        
+
         // Se metodosPermitidos estiver vazio (identificação inicial), permite apenas facial
-        const podeFacial = true; 
-        const podeDigital = false; 
+        const podeFacial = true;
+        const podeDigital = false;
 
         if (tFacial) tFacial.style.display = podeFacial ? 'block' : 'none';
         if (tDigital) tDigital.style.display = podeDigital ? 'block' : 'none';
 
         document.getElementById('modalBiometria').classList.remove('hidden');
-        
+
         // Selecionar o primeiro método disponível, priorizando facial
         if (podeFacial) {
             window.mudarModoBiometria('facial');
@@ -1280,20 +1589,29 @@
 
         loadFaceModels(); // Background load
         // Iniciar coleta de geolocalização em background
-        _geoCache ? Promise.resolve(_geoCache) : obterLocalizacao().then(loc => { if (loc) _geoCache = loc; });
+        _geoCache ? Promise.resolve(_geoCache) : obterLocalizacao().then(loc => {
+            if (loc) _geoCache = loc;
+        });
     };
 
-    window.fecharModalBiometria = function () {
+    window.fecharModalBiometria = function() {
         document.getElementById('modalBiometria').classList.add('hidden');
         detectionLoopActive = false;
         isProcessingFacial = false;
         landmarkHistory = [];
         isLivenessOk = false;
+        window.currentFuncionarioNome = ''; // Limpar nome ao fechar
+        const matInput = document.getElementById('matricula');
+        const bioMatInput = document.getElementById('bio_matricula');
+        if (matInput) matInput.value = '';
+        if (bioMatInput) bioMatInput.value = '';
+
         window.pararStreamVideo();
+        window.speechSynthesis.cancel();
         if (window.dpSocketClock) window.dpSocketClock.close();
     };
 
-    window.mudarModoBiometria = function (modo) {
+    window.mudarModoBiometria = function(modo) {
         document.getElementById('bio_modo').value = modo;
 
         // UI Tabs
@@ -1331,11 +1649,154 @@
         isLivenessOk = false;
     };
 
-    window.iniciarStreamVideo = async function () {
+    // Utilitário de Vibração
+    window.vibrarDispositivo = function(padrao) {
+        if ("vibrate" in navigator) {
+            try {
+                navigator.vibrate(padrao);
+            } catch (e) {}
+        }
+    };
+
+    // Formatação de nome curto para fala (Primeiro + Segundo ou Primeiro + Preposição + Segundo)
+    window.formatarNomeCurto = function(nomeFull) {
+        if (!nomeFull) return "";
+        const partes = nomeFull.trim().split(/\s+/);
+        if (partes.length <= 1) return partes[0];
+
+        const preposicoes = ["da", "de", "do", "das", "dos"];
+        const p2 = partes[1].toLowerCase();
+
+        if (preposicoes.includes(p2) && partes.length >= 3) {
+            return partes[0] + " " + partes[1] + " " + partes[2];
+        }
+
+        return partes[0] + " " + partes[1];
+    };
+
+    // Utilitário de Sintese de Voz
+    let ultimaFala = "";
+    let ultimaVezFalada = 0;
+
+    const getBestPTVoice = (synth) => {
+        const voices = synth.getVoices();
+        // Prioridade: Daniel (comum masculina PT-BR), Google PT-BR (geralmente tem versão masculina), qualquer PT-BR
+        return voices.find(v => v.lang.includes('pt-BR') && (v.name.includes('Daniel') || v.name.includes('Male') || v.name.includes('Masculino'))) ||
+            voices.find(v => v.lang.includes('pt-BR') && v.name.includes('Google')) ||
+            voices.find(v => v.lang.includes('pt-BR'));
+    };
+
+    window.falarBiometria = function(texto, force = false) {
+        return new Promise((resolve) => {
+            if (!texto) {
+                resolve();
+                return;
+            }
+
+            const agora = Date.now();
+            // Aumentado debounce para 20 segundos para mensagens de status repetitivas
+            const tempoDebounce = (texto.includes("Buscando") || texto.includes("Reconhecendo")) ? 20000 : 3000;
+
+            if (!force && texto === ultimaFala && (agora - ultimaVezFalada < tempoDebounce)) {
+                resolve();
+                return;
+            }
+
+            ultimaFala = texto;
+            ultimaVezFalada = agora;
+
+            const synth = window.speechSynthesis;
+            const utter = new SpeechSynthesisUtterance(texto);
+            utter.lang = 'pt-BR';
+            utter.rate = 1.15;
+            utter.pitch = 1.0;
+
+            utter.onend = () => resolve();
+            utter.onerror = (e) => {
+                console.warn("SpeechSynthesis error:", e);
+                resolve();
+            };
+
+            const ptVoice = getBestPTVoice(synth);
+            if (ptVoice) utter.voice = ptVoice;
+
+            if (force) synth.cancel();
+            synth.speak(utter);
+            setTimeout(() => resolve(), 5000);
+        });
+    };
+
+    /**
+     * Utilitário de Síntese de Voz com suporte a Promise
+     */
+    window.falarTexto = function(texto) {
+        return new Promise((resolve) => {
+            const synth = window.speechSynthesis;
+            const utter = new SpeechSynthesisUtterance(texto);
+            utter.lang = 'pt-BR';
+            utter.rate = 1.05;
+
+            utter.onend = () => resolve();
+            utter.onerror = (e) => {
+                console.warn("SpeechSynthesis error:", e);
+                resolve();
+            };
+
+            const ptVoice = getBestPTVoice(synth);
+            if (ptVoice) utter.voice = ptVoice;
+
+            synth.speak(utter);
+            setTimeout(() => resolve(), 10000);
+        });
+    };
+
+    /**
+     * Utilitário de Reconhecimento de Voz (Sim/Não)
+     */
+    window.ouvirComandoConsentimento = function() {
+        return new Promise((resolve) => {
+            const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!Recognition) {
+                console.warn("Navegador não suporta SpeechRecognition.");
+                return resolve(null);
+            }
+
+            const rec = new Recognition();
+            rec.lang = 'pt-BR';
+            rec.interimResults = false;
+            rec.maxAlternatives = 1;
+
+            rec.onresult = (event) => {
+                const result = event.results[0][0].transcript.toLowerCase();
+                console.log("Voz capturada:", result);
+
+                if (result.includes('sim') || result.includes('aceito') || result.includes('concordo') || result.includes('positivo')) {
+                    resolve('sim');
+                } else if (result.includes('não') || result.includes('nao') || result.includes('nego') || result.includes('cancelar') || result.includes('negativo')) {
+                    resolve('nao');
+                } else {
+                    resolve(null);
+                }
+            };
+
+            rec.onerror = (err) => {
+                console.error("Erro no reconhecimento de voz:", err);
+                resolve(null);
+            };
+
+            try {
+                rec.start();
+            } catch (e) {
+                resolve(null);
+            }
+        });
+    };
+
+    window.iniciarStreamVideo = async function() {
         const video = document.getElementById('videoFeed');
         const camLoading = document.getElementById('camLoading');
         const statusEl = document.querySelector('#faceStatus span');
-        
+
         if (camLoading) {
             camLoading.classList.remove('hidden');
         }
@@ -1348,15 +1809,17 @@
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
                 throw new Error("Navegador não suporta acesso à câmera.");
             }
-            
+
             window.pararStreamVideo();
 
-            videoStream = await navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: 'user' } 
+            videoStream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    facingMode: 'user'
+                }
             });
-            
+
             video.srcObject = videoStream;
-            
+
             // Força o play e tenta lidar com restrições do navegador
             const playVideo = async () => {
                 try {
@@ -1364,7 +1827,7 @@
                     if (camLoading) camLoading.classList.add('hidden');
                     if (video) video.classList.remove('hidden');
                     if (statusEl) statusEl.innerText = !modelsLoaded ? "Carregando IA..." : "Aguardando Face...";
-                    
+
                     if (document.getElementById('bio_modo').value === 'facial') {
                         detectionLoopActive = true;
                         isProcessingFacial = false;
@@ -1387,7 +1850,7 @@
                         resolve(true);
                     }
                 }, 1000);
-                
+
                 // Timeout de 10 segundos para desistir
                 setTimeout(() => {
                     clearInterval(retryPlay);
@@ -1403,115 +1866,273 @@
         }
     };
 
-    window.pararStreamVideo = function () {
+    window.pararStreamVideo = function() {
         if (videoStream) {
             videoStream.getTracks().forEach(track => track.stop());
             videoStream = null;
         }
     };
 
+
     async function startFaceDetectionLoop() {
+        const modal = document.getElementById('modalBiometria');
+        if (!modal || modal.classList.contains('hidden')) {
+            detectionLoopActive = false;
+            return;
+        }
+
         const statusEl = document.querySelector('#faceStatus span');
+        const container = document.getElementById('videoContainer');
+        const video = document.getElementById('videoFeed');
+
         if (!modelsLoaded) {
             if (statusEl) statusEl.innerText = "Carregando IA...";
             if (detectionLoopActive) setTimeout(() => requestAnimationFrame(startFaceDetectionLoop), 500);
             return;
         }
-        
-        if (!detectionLoopActive || isProcessingFacial) {
-            if (detectionLoopActive) requestAnimationFrame(startFaceDetectionLoop);
+
+        // Permitir que o loop continue se estiver em COOLDOWN para detectar mudança de pessoa
+        if (!detectionLoopActive) return;
+
+        // Se estiver processando e não estiver em cooldown, apenas aguarda um pouco e tenta de novo
+        if (isProcessingFacial && !window.isStatusCooldown) {
+            setTimeout(() => requestAnimationFrame(startFaceDetectionLoop), 500);
             return;
         }
 
-        const video = document.getElementById('videoFeed');
         if (!video || video.paused || video.ended) {
             if (detectionLoopActive) requestAnimationFrame(startFaceDetectionLoop);
             return;
         }
 
         try {
-            // Usamos TinyFaceDetector + landmarks para verificar movimento
-            const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 })).withFaceLandmarks();
+            // Se tivermos um descritor de sucesso anterior, verificamos se a pessoa ainda está lá
+            if (window.lastSuccessDescriptor) {
+                const detectionWithDesc = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({
+                    inputSize: 224,
+                    scoreThreshold: 0.5
+                })).withFaceLandmarks().withFaceDescriptor();
 
-            if (detection) {
-                // Lógica de Vivacidade (Liveness)
-                const landmarks = detection.landmarks.positions;
-                // Pegamos alguns pontos chave: nariz, olhos, boca
-                const checkPoints = [
-                    landmarks[30], // Ponta do nariz
-                    landmarks[36], // Olho esquerdo
-                    landmarks[45], // Olho direito
-                    landmarks[48], // Canto boca esquerdo
-                    landmarks[54]  // Canto boca direito
-                ];
-                
-                landmarkHistory.push(checkPoints);
-                if (landmarkHistory.length > MAX_HISTORY) landmarkHistory.shift();
+                if (detectionWithDesc && window.lastSuccessDescriptor) {
+                    window._lastFaceDetectedTime = Date.now(); // Atualizar tempo da última detecção
+                    const distance = faceapi.euclideanDistance(detectionWithDesc.descriptor, window.lastSuccessDescriptor);
 
-                if (landmarkHistory.length >= MAX_HISTORY) {
-                    let totalMovement = 0;
-                    for (let i = 1; i < landmarkHistory.length; i++) {
-                        for (let j = 0; j < checkPoints.length; j++) {
-                            const p1 = landmarkHistory[i-1][j];
-                            const p2 = landmarkHistory[i][j];
-                            totalMovement += Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
+                    // Se for a MESMA pessoa
+                    if (distance <= 0.45) {
+                        // Se ainda estiver no cooldown (4s iniciais), apenas espera
+                        if (window.isStatusCooldown) {
+                            if (detectionLoopActive) setTimeout(() => requestAnimationFrame(startFaceDetectionLoop), 500);
+                            return;
                         }
-                    }
-                    
-                    const avgMovement = totalMovement / (MAX_HISTORY * checkPoints.length);
-                    // console.log("Movimento médio:", avgMovement);
-                    
-                    if (avgMovement > MOVEMENT_THRESHOLD) {
-                        isLivenessOk = true;
-                    }
-                }
 
-                if (statusEl) {
-                    if (isLivenessOk) {
-                        statusEl.textContent = "Face Validada";
-                        statusEl.className = "bg-emerald-500/80 backdrop-blur-md text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest border border-white/10";
+                        // Se já passou o cooldown mas a pessoa não saiu da frente, avisa e espera ela sair
+                        if (statusEl && !isProcessingFacial) {
+                            statusEl.textContent = "Aguardando outra face";
+                            statusEl.className = "glass-status text-white text-[9px] font-bold px-6 py-2.5 rounded-full uppercase tracking-widest transition-all shadow-xl";
+                        }
+                        // Resetar elementos visuais para estado neutro
+                        if (oval) oval.className = "w-[85%] h-[80%] border-2 border-white/30 rounded-[50%] transition-all duration-300";
+                        if (container) container.className = "relative w-full max-w-[280px] aspect-[4/5] bg-slate-900 rounded-[32px] overflow-hidden shadow-2xl border-2 border-white/5 transition-colors duration-300";
+                        if (scanner) scanner.classList.add('hidden');
+
+                        if (detectionLoopActive) setTimeout(() => requestAnimationFrame(startFaceDetectionLoop), 1000);
+                        return;
                     } else {
-                        statusEl.textContent = "Mova a Cabeça Levemente";
-                        statusEl.className = "bg-amber-500/80 backdrop-blur-md text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest border border-white/10";
+                        // É uma pessoa DIFERENTE! Resetar e permitir nova batida
+                        console.log("[SmartReset] Nova pessoa detectada. Liberando.");
+                        window.resetarInterfacePosBatida();
+                        // Importante: resetarInterfacePosBatida agora não limpa o descritor se isStatusCooldown for falso? 
+                        // Na verdade, aqui queremos limpar para permitir a nova pessoa.
+                        window.lastSuccessDescriptor = null;
+                    }
+                } else {
+                    // Ninguém na frente da câmera! 
+                    // Esperar 2 segundos de "vazio" antes de limpar o descritor de sucesso (evita revalidação acidental)
+                    const agora = Date.now();
+                    if (!window._lastFaceDetectedTime) window._lastFaceDetectedTime = agora;
+
+                    if (agora - window._lastFaceDetectedTime > 2000) {
+                        console.log("[SmartReset] Espaço vazio detectado por 2s. Limpando memória facial.");
+                        window.lastSuccessDescriptor = null;
+                        if (!window.isStatusCooldown) window.resetarInterfacePosBatida();
                     }
                 }
-                
-                // Só dispara captura automática se a face for estável E houver vivacidade detectada
-                if (detection.detection.score > 0.85 && !isProcessingFacial && isLivenessOk) {
-                    console.log("Confiança alta e vivacidade detectada.");
-                    window.tirarFotoFacial();
+            }
+
+            // Fluxo normal de detecção
+            const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({
+                inputSize: 224,
+                scoreThreshold: 0.4
+            }));
+
+            const oval = document.getElementById('faceOvalBorder');
+            const scanner = document.getElementById('scannerLine');
+            const progressBar = document.getElementById('progressBar');
+
+            if (detection && detection.score > 0.55 && !isProcessingFacial) {
+                const box = detection.box;
+                const centerX = box.x + box.width / 2;
+                const centerY = box.y + box.height / 2;
+
+                // Dimensões do vídeo
+                const vWidth = video.videoWidth;
+                const vHeight = video.videoHeight;
+
+                // Verificar se o centro do rosto está na região central (tolerância de 15%)
+                const isCenteredX = Math.abs(centerX - vWidth / 2) < (vWidth * 0.15);
+                const isCenteredY = Math.abs(centerY - vHeight / 2) < (vHeight * 0.15);
+
+                if (!isCenteredX || !isCenteredY) {
+                    if (statusEl) {
+                        statusEl.textContent = "Centralize seu rosto";
+                        statusEl.className = "bg-slate-900/90 text-white text-[9px] font-black px-5 py-2 rounded-full uppercase tracking-widest border border-white/10 shadow-2xl transition-all";
+                    }
+                    if (oval) oval.className = "w-[85%] h-[80%] border-[3px] border-dashed border-white/50 rounded-[50%] transition-all duration-500 pulse-white";
+                    window._stabilityCount = 0;
+                    if (detectionLoopActive) setTimeout(() => requestAnimationFrame(startFaceDetectionLoop), 100);
                     return;
                 }
-            } else {
-                if (statusEl) {
-                    statusEl.textContent = "Ajuste sua Face";
-                    statusEl.className = "bg-black/60 backdrop-blur-md text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest border border-white/10";
+
+                // Face detectada, CENTRALIZADA e ALINHADA -> Incrementar estabilidade
+                window._stabilityCount = (window._stabilityCount || 0) + 1;
+
+                if (scanner) scanner.classList.remove('hidden');
+                if (container) {
+                    container.className = "relative w-full max-w-[280px] aspect-[4/5] bg-slate-50 rounded-[32px] overflow-hidden shadow-lg border-4 border-cyan-500 transition-colors duration-300";
                 }
-                isLivenessOk = false;
-                landmarkHistory = [];
+                if (oval) {
+                    oval.className = "w-[85%] h-[80%] border-2 border-cyan-400 rounded-[50%] transition-all duration-300 neon-pulse-cyan";
+                }
+
+                // Progresso visual da estabilidade
+                if (progressBar) progressBar.style.width = (window._stabilityCount * 33) + '%';
+
+                if (statusEl) {
+                    statusEl.textContent = window.getMsgComNome("Mantenha o rosto parado...");
+                    statusEl.className = "glass-status-info text-white text-[10px] font-bold px-6 py-2.5 rounded-full uppercase tracking-widest transition-all shadow-lg";
+                }
+
+                if (window._stabilityCount >= 3) {
+                    if (scanner) scanner.classList.add('hidden');
+                    if (container) {
+                        container.className = "relative w-full max-w-[280px] aspect-[4/5] bg-slate-50 rounded-[32px] overflow-hidden shadow-lg border-4 border-emerald-500 transition-colors duration-300";
+                    }
+                    if (oval) {
+                        oval.className = "w-[85%] h-[80%] border-[3px] border-solid border-emerald-500 rounded-[50%] transition-all duration-300 shadow-[0_0_30px_rgba(16,185,129,0.4)]";
+                    }
+                    if (progressBar) progressBar.style.width = '100%';
+
+                    if (statusEl) {
+                        statusEl.textContent = window.getMsgComNome("Validando...");
+                        statusEl.className = "glass-status-success text-white text-[10px] font-bold px-6 py-2.5 rounded-full uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)]";
+                        window.falarBiometria("Validando", true);
+                    }
+
+                    // IMPORTANTE: Agendar o próximo frame ANTES de chamar tirarFotoFacial 
+                    // para manter o loop vivo em estado de espera (isProcessingFacial)
+                    if (detectionLoopActive) setTimeout(() => requestAnimationFrame(startFaceDetectionLoop), 500);
+
+                    window.tirarFotoFacial(null);
+                    return;
+                }
+            } else if (detection) {
+                // Detectou mas com score menor, apenas mostra que está reconhecendo
+                if (scanner) scanner.classList.remove('hidden');
+                if (container) {
+                    container.className = "relative w-full max-w-[280px] aspect-[4/5] bg-slate-50 rounded-[32px] overflow-hidden shadow-lg border-4 border-cyan-500 transition-colors duration-300";
+                }
+                if (oval) {
+                    oval.className = "w-[85%] h-[80%] border-[3px] border-dashed border-cyan-500 rounded-[50%] transition-all duration-300";
+                }
+                if (progressBar) progressBar.style.width = '50%';
+
+                if (statusEl) {
+                    statusEl.textContent = window.getMsgComNome("Reconhecendo...");
+                    statusEl.className = "glass-status-info text-white text-[10px] font-bold px-6 py-2.5 rounded-full uppercase tracking-widest transition-all shadow-lg";
+                    window.falarBiometria("Reconhecendo face");
+                }
+            } else {
+                if (scanner) scanner.classList.remove('hidden');
+                if (oval) oval.className = "w-[85%] h-[80%] border-[3px] border-dashed rounded-[50%] transition-all duration-500 pulse-white";
+                if (container) {
+                    container.className = "relative w-full max-w-[280px] aspect-[4/5] bg-slate-50 rounded-[32px] overflow-hidden shadow-lg border-4 border-slate-50 transition-colors duration-300";
+                }
+                if (progressBar) progressBar.style.width = '0%';
+
+                if (statusEl) {
+                    window.currentFuncionarioNome = ''; // Reset nome enquanto busca
+                    statusEl.textContent = "Buscando Face...";
+                    statusEl.className = "bg-black/60 backdrop-blur-md text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest border border-white/10";
+                    window.falarBiometria("Buscando face");
+                }
             }
         } catch (e) {
             console.error("Erro no loop de detecção:", e);
         }
 
         if (detectionLoopActive) {
-            setTimeout(() => requestAnimationFrame(startFaceDetectionLoop), 100); // 10fps
+            setTimeout(() => requestAnimationFrame(startFaceDetectionLoop), 100);
         }
     }
 
-    window.tirarFotoFacial = async function () {
-        if (!videoStream || isProcessingFacial) return;
-        
-        if (!isLivenessOk) {
-            Swal.fire({
-                title: 'Atenção',
-                text: 'Por favor, mova-se levemente em frente à câmera para validar que é uma imagem ao vivo.',
-                icon: 'warning',
-                showConfirmButton: true,
-                confirmButtonText: 'Entendi',
-                confirmButtonColor: '#0ea5e9'
-            });
+    function iniciarContadorOval(callback) {
+        const overlay = document.getElementById('countdownOval');
+        const numEl = document.getElementById('countdownNumber');
+        const ring = document.getElementById('countdownRing');
+        if (!overlay || !numEl) {
+            setTimeout(callback, 3000);
             return;
+        }
+
+        const circumference = 304.7; // 2 * PI * 48.5
+        overlay.classList.remove('hidden');
+
+        numEl.textContent = '3';
+        numEl.style.transform = 'scale(1)';
+        numEl.style.opacity = '1';
+
+        if (ring) {
+            ring.style.transition = 'none';
+            ring.style.strokeDashoffset = '0';
+            ring.getBoundingClientRect(); // força reflow para a transição funcionar
+            ring.style.transition = 'stroke-dashoffset 3s linear';
+            ring.style.strokeDashoffset = String(circumference);
+        }
+
+        // Troca animada dos números a cada segundo
+        [{
+            t: 1000,
+            n: '2'
+        }, {
+            t: 2000,
+            n: '1'
+        }].forEach(({
+            t,
+            n
+        }) => {
+            setTimeout(() => {
+                numEl.style.transform = 'scale(1.6)';
+                numEl.style.opacity = '0.2';
+                setTimeout(() => {
+                    numEl.textContent = n;
+                    numEl.style.transform = 'scale(1)';
+                    numEl.style.opacity = '1';
+                }, 130);
+            }, t);
+        });
+
+        setTimeout(() => {
+            overlay.classList.add('hidden');
+            callback();
+        }, 3000);
+    }
+
+    window.tirarFotoFacial = async function(descriptorPreExtraido) {
+        if (!videoStream || isProcessingFacial) return;
+
+        // Se estiver no modo 1:N (sem matrícula prévia), limpa o nome para evitar persistência do usuário anterior
+        if (!document.getElementById('bio_matricula').value) {
+            window.currentFuncionarioNome = '';
         }
 
         const video = document.getElementById('videoFeed');
@@ -1520,100 +2141,191 @@
 
         isProcessingFacial = true; // Bloqueia múltiplas execuções
 
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        canvas.getContext('2d').drawImage(video, 0, 0);
+        const MAX_WIDTH = 640;
+        const scale = video.videoWidth > MAX_WIDTH ? MAX_WIDTH / video.videoWidth : 1;
+        canvas.width = video.videoWidth * scale;
+        canvas.height = video.videoHeight * scale;
+        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
 
-        // Congelar imagem: Esconder vídeo e mostrar canvas
-        video.classList.add('hidden');
-        canvas.classList.remove('hidden');
-
-        let base64Image = canvas.toDataURL('image/jpeg', 0.8);
         if (btn) {
             btn.innerHTML = "Mapeando Face...";
             btn.disabled = true;
         }
 
-        const img = new Image();
-        img.src = base64Image;
-        img.onload = async () => {
-            const statusEl = document.querySelector('#faceStatus span');
-            if (statusEl) statusEl.textContent = "Analisando Face...";
+        const oval = document.getElementById('faceOvalBorder');
+        const container = document.getElementById('videoContainer');
+        if (oval) oval.className = "w-[85%] h-[80%] border-[3px] border-solid border-emerald-500 rounded-[50%] transition-all duration-300 ripple-green";
 
-            // Captura final com SsdMobilenetv1 para máxima precisão na extração de características
-            const [detection, loc] = await Promise.all([
-                faceapi.detectSingleFace(img, new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.4 })).withFaceLandmarks().withFaceDescriptor(),
-                _geoCache ? Promise.resolve(_geoCache) : obterLocalizacao()
-            ]);
+        const statusEl = document.querySelector('#faceStatus span');
+        if (statusEl) statusEl.textContent = window.getMsgComNome("Aguarde...");
 
-            if (!detection) {
-                console.warn("Face perdida no processamento de alta precisão.");
-                isProcessingFacial = false;
-                if (statusEl) statusEl.textContent = "Erro na Leitura";
-                if (btn) {
-                    btn.innerHTML = "Capturar Facial";
-                    btn.disabled = false;
+        try {
+            // Extração de detecção para o recorte inteligente
+            const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor();
+
+            if (detection) {
+                // Armazenar o descritor para detecção de mudança de pessoa (Smart Reset)
+                window.lastSuccessDescriptor = detection.descriptor;
+
+                // --- RECORTE INTELIGENTE ---
+                const box = detection.detection.box;
+                const pad = 0.25; // 25% de margem extra
+
+                // Calcular coordenadas do recorte com padding
+                let cropX = box.x - (box.width * pad);
+                let cropY = box.y - (box.height * pad);
+                let cropW = box.width * (1 + pad * 2);
+                let cropH = box.height * (1 + pad * 2);
+
+                // Garantir que o recorte está dentro dos limites do vídeo
+                cropX = Math.max(0, cropX);
+                cropY = Math.max(0, cropY);
+                cropW = Math.min(video.videoWidth - cropX, cropW);
+                cropH = Math.min(video.videoHeight - cropY, cropH);
+
+                // Redimensionar o canvas para o tamanho do recorte (mantendo qualidade para o DeepFace)
+                // Usamos um tamanho padrão de 300px para garantir alta precisão no backend
+                canvas.width = 300;
+                canvas.height = 300;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, cropX, cropY, cropW, cropH, 0, 0, 300, 300);
+            } else {
+                // Fallback caso a detecção falhe no exato momento do clique (usa o frame inteiro)
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                canvas.getContext('2d').drawImage(video, 0, 0);
+            }
+
+            // Congelar imagem: Esconder vídeo e mostrar canvas
+            video.classList.add('hidden');
+            canvas.classList.remove('hidden');
+
+            let base64Image = canvas.toDataURL('image/jpeg', 0.85); // Aumentada qualidade para compesar o tamanho menor
+
+
+            if (btn) btn.innerHTML = "Validando Face...";
+            const loc = _geoCache ? _geoCache : await obterLocalizacao();
+
+            const response = await fetch('../api/ponto.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    action: 'ponto_facial', // Forçar ação de ponto
+                    matricula: document.getElementById('bio_matricula').value,
+                    image_data: base64Image,
+                    lat: loc?.lat,
+                    lng: loc?.lng
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                if (data.funcionario) window.currentFuncionarioNome = data.funcionario;
+                const nomeCurto = window.formatarNomeCurto(data.funcionario || "");
+
+                if (statusEl) {
+                    statusEl.textContent = `Reconhecido: ${nomeCurto}`;
+                    statusEl.className = "glass-status-success text-white text-[10px] font-bold px-6 py-2.5 rounded-full uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)]";
                 }
-                
-                // Retomar vídeo se falhar
+
+                await window.falarBiometria(`${nomeCurto}, reconhecido.`, true);
+
+                window.lastCaptureWasError = false;
+                if (data.termo_pendente) {
+                    exibirTermoUsoImagem(data, base64Image, null, loc);
+                } else {
+                    processarSucessoRegistro(data);
+                }
+            } else {
+                if (data.funcionario) window.currentFuncionarioNome = data.funcionario;
+                console.warn("[Facial] Servidor retornou falha:", data.message);
+
                 video.classList.remove('hidden');
                 canvas.classList.add('hidden');
 
-                if (detectionLoopActive) startFaceDetectionLoop();
-                return;
-            }
+                const erroReconhecimento = !data.message || data.message.startsWith('Face não reconhecida');
 
-            if (btn) btn.innerHTML = "Validando Face...";
+                if (erroReconhecimento) {
+                    // Falha de reconhecimento: orientar o usuário a reposicionar e tentar de novo
+                    const msg = "Não foi possível identificar. Posicione o rosto centralizado e bem iluminado.";
+                    window.lastCaptureWasError = true;
+                    if (statusEl) {
+                        statusEl.textContent = msg;
+                        statusEl.className = "glass-status-error text-white text-[10px] font-bold px-6 py-2.5 rounded-full uppercase tracking-widest transition-all animate-bounce shadow-[0_0_20px_rgba(239,68,68,0.3)]";
+                    }
+                    if (btn) {
+                        btn.disabled = true;
+                        btn.innerHTML = 'Aguarde...';
+                    }
+                    if (oval) oval.className = "w-[85%] h-[80%] border-[3px] border-dashed border-red-500 rounded-[50%] transition-all duration-300";
+                    if (container) container.className = "relative w-full max-w-[280px] aspect-[4/5] bg-slate-50 rounded-[32px] overflow-hidden shadow-lg border-4 border-red-500 transition-colors duration-300";
 
-            fetch('../api/ponto.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    action: 'validar_facial',
-                    matricula: document.getElementById('bio_matricula').value,
-                    image_data: base64Image,
-                    facial_descriptor: Array.from(detection.descriptor)
-                })
-            }).then(res => res.json()).then(async data => {
-                if (data.success) {
-                    // Face reconhecida! Agora mostra o termo de consentimento
-                    exibirTermoUsoImagem(data, base64Image, Array.from(detection.descriptor), loc);
-                } else {
-                    Swal.fire({
-                        title: 'Não Reconhecido',
-                        text: data.message,
-                        icon: 'error',
-                        confirmButtonColor: '#0ea5e9'
-                    }).then(() => {
-                        isProcessingFacial = false;
+                    await window.falarBiometria(msg);
+
+                    window.isStatusCooldown = true;
+                    iniciarContadorOval(() => {
+                        window.resetarInterfacePosBatida();
                         if (btn) {
-                            btn.innerHTML = "Capturar Facial";
+                            btn.innerHTML = 'Capturar Facial';
                             btn.disabled = false;
                         }
-                        video.classList.remove('hidden');
-                        canvas.classList.add('hidden');
-                        if (detectionLoopActive) startFaceDetectionLoop();
+                    });
+                } else {
+                    // Falha de negócio (ponto já registrado, GPS, método, etc.)
+                    const nomeCurto = window.formatarNomeCurto(window.currentFuncionarioNome);
+                    const msgNegocio = nomeCurto ? `${nomeCurto}, ${data.message}` : data.message;
+                    const isErroNegocio = data.message && (data.message.includes('já foram registrados') || data.message.includes('ponto já registrado'));
+                    const isIntervaloMinimo = data.message && data.message.includes('antes de 15 minutos');
+                    // Mantém a face bloqueada apenas quando o servidor reconheceu e rejeitou por intervalo mínimo
+                    window.lastCaptureWasError = !isIntervaloMinimo;
+
+                    if (statusEl) {
+                        statusEl.textContent = msgNegocio;
+                        statusEl.className = isErroNegocio ?
+                            "bg-amber-500/80 backdrop-blur-md text-white text-[10px] font-bold px-6 py-2.5 rounded-full uppercase tracking-widest border border-white/20 shadow-lg transition-all" :
+                            "bg-red-600/80 backdrop-blur-md text-white text-[10px] font-bold px-6 py-2.5 rounded-full uppercase tracking-widest border border-white/20 shadow-lg transition-all";
+                    }
+                    if (oval) oval.className = "w-[85%] h-[80%] border-[3px] border-dashed border-amber-400 rounded-[50%] transition-all duration-300";
+                    if (container) container.className = "relative w-full max-w-[280px] aspect-[4/5] bg-slate-50 rounded-[32px] overflow-hidden shadow-lg border-4 border-amber-400 transition-colors duration-300";
+                    if (btn) {
+                        btn.disabled = true;
+                        btn.innerHTML = 'Aguarde...';
+                    }
+                    await window.falarBiometria(msgNegocio);
+                    window.isStatusCooldown = true;
+                    iniciarContadorOval(() => {
+                        window.resetarInterfacePosBatida();
+                        if (btn) {
+                            btn.innerHTML = 'Capturar Facial';
+                            btn.disabled = false;
+                        }
                     });
                 }
-            }).catch((err) => {
-                console.error(err);
-                Swal.fire('Aviso', 'Falha na validação facial.', 'error');
-                isProcessingFacial = false;
-                if (detectionLoopActive) startFaceDetectionLoop();
-            }).finally(() => {
-                if (btn) {
-                    btn.innerHTML = "Capturar Facial";
-                    btn.disabled = false;
-                }
-            });
-        };
+            }
+        } catch (err) {
+            console.error("Erro no processamento facial:", err);
+            isProcessingFacial = false;
+            if (statusEl) statusEl.textContent = "Erro IA/Conexão";
+            if (btn) {
+                btn.innerHTML = "Capturar Facial";
+                btn.disabled = false;
+            }
+            video.classList.remove('hidden');
+            canvas.classList.add('hidden');
+            if (detectionLoopActive) startFaceDetectionLoop();
+        }
     };
 
     /**
      * Exibe o modal informativo do Termo de Consentimento de Imagem
      */
     window.exibirTermoUsoImagem = async function(funcionario, base64Image, descriptor, loc) {
-        const { value: accepted } = await Swal.fire({
+        let voiceActive = false;
+
+        const swalModal = Swal.fire({
             title: '<div class="text-left"><p class="text-[10px] font-black text-brand-500 uppercase tracking-widest m-0">Termo de Consentimento</p> <p class="text-lg font-black text-slate-800 m-0">Uso de Imagem e Biometria</p></div>',
             html: `
                 <div class="text-left text-[11px] leading-relaxed max-h-[50vh] overflow-y-auto px-1 custom-scrollbar space-y-4 py-2">
@@ -1629,7 +2341,12 @@
                         <p class="text-slate-500">O tratamento de dados segue estritamente a Lei nº 13.709/2018 (LGPD), garantindo a segurança e o sigilo das informações coletadas.</p>
                     </div>
 
-                    <div class="bg-amber-50 p-3 rounded-xl border border-amber-100 border-dashed text-amber-800 italic mt-4">
+                    <div id="voice-indicator" class="hidden bg-blue-50 p-3 rounded-xl border border-blue-100 border-dashed text-blue-800 font-bold mt-4 flex items-center gap-3 animate-pulse">
+                        <div class="w-2 h-2 bg-blue-600 rounded-full"></div>
+                        Ouvindo sua resposta... Diga "Sim" ou "Não"
+                    </div>
+
+                    <div id="consent-footer" class="bg-amber-50 p-3 rounded-xl border border-amber-100 border-dashed text-amber-800 italic mt-4">
                         Ao clicar em <b>"Aceito e Registrar"</b>, você confirma sua ciência e autoriza este registro específico de ponto por biometria facial.
                     </div>
                 </div>
@@ -1644,15 +2361,60 @@
             reverseButtons: true,
             customClass: {
                 container: 'z-[10000]'
+            },
+            didOpen: async () => {
+                voiceActive = true;
+                const nomeCurto = window.formatarNomeCurto(funcionario.nome);
+                const textoLeitura = `Termo de Consentimento. Eu, ${nomeCurto}, concordo com o tratamento dos meus dados biométricos para controle de ponto, conforme a Lei Geral de Proteção de Dados. Você consente? Diga sim ou não.`;
+
+                await window.falarTexto(textoLeitura);
+
+                if (voiceActive && Swal.isVisible()) {
+                    const indicator = document.getElementById('voice-indicator');
+                    if (indicator) indicator.classList.remove('hidden');
+
+                    const resposta = await window.ouvirComandoConsentimento();
+                    if (voiceActive && Swal.isVisible()) {
+                        if (resposta === 'sim') {
+                            Swal.clickConfirm();
+                        } else if (resposta === 'nao') {
+                            Swal.clickCancel();
+                        }
+                    }
+                }
+            },
+            willClose: () => {
+                voiceActive = false;
+                if (window.speechSynthesis.speaking) window.speechSynthesis.cancel();
             }
         });
 
+        const {
+            isConfirmed: accepted
+        } = await swalModal;
+
         if (accepted) {
+            // Salvar o aceite do termo no banco de dados para não repetir no futuro
+            try {
+                await fetch('../api/ponto.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'aceitar_termo',
+                        matricula: funcionario.matricula
+                    })
+                });
+            } catch (e) {
+                console.error("Erro ao salvar aceite do termo:", e);
+            }
+
             executarRegistroFinalFacial(funcionario.matricula, base64Image, descriptor, loc);
         } else {
             Swal.fire({
-                title: 'Registro Cancelado',
-                text: 'O ponto não foi registrado. Por favor, procure o CRH (Recursos Humanos) para regularizar seu aceite de uso de imagem.',
+                title: window.getMsgComNome('Registro Cancelado'),
+                text: 'O ponto não foi registrado. Por favor, procure o CRH para regularizar seu aceite.',
                 icon: 'warning',
                 confirmButtonColor: '#f59e0b'
             });
@@ -1661,20 +2423,100 @@
         }
     }
 
+
+
+    /**
+     * Centraliza o processamento visual e auditivo de um registro de ponto bem-sucedido
+     */
+    function processarSucessoRegistro(data) {
+        window.isStatusCooldown = true;
+        detectionLoopActive = true;
+
+        const statusEl = document.querySelector('#faceStatus span');
+        const video = document.getElementById('videoFeed');
+        const canvas = document.getElementById('videoCanvas');
+        const nomeCurto = window.formatarNomeCurto(data.funcionario);
+        const msgBase = `seu ponto foi batido com sucesso em ${data.data_ponto} às ${data.hora}.`;
+        const msgFinal = window.getMsgComNome(msgBase);
+
+        // Mantemos a câmera rodando para detectar a próxima pessoa
+        if (video) video.classList.remove('hidden');
+        if (canvas) canvas.classList.add('hidden');
+
+        if (statusEl) {
+            statusEl.innerHTML = `${data.funcionario}<br>PONTO BATIDO!<br><span class="text-[8px] opacity-80">${data.data_ponto} às ${data.hora}</span>`;
+            statusEl.className = "glass-status-success text-white text-[10px] font-bold px-6 py-2 rounded-full uppercase tracking-widest transition-all leading-tight text-center shadow-[0_0_25px_rgba(16,185,129,0.4)]";
+            window.falarBiometria(msgFinal, true);
+        }
+
+        // Feedback de sucesso curto e reinício automático
+        let segundos = 4;
+        window.cooldownTimer = setInterval(() => {
+            segundos--;
+            if (statusEl) {
+                statusEl.textContent = `Próximo Registro em ${segundos}s...`;
+                statusEl.className = "bg-slate-700/80 backdrop-blur-md text-white text-[10px] font-bold px-6 py-2.5 rounded-full uppercase tracking-widest border border-white/20 shadow-lg transition-all";
+            }
+            if (segundos <= 0) {
+                clearInterval(window.cooldownTimer);
+                window.resetarInterfacePosBatida();
+            }
+        }, 1000);
+    }
+
+    window.resetarInterfacePosBatida = function() {
+        if (window.cooldownTimer) clearInterval(window.cooldownTimer);
+        window.isStatusCooldown = false;
+        isProcessingFacial = false; // Forçar liberação imediata
+
+        // Se foi erro, limpamos o descritor para permitir nova tentativa imediata da mesma pessoa
+        if (window.lastCaptureWasError) {
+            window.lastSuccessDescriptor = null;
+        }
+        detectionLoopActive = true;
+        window.currentFuncionarioNome = '';
+        window._stabilityCount = 0;
+        const matInput = document.getElementById('matricula');
+        const bioMatInput = document.getElementById('bio_matricula');
+        if (matInput) matInput.value = '';
+        if (bioMatInput) bioMatInput.value = '';
+        const video = document.getElementById('videoFeed');
+        const canvas = document.getElementById('videoCanvas');
+        if (video) video.classList.remove('hidden');
+        if (canvas) canvas.classList.add('hidden');
+        const statusEl = document.querySelector('#faceStatus span');
+        if (statusEl) {
+            statusEl.textContent = "Buscando Face...";
+            statusEl.className = "bg-black/60 backdrop-blur-md text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest border border-white/10";
+        }
+
+        // Garantir que o loop de detecção esteja ativo
+        if (!detectionLoopActive) {
+            detectionLoopActive = true;
+            startFaceDetectionLoop();
+        }
+    };
+
     /**
      * Executa a batida final após o aceite do termo
      */
     async function executarRegistroFinalFacial(matricula, base64Image, descriptor, loc) {
-        Swal.fire({
-            title: 'Registrando Ponto...',
-            didOpen: () => { Swal.showLoading(); },
-            allowOutsideClick: false
-        });
+        // Se for modo 1:N, garante que o nome está limpo antes de receber a resposta do servidor
+        if (!matricula) window.currentFuncionarioNome = '';
+
+        const statusEl = document.querySelector('#faceStatus span');
+        if (statusEl) {
+            statusEl.textContent = window.getMsgComNome("Registrando Ponto...");
+            statusEl.className = "bg-brand-500 text-white text-[10px] font-black px-6 py-2.5 rounded-full uppercase tracking-widest border border-white/20 shadow-xl transition-all animate-pulse";
+            window.falarBiometria(window.getMsgComNome("Registrando ponto, aguarde"), true);
+        }
 
         try {
             const res = await fetch('../api/ponto.php', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json'
+                },
                 body: JSON.stringify({
                     action: 'ponto_facial',
                     matricula: matricula,
@@ -1685,42 +2527,71 @@
                 })
             });
             const data = await res.json();
-            
+            if (data.funcionario) window.currentFuncionarioNome = data.funcionario;
+
             if (data.success) {
-                detectionLoopActive = false;
-                Swal.fire({ 
-                    title: 'Marcado!', 
-                    html: `<b>${data.funcionario}</b><br>Ponto via Facial às ${data.hora}`, 
-                    icon: 'success', 
-                    showConfirmButton: true,
-                    confirmButtonText: 'Concluir',
-                    confirmButtonColor: '#0ea5e9'
-                });
-                window.fecharModalBiometria();
+                processarSucessoRegistro(data);
             } else {
+                const statusEl = document.querySelector('#faceStatus span');
+                const msgErr = data.message || "Erro no registro";
+
+                // Garantir captura do nome para personalização
+                if (data.funcionario || data.nome) {
+                    window.currentFuncionarioNome = data.funcionario || data.nome;
+                }
+                const nomeCurto = window.formatarNomeCurto(window.currentFuncionarioNome);
+                const personalizedMsg = `${nomeCurto}, ${msgErr}`;
+
+                if (statusEl) {
+                    statusEl.textContent = personalizedMsg;
+                    statusEl.className = "bg-red-600 text-white text-[10px] font-black px-6 py-2.5 rounded-full uppercase tracking-widest border border-white/20 shadow-xl transition-all animate-pulse";
+                }
+                await window.falarTexto(personalizedMsg);
+
                 if (data.ficha_incompleta) {
-                    Swal.fire({
-                        title: 'Ficha Incompleta',
-                        text: data.message,
-                        icon: 'warning',
-                        confirmButtonText: 'Atualizar Agora',
-                        confirmButtonColor: '#0ea5e9'
-                    }).then(() => {
+                    setTimeout(() => {
                         window.fecharModalBiometria();
                         window.abrirModalFichaIncompleta(data);
-                    });
+                    }, 5000);
                 } else {
-                    Swal.fire('Aviso', data.message, 'error').then(() => window.fecharModalBiometria());
+                    // Aguarda 2 segundos (ajustado a pedido do usuário)
+                    let segErro = 2;
+                    const intervalErro = setInterval(() => {
+                        segErro--;
+                        if (statusEl) {
+                            statusEl.textContent = `${msgErr} (${segErro}s)`;
+                        }
+                        if (segErro <= 0) {
+                            clearInterval(intervalErro);
+
+                            isProcessingFacial = false;
+                            detectionLoopActive = true;
+                            window._stabilityCount = 0;
+                            window.currentFuncionarioNome = ''; // Limpar nome após exibir erro para não vazar para o próximo
+
+                            if (video) video.classList.remove('hidden');
+                            if (canvas) canvas.classList.add('hidden');
+
+                            window.iniciarStreamVideo();
+                            setTimeout(() => {
+                                startFaceDetectionLoop();
+                            }, 500);
+                        }
+                    }, 1000);
                 }
             }
         } catch (e) {
-            Swal.fire('Aviso', 'Falha ao registrar ponto. Tente novamente.', 'error');
+            const statusEl = document.querySelector('#faceStatus span');
+            if (statusEl) {
+                statusEl.textContent = "Falha no Registro";
+                await window.falarBiometria("Falha ao registrar ponto. Tente novamente.");
+            }
         } finally {
             isProcessingFacial = false;
         }
     }
 
-    window.togglePassword = function (inputId, btn) {
+    window.togglePassword = function(inputId, btn) {
         const input = document.getElementById(inputId);
         const icon = btn.querySelector('svg');
         if (input.type === 'password') {
@@ -1733,7 +2604,7 @@
     };
 
     // -- Lógica Digital Persona (Sensor Digital) --
-    window.iniciarCapturaDigitalClock = async function () {
+    window.iniciarCapturaDigitalClock = async function() {
         if (isMobile && window.PublicKeyCredential) {
             window.baterPontoWebAuthn();
             return;
@@ -1758,25 +2629,37 @@
             try {
                 const connected = await new Promise((resolve, reject) => {
                     const s = new WebSocket(url);
-                    const t = setTimeout(() => { s.close(); reject(); }, 1500);
+                    const t = setTimeout(() => {
+                        s.close();
+                        reject();
+                    }, 1500);
                     s.onopen = () => {
                         clearTimeout(t);
                         window.dpSocketClock = s;
-                        s.send(JSON.stringify({ Type: "Capture", Method: "Start" }));
+                        s.send(JSON.stringify({
+                            Type: "Capture",
+                            Method: "Start"
+                        }));
                         resolve(true);
                     };
                     s.onmessage = async (e) => {
                         const d = JSON.parse(e.data);
                         if (d && d.Event === "SamplesReady" && d.Samples.length > 0) {
-                            s.send(JSON.stringify({ Type: "Capture", Method: "Stop" }));
+                            s.send(JSON.stringify({
+                                Type: "Capture",
+                                Method: "Stop"
+                            }));
                             const hash = d.Samples[d.Samples.length - 1].Data;
                             processarPontoDigital(hash);
                         }
                     };
                     s.onerror = () => reject();
                 });
-                if (connected) { ok = true; break; }
-            } catch (e) { }
+                if (connected) {
+                    ok = true;
+                    break;
+                }
+            } catch (e) {}
         }
 
         if (!ok) {
@@ -1795,14 +2678,22 @@
             const loc = await _geoCache ? Promise.resolve(_geoCache) : obterLocalizacao();
             const res = await fetch('../api/ponto.php', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ biometria: hash, lat: loc?.lat, lng: loc?.lng })
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    biometria: hash,
+                    lat: loc?.lat,
+                    lng: loc?.lng
+                })
             });
             const data = await res.json();
             if (data.success) {
-                Swal.fire({ 
-                    title: 'Marcado!', 
-                    html: `<b>${data.funcionario}</b><br>Ponto via Digital às ${data.hora}`, 
+                const msgSucesso = `Ponto registrado com sucesso via digital.`;
+                await window.falarTexto(msgSucesso);
+                Swal.fire({
+                    title: 'Marcado!',
+                    html: `<b>${data.funcionario}</b><br>${msgSucesso}<br>Registrado em <b>${data.data_ponto}</b> às <b>${data.hora}</b>`,
                     icon: 'success',
                     showConfirmButton: true,
                     confirmButtonText: 'Fechar',
@@ -1810,9 +2701,11 @@
                 });
                 window.fecharModalBiometria();
             } else if (data.ficha_incompleta) {
+                const msgIncompleta = 'Sua ficha está incompleta. Por favor, atualize seus dados.';
+                await window.falarTexto(msgIncompleta);
                 await Swal.fire({
                     title: 'Atualização Cadastral',
-                    text: 'Sua ficha está incompleta. Clique em atualizar para abrir o formulário de atualização.',
+                    text: msgIncompleta,
                     icon: 'info',
                     confirmButtonText: 'Atualizar',
                     confirmButtonColor: '#0ea5e9'
@@ -1825,7 +2718,13 @@
                     window.fecharModalBiometria();
                 }
             } else {
-                Swal.fire('Digital Desconhecida', data.message, 'error').then(() => window.fecharModalBiometria());
+                const msgErr = data.message || "Digital não reconhecida";
+                await window.falarTexto(msgErr);
+                Swal.fire({
+                    title: window.getMsgComNome('Digital Desconhecida'),
+                    text: msgErr,
+                    icon: 'error'
+                }).then(() => window.fecharModalBiometria());
                 resetarBotaoDigital();
             }
         } catch (e) {
@@ -1846,15 +2745,19 @@
     }
 
     // -- Lógica WebAuthn (Autenticação Mobile) --
-    window.baterPontoWebAuthn = async function (silent = false) {
+    window.baterPontoWebAuthn = async function(silent = false) {
         if (!window.PublicKeyCredential) return;
 
         try {
             // 1. Obter desafio do servidor
             const resOpt = await fetch('../api/webauthn.php', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'get_assertion_options' })
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    action: 'get_assertion_options'
+                })
             });
             const opt = await resOpt.json();
             if (!opt.success) throw new Error(opt.message);
@@ -1875,7 +2778,9 @@
             const loc = await _geoCache ? Promise.resolve(_geoCache) : obterLocalizacao();
             const verifyRes = await fetch('../api/ponto.php', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json'
+                },
                 body: JSON.stringify({
                     action: 'ponto_webauthn',
                     credentialId: btoa(String.fromCharCode(...new Uint8Array(assertion.rawId))),
@@ -1887,7 +2792,11 @@
             const data = await verifyRes.json();
 
             if (data.success) {
-                Swal.fire({ title: 'Marcado!', html: `<b>${data.funcionario}</b><br>Ponto via Mobile às ${data.hora}`, icon: 'success' });
+                Swal.fire({
+                    title: 'Marcado!',
+                    html: `<b>${data.funcionario}</b><br>Ponto via Mobile em <b>${data.data_ponto}</b> às <b>${data.hora}</b>`,
+                    icon: 'success'
+                });
                 window.fecharModalBiometria();
                 return true;
             } else if (data.ficha_incompleta) {
@@ -1908,7 +2817,7 @@
             } else {
                 if (!silent) {
                     Swal.fire({
-                        title: 'Não Permitido',
+                        title: window.getMsgComNome('Não Permitido'),
                         text: data.message,
                         icon: 'error',
                         confirmButtonText: 'Fechar',
@@ -1937,8 +2846,7 @@
     // --- MEU ACESSO (Individual) ---
     async function abrirMeuAcesso(e) {
         if (e) e.preventDefault();
-        const inputMatricula = document.getElementById('matricula');
-        const matriculaPrevia = inputMatricula.value.trim();
+        const matriculaPrevia = ""; // Sempre inicia vazio para segurança e clareza
 
         const today = new Date();
         const y = today.getFullYear();
@@ -1947,19 +2855,29 @@
         const defaultStart = `${y}-${m}-01`;
         const defaultEnd = `${y}-${m}-${String(lastDay).padStart(2, '0')}`;
 
-        const { value: loginData } = await Swal.fire({
+        const {
+            value: loginData
+        } = await Swal.fire({
             title: 'Meu Cartão de Ponto',
             text: 'Identifique-se e escolha o período do extrato.',
             html: `
                 <div class="space-y-4 py-2">
                     <div class="text-left">
                         <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Matrícula</label>
-                        <input id="sw-m" class="swal2-input !w-full !m-0 mt-1 !text-center !rounded-xl !border-slate-200 !text-sm font-bold tracking-widest" placeholder="99.999-9" value="${matriculaPrevia}">
+                        <input id="sw-m" type="text" autocomplete="off" name="m_${Date.now()}" class="swal2-input !w-full !m-0 mt-1 !text-center !rounded-xl !border-slate-200 !text-sm font-bold tracking-widest" placeholder="99.999-9" value="">
                     </div>
                     <div class="text-left">
                         <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Sua Senha</label>
-                        <input id="sw-s" type="password" class="swal2-input !w-full !m-0 mt-1 !text-center !rounded-xl !border-slate-200 !text-sm font-bold tracking-widest" placeholder="******">
+                        <input id="sw-s" type="password" autocomplete="new-password" name="s_${Date.now()}" class="swal2-input !w-full !m-0 mt-1 !text-center !rounded-xl !border-slate-200 !text-sm font-bold tracking-widest" placeholder="******" value="">
                     </div>
+
+                    <div class="relative flex py-3 items-center">
+                        <div class="flex-grow border-t border-slate-100"></div>
+                        <span class="flex-shrink-0 mx-4 text-slate-300 text-[10px] font-black uppercase tracking-widest">ou</span>
+                        <div class="flex-grow border-t border-slate-100"></div>
+                    </div>
+
+                    <div class="flex flex-col gap-2" ></div>
                     <div class="flex gap-3">
                         <div class="flex-1 text-left">
                             <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Data Inicial</label>
@@ -1981,21 +2899,46 @@
                 const s = document.getElementById('sw-s').value;
                 const dtIni = document.getElementById('sw-dt-ini').value;
                 const dtFim = document.getElementById('sw-dt-fim').value;
-                if (!m || !s) { Swal.showValidationMessage('Preencha matrícula e senha'); return false; }
-                if (!dtIni || !dtFim) { Swal.showValidationMessage('Selecione o período completo'); return false; }
-                return { m, s, dtIni, dtFim };
+                if (!m || !s) {
+                    Swal.showValidationMessage('Preencha matrícula e senha');
+                    return false;
+                }
+                if (!dtIni || !dtFim) {
+                    Swal.showValidationMessage('Selecione o período completo');
+                    return false;
+                }
+                return {
+                    m,
+                    s,
+                    dtIni,
+                    dtFim
+                };
             }
         });
 
         if (!loginData) return;
 
-        Swal.fire({ title: 'Carregando...', didOpen: () => { Swal.showLoading(); }, allowOutsideClick: false });
+        Swal.fire({
+            title: 'Carregando...',
+            didOpen: () => {
+                Swal.showLoading();
+            },
+            allowOutsideClick: false
+        });
 
         try {
             const res = await fetch('../api/ponto.php', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'get_meu_ponto', matricula: loginData.m, senha: loginData.s, start_date: loginData.dtIni, end_date: loginData.dtFim })
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    action: 'get_meu_ponto',
+                    matricula: loginData.m,
+                    senha: loginData.s,
+                    start_date: loginData.dtIni,
+                    end_date: loginData.dtFim
+                })
             });
 
             const json = await res.json();
@@ -2006,7 +2949,7 @@
 
             window._ultimaMatricula = loginData.m;
             window._ultimaSenha = loginData.s;
-            
+
             // Salva no session storage para persistência em caso de F5
             sessionStorage.setItem('extrato_pendente_dados', JSON.stringify(json.data));
             sessionStorage.setItem('extrato_pendente_nome', json.funcionario);
@@ -2025,7 +2968,7 @@
     window.recarregarExtrato = async function() {
         const dtIni = document.getElementById('inline-dt-ini')?.value || sessionStorage.getItem('extrato_pendente_ini') || new Date().toISOString().split('T')[0].substring(0, 8) + '01';
         const dtFim = document.getElementById('inline-dt-fim')?.value || sessionStorage.getItem('extrato_pendente_fim') || new Date().toISOString().split('T')[0];
-        
+
         const mat = window._ultimaMatricula || sessionStorage.getItem('extrato_pendente_mat');
         const sen = window._ultimaSenha || sessionStorage.getItem('extrato_pendente_senha');
 
@@ -2034,17 +2977,34 @@
             return;
         }
 
-        Swal.fire({ title: 'Buscando período...', didOpen: () => { Swal.showLoading(); }, allowOutsideClick: false });
+        Swal.fire({
+            title: 'Buscando período...',
+            didOpen: () => {
+                Swal.showLoading();
+            },
+            allowOutsideClick: false
+        });
 
         try {
             const res = await fetch('../api/ponto.php', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'get_meu_ponto', matricula: mat, senha: sen, start_date: dtIni, end_date: dtFim })
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    action: 'get_meu_ponto',
+                    matricula: mat,
+                    senha: sen,
+                    start_date: dtIni,
+                    end_date: dtFim
+                })
             });
 
             const json = await res.json();
-            if (!json.success) { Swal.fire('Aviso', json.message, 'error'); return; }
+            if (!json.success) {
+                Swal.fire('Aviso', json.message, 'error');
+                return;
+            }
 
             sessionStorage.setItem('extrato_pendente_dados', JSON.stringify(json.data));
             sessionStorage.setItem('extrato_pendente_ini', dtIni);
@@ -2058,10 +3018,13 @@
 
     function renderizarCartaoIndividual(dados, nome, dtIni, dtFim) {
         const esc = (s) => (s || '').toString().replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
-        
+
         const pontoHtml = (hora, atrasou, faltaAuto, justIndividual, statusCrh, tipoJustificativa, justificativaGlobal, horarioProgramado, emFerias, motivo, r, pIndex) => {
             if (emFerias) {
-                return `<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-black bg-amber-500 text-white border border-amber-600 uppercase tracking-tighter" title="${esc(motivo)}">📅 ${esc(motivo)}</span>`;
+                const isPendente = String(r.status_afastamento).toLowerCase() === 'pendente';
+                const badgeClass = isPendente ? 'bg-amber-400 text-white border-amber-500' : 'bg-amber-500 text-white border-amber-600';
+                const label = isPendente ? `${esc(motivo)} (Pendente)` : esc(motivo);
+                return `<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-black ${badgeClass} border uppercase tracking-tighter" title="${esc(motivo)}">📅 ${label}</span>`;
             }
 
             const isFaltaAuto = (hora === 'FALTA' || hora === 'falta' || !hora);
@@ -2071,7 +3034,7 @@
                 const desc = String(r.liberacao.descricao || '').toUpperCase();
                 const isFeriado = desc.includes('FERIADO');
                 const isFacultativo = desc.includes('FACULTATIVO');
-                
+
                 if (isFeriado || isFacultativo) {
                     if (horarioProgramado) {
                         const badgeClass = isFeriado ? 'bg-rose-500' : 'bg-violet-500';
@@ -2093,18 +3056,18 @@
             const isDeferido = statusCrh === 'deferido';
             const hasJust = justIndividual && justIndividual !== 'null' && String(justIndividual).trim() !== '';
             const hasGlobalJust = tipoJustificativa && tipoJustificativa !== 'null' && String(tipoJustificativa).trim() !== '';
-            
+
             if (!horarioProgramado && !hora) {
                 return '<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-black text-slate-300">---</span>';
             }
 
-            const hasAnyIndiv = (r.just_ent1 && String(r.just_ent1).trim() !== '' && r.just_ent1 !== 'null') || 
-                                (r.just_sai1 && String(r.just_sai1).trim() !== '' && r.just_sai1 !== 'null') || 
-                                (r.just_ent2 && String(r.just_ent2).trim() !== '' && r.just_ent2 !== 'null') || 
-                                (r.just_sai2 && String(r.just_sai2).trim() !== '' && r.just_sai2 !== 'null');
+            const hasAnyIndiv = (r.just_ent1 && String(r.just_ent1).trim() !== '' && r.just_ent1 !== 'null') ||
+                (r.just_sai1 && String(r.just_sai1).trim() !== '' && r.just_sai1 !== 'null') ||
+                (r.just_ent2 && String(r.just_ent2).trim() !== '' && r.just_ent2 !== 'null') ||
+                (r.just_sai2 && String(r.just_sai2).trim() !== '' && r.just_sai2 !== 'null');
 
             const hasAnyJust = hasJust || (hasGlobalJust && !hasAnyIndiv && (atrasou || isFaltaAuto || faltaAuto));
-            
+
             const time = isFaltaAuto ? 'Falta' : String(hora).substring(0, 5);
             const valJust = justificativaGlobal ? justificativaGlobal.replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, " ") : '';
 
@@ -2148,8 +3111,12 @@
         };
 
         const statusHtml = (rec) => {
-            if (rec.em_ferias) return `<span class="text-[9px] font-black text-amber-600 uppercase">Afastado</span>`;
-            
+            if (rec.em_ferias) {
+                const isPendente = String(rec.status_afastamento).toLowerCase() === 'pendente';
+                const label = isPendente ? `${esc(rec.motivo_afastamento)} (Pendente)` : esc(rec.motivo_afastamento);
+                return `<span class="text-[9px] font-black ${isPendente ? 'text-amber-400' : 'text-amber-600'} uppercase">${label}</span>`;
+            }
+
             const toMin = v => {
                 if (!v || v === 'FALTA' || v === 'falta') return null;
                 const p = String(v).substring(0, 5).split(':');
@@ -2157,147 +3124,291 @@
                 return parseInt(p[0]) * 60 + parseInt(p[1]);
             };
 
-            const h1 = !!rec.primeiro_horario, h2 = !!rec.segundo_horario;
-            const h3 = !!rec.terceiro_horario, h4 = !!rec.quarto_horario;
+            const h1 = !!rec.primeiro_horario,
+                h2 = !!rec.segundo_horario;
+            const h3 = !!rec.terceiro_horario,
+                h4 = !!rec.quarto_horario;
             const p1 = !!rec.primeiro_ponto && rec.primeiro_ponto !== 'FALTA' && rec.primeiro_ponto !== 'falta';
-            const p2 = !!rec.segundo_ponto  && rec.segundo_ponto  !== 'FALTA' && rec.segundo_ponto  !== 'falta';
+            const p2 = !!rec.segundo_ponto && rec.segundo_ponto !== 'FALTA' && rec.segundo_ponto !== 'falta';
             const p3 = !!rec.terceiro_ponto && rec.terceiro_ponto !== 'FALTA' && rec.terceiro_ponto !== 'falta';
-            const p4 = !!rec.quarto_ponto   && rec.quarto_ponto   !== 'FALTA' && rec.quarto_ponto   !== 'falta';
+            const p4 = !!rec.quarto_ponto && rec.quarto_ponto !== 'FALTA' && rec.quarto_ponto !== 'falta';
 
             const isFeriadoFacultativo = rec.liberacao && (String(rec.liberacao.descricao).toUpperCase().includes('FERIADO') || String(rec.liberacao.descricao).toUpperCase().includes('FACULTATIVO'));
             const incompleto = !isFeriadoFacultativo && ((h1 && !p1) || (h2 && !p2) || (h3 && !p3) || (h4 && !p4));
 
-            let esp = 0, trab = 0;
-            const eh1 = toMin(rec.primeiro_horario), eh2 = toMin(rec.segundo_horario);
+            let esp = 0,
+                trab = 0;
+            const eh1 = toMin(rec.primeiro_horario),
+                eh2 = toMin(rec.segundo_horario);
             if (eh1 !== null && eh2 !== null) esp += eh2 - eh1;
-            const eh3 = toMin(rec.terceiro_horario), eh4 = toMin(rec.quarto_horario);
+            const eh3 = toMin(rec.terceiro_horario),
+                eh4 = toMin(rec.quarto_horario);
             if (eh3 !== null && eh4 !== null) esp += eh4 - eh3;
 
-            const r1 = toMin(rec.primeiro_ponto), r2 = toMin(rec.segundo_ponto);
+            const r1 = toMin(rec.primeiro_ponto),
+                r2 = toMin(rec.segundo_ponto);
             if (r1 !== null && r2 !== null) trab += r2 - r1;
-            const r3 = toMin(rec.terceiro_ponto), r4 = toMin(rec.quarto_ponto);
+            const r3 = toMin(rec.terceiro_ponto),
+                r4 = toMin(rec.quarto_ponto);
             if (r3 !== null && r4 !== null) trab += r4 - r3;
 
             if (incompleto) return '<span class="text-[9px] font-black text-orange-600 uppercase">Incompleto</span>';
 
             if (isFeriadoFacultativo) return `<span class="text-[9px] font-black text-indigo-600 uppercase">✓ ${rec.liberacao.descricao}</span>`;
 
-            if (esp > 0) {
+            if (esp > 0 && Math.abs(esp - trab) < 15) {
                 return '<span class="text-[9px] font-black text-emerald-600 uppercase flex items-center justify-center gap-1"><svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg> OK</span>';
             }
             if (!p1 && !p2 && !p3 && !p4) return '';
-            return '<span class="text-[9px] font-black text-emerald-600 uppercase flex items-center justify-center gap-1"><svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg> OK</span>';
+            return '<span class="text-[9px] font-black text-slate-500 uppercase">Pendente</span>';
         };
 
-        const rows = dados.map(r => {
-            const dataFmt = new Date(r.data + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', weekday: 'short' }).replace('.', '');
-            
-            const p1 = pontoHtml(r.primeiro_ponto, r.atrasou_primeiro_ponto, r.falta_turno1_entrada, r.just_ent1, r.status_crh, r.tipo_justificativa, r.justificativa, r.primeiro_horario, r.em_ferias, r.motivo_afastamento, r, 1);
-            const p2 = pontoHtml(r.segundo_ponto,  r.atrasou_segundo_ponto,  r.falta_turno1_saida,   r.just_sai1, r.status_crh, r.tipo_justificativa, r.justificativa, r.segundo_horario, r.em_ferias, r.motivo_afastamento, r, 2);
-            const p3 = pontoHtml(r.terceiro_ponto, r.atrasou_terceiro_ponto, r.falta_turno2_entrada, r.just_ent2, r.status_crh, r.tipo_justificativa, r.justificativa, r.terceiro_horario, r.em_ferias, r.motivo_afastamento, r, 3);
-            const p4 = pontoHtml(r.quarto_ponto,   r.atrasou_quarto_ponto,   r.falta_turno2_saida,   r.just_sai2, r.status_crh, r.tipo_justificativa, r.justificativa, r.quarto_horario, r.em_ferias, r.motivo_afastamento, r, 4);
+        const resumo = {
+            total: dados.length,
+            ok: 0,
+            atrasos: 0,
+            faltas: 0,
+            incompletos: 0
+        };
 
-            const st = statusHtml(r);
-            const com = (r.comunicado && r.comunicado !== 'null') ? r.comunicado : '';
-
-            let avisoRow = '';
-            if (r.aviso && String(r.aviso).trim() !== '' && r.aviso !== 'null') {
-                avisoRow = `<tr class="bg-red-50/20"><td colspan="7" class="py-1 px-3 text-[9px] font-bold text-red-600 italic border-b border-red-50/30 leading-tight">Recado: ${esc(r.aviso)}</td></tr>`;
-            }
-
-            return `
-                <tr class="border-b border-slate-50 last:border-0 hover:bg-slate-50/50 transition-colors">
-                    <td class="py-3 px-2 text-[10px] font-black text-slate-500 uppercase">${dataFmt}</td>
-                    <td class="py-3 px-1 text-center">${p1}</td>
-                    <td class="py-3 px-1 text-center">${p2}</td>
-                    <td class="py-3 px-1 text-center">${p3}</td>
-                    <td class="py-3 px-1 text-center">${p4}</td>
-                    <td class="py-3 px-1 text-center">${st}</td>
-                    <td class="py-3 px-2 text-[9px] text-slate-500 italic truncate max-w-[120px]" title="${esc(com)}">${esc(com)}</td>
-                </tr>
-                ${avisoRow}
-            `;
-        }).join('');
+        const rows = renderizarLinhasExtrato(dados, resumo, pontoHtml, statusHtml, esc);
 
         Swal.fire({
-            title: `<div class="text-left flex flex-col gap-1"><p class="text-[10px] font-black text-brand-500 uppercase tracking-widest m-0">Extrato Individual</p><p class="text-lg font-black text-slate-800 m-0">${esc(nome)}</p></div>`,
-            width: '850px',
+            title: `
+                <div class="flex items-center justify-between w-full pr-8">
+                    <div class="flex items-center gap-4 text-left">
+                        <div class="w-12 h-12 rounded-2xl bg-brand-600 flex items-center justify-center text-white shadow-lg shadow-brand-200">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-black text-brand-600 uppercase tracking-[0.2em] m-0 leading-none mb-1">Folha de Ponto Digital</p>
+                            <h2 class="text-xl font-black text-slate-800 m-0 leading-tight">${esc(nome)}</h2>
+                        </div>
+                    </div>
+                </div>
+            `,
+            width: '900px',
+            padding: '2rem',
+            showCloseButton: true,
             html: `
-                <div id="extrato-pdf-content" class="p-1">
-                    <div class="flex items-center justify-between mt-2 mb-2 p-3 bg-slate-50 border border-slate-100 rounded-xl relative" data-html2canvas-ignore="true">
-                        <div class="flex flex-wrap items-center gap-3 w-full">
-                            <div class="flex items-center gap-2">
-                                <input type="date" id="inline-dt-ini" value="${dtIni}" class="px-2 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-bold font-mono text-slate-700 outline-none focus:border-brand-500 transition-colors shadow-sm">
-                                <span class="text-xs font-black text-slate-400 uppercase">até</span>
-                                <input type="date" id="inline-dt-fim" value="${dtFim}" class="px-2 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-bold font-mono text-slate-700 outline-none focus:border-brand-500 transition-colors shadow-sm">
+                <div id="extrato-pdf-content" class="text-slate-600">
+                    <!-- Resumo Dashboard -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6" data-html2canvas-ignore="true">
+                        <div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm flex flex-col">
+                            <span class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Dias</span>
+                            <span class="text-xl font-black text-slate-800">${resumo.total}</span>
+                        </div>
+                        <div class="bg-emerald-50/50 p-3 rounded-2xl border border-emerald-100 shadow-sm flex flex-col">
+                            <span class="text-[8px] font-black text-emerald-600 uppercase tracking-widest mb-1">Dias OK</span>
+                            <span class="text-xl font-black text-emerald-700">${resumo.ok}</span>
+                        </div>
+                        <div class="bg-amber-50/50 p-3 rounded-2xl border border-amber-100 shadow-sm flex flex-col">
+                            <span class="text-[8px] font-black text-amber-600 uppercase tracking-widest mb-1">Atrasos</span>
+                            <span class="text-xl font-black text-amber-700">${resumo.atrasos}</span>
+                        </div>
+                        <div class="bg-rose-50/50 p-3 rounded-2xl border border-rose-100 shadow-sm flex flex-col">
+                            <span class="text-[8px] font-black text-rose-600 uppercase tracking-widest mb-1">Faltas</span>
+                            <span class="text-xl font-black text-rose-700">${resumo.faltas}</span>
+                        </div>
+                    </div>
+
+                    <!-- Filtros -->
+                    <div class="flex flex-col md:flex-row items-center justify-between mb-4 p-4 bg-slate-50/80 backdrop-blur-sm border border-slate-100 rounded-2xl gap-4" data-html2canvas-ignore="true">
+                        <div class="flex items-center gap-3 w-full md:w-auto">
+                            <div class="flex items-center bg-white p-1 rounded-xl border border-slate-200 shadow-sm flex-1">
+                                <input type="date" id="inline-dt-ini" value="${dtIni}" class="px-2 py-1 bg-transparent text-xs font-bold font-mono text-slate-700 outline-none border-none w-full">
+                                <span class="px-2 text-[10px] font-black text-slate-300">➜</span>
+                                <input type="date" id="inline-dt-fim" value="${dtFim}" class="px-2 py-1 bg-transparent text-xs font-bold font-mono text-slate-700 outline-none border-none w-full">
                             </div>
-                            <button type="button" onclick="window.recarregarExtrato()" class="px-4 py-1.5 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-xs font-black uppercase tracking-widest transition-all shadow-sm flex items-center gap-1 active:scale-95 ml-auto">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                                Filtrar
+                            <button type="button" onclick="window.recarregarExtrato()" class="h-9 px-5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-md shadow-brand-100 flex items-center gap-2 active:scale-95">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                                Atualizar
+                            </button>
+                            
+                            <div class="flex items-center bg-white p-1 rounded-xl border border-slate-200 shadow-sm">
+                                <select id="sw-sort-order" onchange="window.mudarOrdenacaoExtrato(this.value)" class="bg-transparent text-[10px] font-black uppercase tracking-widest text-slate-600 outline-none border-none px-2 py-1 cursor-pointer">
+                                    <option value="desc" ${window._extratoSortOrder === 'desc' ? 'selected' : ''}>Mais Recentes</option>
+                                    <option value="asc" ${window._extratoSortOrder === 'asc' ? 'selected' : ''}>Mais Antigos</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center gap-2 w-full md:w-auto">
+                             <button onclick="exportarExtratoPDF('${esc(nome)}', '${dtIni}', '${dtFim}')" class="h-9 px-5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-md flex items-center gap-2 active:scale-95 flex-1 md:flex-none justify-center">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                PDF
                             </button>
                         </div>
                     </div>
-                    <div class="mt-2 border border-slate-100 rounded-2xl overflow-hidden bg-white shadow-inner">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="bg-slate-50 border-b border-slate-100">
-                                    <th class="py-3 px-3 text-[9px] font-black text-slate-400 uppercase tracking-widest w-24">Data</th>
-                                    <th class="py-3 px-1 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">E1</th>
-                                    <th class="py-3 px-1 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">S1</th>
-                                    <th class="py-3 px-1 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">E2</th>
-                                    <th class="py-3 px-1 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">S2</th>
-                                    <th class="py-3 px-1 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">Status</th>
-                                    <th class="py-3 px-3 text-[9px] font-black text-slate-400 uppercase tracking-widest text-left">Aviso</th>
+
+                    <!-- Tabela -->
+                    <div class="md:border border-slate-100 md:rounded-3xl overflow-hidden bg-transparent md:bg-white md:shadow-xl md:shadow-slate-200/50">
+                        <table class="w-full text-left border-collapse block md:table">
+                            <thead class="hidden md:table-header-group">
+                                <tr class="bg-slate-800 text-white">
+                                    <th class="py-4 px-4 text-[9px] font-black uppercase tracking-widest w-28 border-r border-slate-700/50">Data / Dia</th>
+                                    <th class="py-4 px-1 text-[9px] font-black uppercase tracking-widest text-center border-r border-slate-700/50">Entrada 1</th>
+                                    <th class="py-4 px-1 text-[9px] font-black uppercase tracking-widest text-center border-r border-slate-700/50">Saída 1</th>
+                                    <th class="py-4 px-1 text-[9px] font-black uppercase tracking-widest text-center border-r border-slate-700/50">Entrada 2</th>
+                                    <th class="py-4 px-1 text-[9px] font-black uppercase tracking-widest text-center border-r border-slate-700/50">Saída 2</th>
+                                    <th class="py-4 px-1 text-[9px] font-black uppercase tracking-widest text-center border-r border-slate-700/50">Status</th>
+                                    <th class="py-4 px-4 text-[9px] font-black uppercase tracking-widest text-left">Observações</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-slate-50">
-                                ${rows || '<tr><td colspan="5" class="py-12 text-center text-slate-400 font-medium italic">Nenhum registro encontrado este mês.</td></tr>'}
+                            <tbody class="block md:table-row-group">
+                                ${rows || '<tr><td colspan="7" class="py-20 text-center"><div class="flex flex-col items-center gap-2"><svg class="w-12 h-12 text-slate-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><span class="text-slate-400 font-bold italic">Nenhum registro encontrado.</span></div></td></tr>'}
                             </tbody>
                         </table>
                     </div>
                 </div>
-                <div class="mt-4 flex flex-col gap-2">
-                    <button onclick="comunicarAtrasoFalta('${esc(nome)}')" class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-amber-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-amber-500 transition-all shadow-md active:scale-95">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                        Comunicar meu Atraso / Falta
+
+                <!-- Ações de Rodapé -->
+                <div class="mt-8 grid grid-cols-2 gap-4">
+                    <button onclick="comunicarAtrasoFalta('${esc(nome)}')" class="flex items-center justify-center gap-3 px-6 py-4 bg-amber-500 hover:bg-amber-600 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all shadow-lg shadow-amber-200 active:scale-95 group">
+                        <svg class="w-5 h-5 group-hover:animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                        Justificar Falta/Atraso
                     </button>
-                    <button onclick="trocarSenhaFuncionario()" class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-slate-800 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-700 transition-all shadow-md active:scale-95">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
-                        Alterar Minha Senha
+                    <button onclick="trocarSenhaFuncionario()" class="flex items-center justify-center gap-3 px-6 py-4 bg-slate-800 hover:bg-slate-900 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all shadow-lg shadow-slate-200 active:scale-95 group">
+                        <svg class="w-5 h-5 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
+                        Alterar Senha
                     </button>
                 </div>
-                <div class="mt-6 p-4 bg-amber-50 rounded-xl border border-amber-100 flex gap-3">
-                    <div class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
-                        <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+
+                <div class="mt-6 p-5 bg-gradient-to-br from-slate-50 to-white rounded-2xl border border-slate-100 flex gap-4 shadow-sm">
+                    <div class="w-12 h-12 rounded-xl bg-brand-100 flex items-center justify-center flex-shrink-0">
+                        <svg class="w-6 h-6 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     </div>
                     <div class="text-left">
-                        <p class="text-[11px] font-bold text-amber-800 leading-tight">Dúvidas ou Divergências?</p>
-                        <p class="text-[10px] text-amber-700/80 mt-1">Caso encontre algum erro nas batidas, procure imediatamente o gestor do seu setor ou o RH para regularização.</p>
+                        <p class="text-[12px] font-black text-slate-800 leading-none mb-1">Dúvidas ou Divergências?</p>
+                        <p class="text-[10px] text-slate-500 leading-relaxed font-medium">Caso identifique erros em suas batidas, entre em contato com o gestor do seu setor ou com o RH para regularização imediata.</p>
                     </div>
                 </div>
             `,
-            showDenyButton: true,
-            denyButtonText: 'Salvar PDF',
-            denyButtonColor: '#0c4a6e',
-            confirmButtonText: 'Fechar Extrato',
-            confirmButtonColor: '#0ea5e9',
-            allowOutsideClick: false
-        }).then((result) => {
-            if (result.isConfirmed) {
+            showConfirmButton: true,
+            confirmButtonText: 'Sair e Logout',
+            confirmButtonColor: '#1e293b',
+            allowOutsideClick: false,
+            customClass: {
+                popup: 'rounded-[2rem]',
+                confirmButton: 'rounded-xl px-8 py-3 text-xs font-black uppercase tracking-widest',
+                closeButton: 'top-4 right-4 text-slate-400 hover:text-slate-600 bg-slate-100 hover:bg-slate-200 border-none rounded-lg'
+            },
+            didClose: () => {
+                // Logout Completo ao fechar o modal (Limpa sessão no backend e frontend)
+                fetch('../api/ponto.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'logout_meu_ponto'
+                    })
+                });
+
                 sessionStorage.removeItem('extrato_pendente_dados');
                 sessionStorage.removeItem('extrato_pendente_nome');
                 sessionStorage.removeItem('extrato_pendente_mat');
                 sessionStorage.removeItem('extrato_pendente_senha');
-            } else if (result.isDenied) {
-                exportarExtratoPDF(nome, dtIni, dtFim);
-                renderizarCartaoIndividual(dados, nome, dtIni, dtFim);
+                location.reload();
             }
         });
     }
 
+    // Gerenciamento de Ordenação no Extrato Individual
+    window._extratoSortOrder = 'asc';
+    window.mudarOrdenacaoExtrato = function(order) {
+        window._extratoSortOrder = order;
+        const rawData = sessionStorage.getItem('extrato_pendente_dados');
+        const nome = sessionStorage.getItem('extrato_pendente_nome');
+        const dtIni = sessionStorage.getItem('extrato_pendente_ini');
+        const dtFim = sessionStorage.getItem('extrato_pendente_fim');
+        if (rawData && nome) {
+            renderizarCartaoIndividual(JSON.parse(rawData), nome, dtIni, dtFim);
+        }
+    };
+
+    function renderizarLinhasExtrato(dados, resumo, pontoHtml, statusHtml, esc) {
+        const sortedData = [...dados].sort((a, b) => {
+            return window._extratoSortOrder === 'desc' ?
+                b.data.localeCompare(a.data) :
+                a.data.localeCompare(b.data);
+        });
+
+        return sortedData.map(r => {
+            const dataObj = new Date(r.data + 'T00:00:00');
+            const dataFmt = dataObj.toLocaleDateString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit'
+            });
+            const diaSemana = dataObj.toLocaleDateString('pt-BR', {
+                weekday: 'short'
+            }).replace('.', '').toUpperCase();
+
+            const p1 = pontoHtml(r.primeiro_ponto, r.atrasou_primeiro_ponto, r.falta_turno1_entrada, r.just_ent1, r.status_crh, r.tipo_justificativa, r.justificativa, r.primeiro_horario, r.em_ferias, r.motivo_afastamento, r, 1);
+            const p2 = pontoHtml(r.segundo_ponto, r.atrasou_segundo_ponto, r.falta_turno1_saida, r.just_sai1, r.status_crh, r.tipo_justificativa, r.justificativa, r.segundo_horario, r.em_ferias, r.motivo_afastamento, r, 2);
+            const p3 = pontoHtml(r.terceiro_ponto, r.atrasou_terceiro_ponto, r.falta_turno2_entrada, r.just_ent2, r.status_crh, r.tipo_justificativa, r.justificativa, r.terceiro_horario, r.em_ferias, r.motivo_afastamento, r, 3);
+            const p4 = pontoHtml(r.quarto_ponto, r.atrasou_quarto_ponto, r.falta_turno2_saida, r.just_sai2, r.status_crh, r.tipo_justificativa, r.justificativa, r.quarto_horario, r.em_ferias, r.motivo_afastamento, r, 4);
+
+            const stHtmlStr = statusHtml(r);
+            if (stHtmlStr.includes('OK')) resumo.ok++;
+            if (stHtmlStr.includes('Falta')) resumo.faltas++;
+            if (stHtmlStr.includes('Incompleto')) resumo.incompletos++;
+            if (r.atrasou_primeiro_ponto || r.atrasou_segundo_ponto || r.atrasou_terceiro_ponto || r.atrasou_quarto_ponto) resumo.atrasos++;
+
+            const com = (r.comunicado && r.comunicado !== 'null') ? r.comunicado : '';
+
+            let avisoRow = '';
+            if (r.aviso && String(r.aviso).trim() !== '' && r.aviso !== 'null') {
+                avisoRow = `<tr class="bg-rose-50/30 flex flex-col md:table-row"><td colspan="7" class="py-2 px-4 text-[10px] font-bold text-rose-600 italic border-b border-rose-100/50 leading-tight"><span class="inline-flex mr-1 items-center justify-center w-4 h-4 bg-rose-100 rounded-full text-rose-600 not-italic">!</span> Recado: ${esc(r.aviso)}</td></tr>`;
+            }
+
+            const isHoje = new Date().toISOString().split('T')[0] === r.data;
+
+            return `
+                <tr class="group border-b border-slate-50 last:border-0 hover:bg-slate-50/80 transition-all ${isHoje ? 'bg-brand-50/20' : ''} flex flex-col md:table-row mb-4 md:mb-0 rounded-2xl md:rounded-none border md:border-0 border-slate-100 bg-white md:bg-transparent shadow-sm md:shadow-none overflow-hidden">
+                    <td class="py-3 px-4 md:px-3 flex justify-between items-center md:table-cell border-b md:border-0 border-slate-50 bg-slate-50/30 md:bg-transparent">
+                        <span class="md:hidden text-[9px] font-black text-slate-400 uppercase tracking-widest">Data</span>
+                        <div class="flex flex-col leading-none text-right md:text-left">
+                            <span class="text-[11px] font-black text-slate-800">${dataFmt}</span>
+                            <span class="text-[8px] font-bold text-slate-400 uppercase mt-0.5">${diaSemana}</span>
+                        </div>
+                    </td>
+                    <td class="py-3 px-4 md:px-1 flex justify-between items-center md:table-cell border-b md:border-0 border-slate-50">
+                        <span class="md:hidden text-[9px] font-black text-slate-400 uppercase tracking-widest">Entrada 1</span>
+                        <div class="text-right md:text-center">${p1}</div>
+                    </td>
+                    <td class="py-3 px-4 md:px-1 flex justify-between items-center md:table-cell border-b md:border-0 border-slate-50">
+                        <span class="md:hidden text-[9px] font-black text-slate-400 uppercase tracking-widest">Saída 1</span>
+                        <div class="text-right md:text-center">${p2}</div>
+                    </td>
+                    <td class="py-3 px-4 md:px-1 flex justify-between items-center md:table-cell border-b md:border-0 border-slate-50">
+                        <span class="md:hidden text-[9px] font-black text-slate-400 uppercase tracking-widest">Entrada 2</span>
+                        <div class="text-right md:text-center">${p3}</div>
+                    </td>
+                    <td class="py-3 px-4 md:px-1 flex justify-between items-center md:table-cell border-b md:border-0 border-slate-50">
+                        <span class="md:hidden text-[9px] font-black text-slate-400 uppercase tracking-widest">Saída 2</span>
+                        <div class="text-right md:text-center">${p4}</div>
+                    </td>
+                    <td class="py-3 px-4 md:px-1 flex justify-between items-center md:table-cell border-b md:border-0 border-slate-50">
+                        <span class="md:hidden text-[9px] font-black text-slate-400 uppercase tracking-widest">Status</span>
+                        <div class="text-right md:text-center">${stHtmlStr}</div>
+                    </td>
+                    <td class="py-3 px-4 md:px-3 flex justify-between items-center md:table-cell">
+                         <span class="md:hidden text-[9px] font-black text-slate-400 uppercase tracking-widest">Obs</span>
+                         <p class="text-[9px] text-slate-500 italic truncate max-w-[150px] m-0 text-right md:text-left" title="${esc(com)}">${esc(com)}</p>
+                    </td>
+                </tr>
+                ${avisoRow}
+            `;
+        }).join('');
+    }
+
     window.exportarExtratoPDF = function(nome, dtIni, dtFim) {
         const rawData = sessionStorage.getItem('extrato_pendente_dados');
-        if (!rawData) { Swal.fire('Erro', 'Dados não encontrados na memória.', 'error'); return; }
+        if (!rawData) {
+            Swal.fire('Erro', 'Dados não encontrados na memória.', 'error');
+            return;
+        }
         const dados = JSON.parse(rawData);
 
         var bgFullBase64 = "data:image/png;base64,<?php echo base64_encode(file_get_contents('../public/img/timbre_bg.png')); ?>";
@@ -2306,21 +3417,53 @@
         var logoFunadBase64 = "data:image/jpeg;base64,<?php echo base64_encode(file_get_contents('../public/img/timbre_funad.jpeg')); ?>";
 
         let pdfBody = [];
-        
+
         // Cabeçalho da Tabela
-        pdfBody.push([
-            { text: 'Data', style: 'th', alignment: 'left' },
-            { text: 'E1', style: 'th', alignment: 'center' },
-            { text: 'S1', style: 'th', alignment: 'center' },
-            { text: 'E2', style: 'th', alignment: 'center' },
-            { text: 'S2', style: 'th', alignment: 'center' },
-            { text: 'Status', style: 'th', alignment: 'center' },
-            { text: 'Aviso / Comunicados', style: 'th', alignment: 'left' }
+        pdfBody.push([{
+                text: 'Data',
+                style: 'th',
+                alignment: 'left'
+            },
+            {
+                text: 'E1',
+                style: 'th',
+                alignment: 'center'
+            },
+            {
+                text: 'S1',
+                style: 'th',
+                alignment: 'center'
+            },
+            {
+                text: 'E2',
+                style: 'th',
+                alignment: 'center'
+            },
+            {
+                text: 'S2',
+                style: 'th',
+                alignment: 'center'
+            },
+            {
+                text: 'Status',
+                style: 'th',
+                alignment: 'center'
+            },
+            {
+                text: 'Aviso / Comunicados',
+                style: 'th',
+                alignment: 'left'
+            }
         ]);
 
         dados.forEach(r => {
-            const dataFmt = new Date(r.data + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) + ' (' + new Date(r.data + 'T00:00:00').toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '').toUpperCase() + ')';
-            
+            const dataFmt = new Date(r.data + 'T00:00:00').toLocaleDateString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit'
+            }) + ' (' + new Date(r.data + 'T00:00:00').toLocaleDateString('pt-BR', {
+                weekday: 'short'
+            }).replace('.', '').toUpperCase() + ')';
+
             const formatBat = (h, hp, pIdx) => {
                 const isFaltaAuto = (!h || h.toLowerCase() === 'falta');
                 if (r.liberacao && isFaltaAuto) {
@@ -2343,16 +3486,16 @@
             const s1 = formatBat(r.segundo_ponto, r.segundo_horario, 2);
             const e2 = formatBat(r.terceiro_ponto, r.terceiro_horario, 3);
             const s2 = formatBat(r.quarto_ponto, r.quarto_horario, 4);
-            
+
             let status = 'Regular';
             const incompleto = (r.primeiro_horario && (!r.primeiro_ponto || r.primeiro_ponto.toLowerCase() === 'falta')) || (r.segundo_horario && (!r.segundo_ponto || r.segundo_ponto.toLowerCase() === 'falta')) || (r.terceiro_horario && (!r.terceiro_ponto || r.terceiro_ponto.toLowerCase() === 'falta')) || (r.quarto_horario && (!r.quarto_ponto || r.quarto_ponto.toLowerCase() === 'falta'));
-            
+
             if (incompleto) status = 'Incompleto';
             if (r.falta_turno1_entrada === 'S' || r.falta_turno1_saida === 'S' || r.falta_turno2_entrada === 'S' || r.falta_turno2_saida === 'S' || (r.primeiro_ponto && r.primeiro_ponto.toLowerCase() === 'falta')) {
                 status = 'Falta';
             }
             if (r.justificativa || r.just_ent1 || r.just_sai1 || r.just_ent2 || r.just_sai2) {
-                 status = 'Justificado';
+                status = 'Justificado';
             }
             if (r.em_ferias === 'S' || r.motivo_afastamento) {
                 status = 'Afastamento';
@@ -2368,19 +3511,51 @@
 
             const aviso = (r.comunicado && String(r.comunicado) !== 'null') ? r.comunicado : ((r.aviso && String(r.aviso) !== 'null') ? r.aviso : ((r.liberacao && r.liberacao.descricao) ? r.liberacao.descricao : ''));
 
-            pdfBody.push([
-                { text: dataFmt, fontSize: 8 },
-                { text: e1, fontSize: 8, alignment: 'center' },
-                { text: s1, fontSize: 8, alignment: 'center' },
-                { text: e2, fontSize: 8, alignment: 'center' },
-                { text: s2, fontSize: 8, alignment: 'center' },
-                { text: status, fontSize: 8, alignment: 'center' },
-                { text: aviso, fontSize: 8 }
+            pdfBody.push([{
+                    text: dataFmt,
+                    fontSize: 8
+                },
+                {
+                    text: e1,
+                    fontSize: 8,
+                    alignment: 'center'
+                },
+                {
+                    text: s1,
+                    fontSize: 8,
+                    alignment: 'center'
+                },
+                {
+                    text: e2,
+                    fontSize: 8,
+                    alignment: 'center'
+                },
+                {
+                    text: s2,
+                    fontSize: 8,
+                    alignment: 'center'
+                },
+                {
+                    text: status,
+                    fontSize: 8,
+                    alignment: 'center'
+                },
+                {
+                    text: aviso,
+                    fontSize: 8
+                }
             ]);
         });
 
         if (dados.length === 0) {
-            pdfBody.push([{ text: 'Nenhum registro encontrado este mês.', colSpan: 7, alignment: 'center', margin: [0, 20, 0, 20], color: '#64748b', italics: true }, {}, {}, {}, {}, {}, {}]);
+            pdfBody.push([{
+                text: 'Nenhum registro encontrado este mês.',
+                colSpan: 7,
+                alignment: 'center',
+                margin: [0, 20, 0, 20],
+                color: '#64748b',
+                italics: true
+            }, {}, {}, {}, {}, {}, {}]);
         }
 
         var docDefinition = {
@@ -2388,63 +3563,119 @@
             pageOrientation: 'landscape',
             pageMargins: [40, 80, 40, 70],
             background: function() {
-                return [
-                    { image: bgFullBase64, width: 842, height: 595, absolutePosition: { x: 0, y: 0 } },
-                    { image: logoBgBase64, width: 450, absolutePosition: { x: (842 / 2) - 225, y: (595 / 2) - 225 }, opacity: 0.15 }
+                return [{
+                        image: bgFullBase64,
+                        width: 842,
+                        height: 595,
+                        absolutePosition: {
+                            x: 0,
+                            y: 0
+                        }
+                    },
+                    {
+                        image: logoBgBase64,
+                        width: 450,
+                        absolutePosition: {
+                            x: (842 / 2) - 225,
+                            y: (595 / 2) - 225
+                        },
+                        opacity: 0.15
+                    }
                 ];
             },
             header: {
                 margin: [40, 20, 40, 0],
-                columns: [
-                    {
+                columns: [{
                         width: 250,
-                        columns: [
-                            { image: logoFunadBase64, width: 60, margin: [0, 8, 15, 0] },
-                            { image: logoGovpbBase64, width: 140 }
+                        columns: [{
+                                image: logoFunadBase64,
+                                width: 60,
+                                margin: [0, 8, 15, 0]
+                            },
+                            {
+                                image: logoGovpbBase64,
+                                width: 140
+                            }
                         ]
                     },
                     {
                         text: 'EXTRATO INDIVIDUAL DE PONTO\nFuncionário: ' + nome + '\nPeríodo: ' + dtIni.split('-').reverse().join('/') + ' a ' + dtFim.split('-').reverse().join('/') + '\nEmitido em: ' + new Date().toLocaleString('pt-BR'),
-                        alignment: 'right', fontSize: 9, bold: true, color: '#000000', margin: [0, 10, 0, 0]
+                        alignment: 'right',
+                        fontSize: 9,
+                        bold: true,
+                        color: '#000000',
+                        margin: [0, 10, 0, 0]
                     }
                 ]
             },
             footer: function(currentPage, pageCount) {
                 return {
                     margin: [40, 0, 40, 20],
-                    columns: [
-                        { text: 'Pág ' + currentPage.toString() + ' / ' + pageCount, alignment: 'left', fontSize: 7, color: '#000000', width: 60, margin: [0, 25, 0, 0] },
+                    columns: [{
+                            text: 'Pág ' + currentPage.toString() + ' / ' + pageCount,
+                            alignment: 'left',
+                            fontSize: 7,
+                            color: '#000000',
+                            width: 60,
+                            margin: [0, 25, 0, 0]
+                        },
                         {
                             text: 'SECRETARIA DE ESTADO DA EDUCAÇÃO\nFUNAD – FUNDAÇÃO CENTRO INTEGRADO DE APOIO À PESSOA COM DEFICIÊNCIA\nCER IV – CENTRO ESPECIALIZADO EM REABILITAÇÃO\nRua Dr. Orestes Lisboa, S/N - Pedro Gondim - CEP 58031-090 - João Pessoa/PB\nCNPJ: 24.507.065/0001-07 Email: funad@funad.pb.gov.br\nTel.: (83) 3214-7879 / (83) 3244-1542 / (83) 3243-8446 / (83) 3243-3765',
-                            alignment: 'center', fontSize: 6, color: '#000000', width: '*', bold: true
+                            alignment: 'center',
+                            fontSize: 6,
+                            color: '#000000',
+                            width: '*',
+                            bold: true
                         },
-                        { text: '', width: 60 }
+                        {
+                            text: '',
+                            width: 60
+                        }
                     ]
                 };
             },
             styles: {
-                th: { fontSize: 9, bold: true, color: '#000000', margin: [0, 3, 0, 3] }
+                th: {
+                    fontSize: 9,
+                    bold: true,
+                    color: '#000000',
+                    margin: [0, 3, 0, 3]
+                }
             },
-            content: [
-                {
-                    table: {
-                        headerRows: 1,
-                        // Data(14%) E1(9%) S1(9%) E2(9%) S2(9%) Status(15%) Aviso(Restante)
-                        widths: ['14%', '9%', '9%', '9%', '9%', '15%', '*'],
-                        body: pdfBody
+            content: [{
+                table: {
+                    headerRows: 1,
+                    // Data(14%) E1(9%) S1(9%) E2(9%) S2(9%) Status(15%) Aviso(Restante)
+                    widths: ['14%', '9%', '9%', '9%', '9%', '15%', '*'],
+                    body: pdfBody
+                },
+                layout: {
+                    hLineWidth: function(i, node) {
+                        return 0.5;
                     },
-                    layout: {
-                        hLineWidth: function(i, node) { return 0.5; },
-                        vLineWidth: function(i, node) { return 0.5; },
-                        hLineColor: function(i, node) { return '#cbd5e1'; },
-                        vLineColor: function(i, node) { return '#cbd5e1'; },
-                        paddingLeft: function(i, node) { return 6; },
-                        paddingRight: function(i, node) { return 6; },
-                        paddingTop: function(i, node) { return 4; },
-                        paddingBottom: function(i, node) { return 4; }
+                    vLineWidth: function(i, node) {
+                        return 0.5;
+                    },
+                    hLineColor: function(i, node) {
+                        return '#cbd5e1';
+                    },
+                    vLineColor: function(i, node) {
+                        return '#cbd5e1';
+                    },
+                    paddingLeft: function(i, node) {
+                        return 6;
+                    },
+                    paddingRight: function(i, node) {
+                        return 6;
+                    },
+                    paddingTop: function(i, node) {
+                        return 4;
+                    },
+                    paddingBottom: function(i, node) {
+                        return 4;
                     }
                 }
-            ]
+            }]
         };
 
         if (typeof pdfMake !== 'undefined') {
@@ -2463,16 +3694,43 @@
 
         try {
             pdfMake.createPdf(docDefinition).download(`Extrato_Ponto_${nome.replace(/\s+/g, '_')}.pdf`);
-        } catch(e) {
+        } catch (e) {
             console.error(e);
             Swal.fire('Erro Técnico', 'Detalhes: ' + (e.message || String(e)), 'error');
         }
     }
 
-    window.comunicarAtrasoFalta = async function(nome) {
-        let anexoData = null;
+    // --- Gestão de Anexos no Comunicado (Múltiplos Arquivos) ---
+    window._pendingComunicadoFiles = [];
+    window._renderComunicadoFiles = () => {
+        const list = document.getElementById('sw-comunicado-list');
+        if (!list) return;
+        list.innerHTML = window._pendingComunicadoFiles.map((file, i) => `
+            <div class="flex items-center justify-between p-2 bg-white rounded-lg border border-slate-200 text-[10px] shadow-sm group hover:border-brand-300 transition-all">
+                <div class="flex items-center gap-2 truncate">
+                    <div class="w-6 h-6 rounded bg-slate-100 flex items-center justify-center text-slate-500">
+                        ${file.type.includes('pdf') ? '📄' : '🖼️'}
+                    </div>
+                    <span class="font-bold text-slate-700 truncate" title="${file.name}">${file.name}</span>
+                </div>
+                <button type="button" onclick="window._removerAnexoComunicado(${i})" class="p-1.5 text-slate-300 hover:text-red-500 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
+            </div>
+        `).join('');
+    };
 
-        const { value: formValues } = await Swal.fire({
+    window._removerAnexoComunicado = (index) => {
+        window._pendingComunicadoFiles.splice(index, 1);
+        window._renderComunicadoFiles();
+    };
+
+    window.comunicarAtrasoFalta = async function(nome) {
+        window._pendingComunicadoFiles = [];
+
+        const {
+            value: formValues
+        } = await Swal.fire({
             title: 'Comunicar Atraso ou Falta',
             html: `
                 <div id="sw-step-form" class="text-left space-y-4 pt-2">
@@ -2481,58 +3739,51 @@
                     </div>
                     <div>
                         <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Data do Ocorrido</label>
-                        <input type="date" id="sw-data-comunicado" class="swal2-input w-full m-0 mt-1 text-sm h-11 bg-slate-50 cursor-not-allowed" value="${new Date().toISOString().split('T')[0]}" readonly>
+                        <input type="date" id="sw-data-comunicado" class="swal2-input w-full m-0 mt-1 text-sm h-11 bg-white" value="${new Date().toISOString().split('T')[0]}">
                     </div>
                     <div>
                         <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Mensagem do Comunicado</label>
-                        <textarea id="sw-mensagem-comunicado" class="swal2-textarea w-full m-0 mt-1 text-sm p-3" rows="3" placeholder="Ex: Tive um imprevisto com o transporte e vou me atrasar 20 min..."></textarea>
+                        <textarea id="sw-mensagem-comunicado" class="swal2-textarea w-full m-0 mt-1 text-sm p-3 border-2 focus:border-amber-400" rows="3" placeholder="Ex: Tive um imprevisto com o transporte e vou me atrasar 20 min..."></textarea>
                     </div>
                     
                     <div class="pt-2">
-                        <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Documento (Opcional)</label>
+                        <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Documentos Comprobatórios (Opcional)</label>
+                        
+                        <div id="sw-comunicado-list" class="space-y-1.5 mb-3 empty:hidden"></div>
+
                         <div id="sw-anexo-container" class="flex items-center gap-3">
-                            <button type="button" onclick="window._exibirPasso('select')" class="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[11px] font-bold transition-all border border-slate-200">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                            <button type="button" onclick="window._exibirPasso('select')" class="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-brand-50 hover:bg-brand-100 text-brand-600 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all border-2 border-dashed border-brand-200">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                                 </svg>
-                                Incluir Documento
+                                Incluir Novo Documento
                             </button>
-                            <div id="sw-anexo-preview" class="hidden items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-lg border border-emerald-100 text-[10px] font-bold">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                </svg>
-                                <span>Documento Anexado</span>
-                                <button type="button" onclick="window._removerAnexoComunicado()" class="ml-1 text-red-500 hover:text-red-700">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </button>
-                            </div>
                         </div>
                     </div>
                 </div>
 
                 <div id="sw-step-select" class="hidden flex flex-col gap-3 py-6">
                     <p class="text-sm font-bold text-slate-700 mb-2">Como deseja incluir o documento?</p>
-                    <button type="button" onclick="document.getElementById('sw-file-input').click()" class="w-full flex items-center justify-center gap-3 p-4 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl border border-blue-200 transition-all font-bold">
+                    <button type="button" onclick="document.getElementById('sw-file-input').click()" class="w-full flex items-center justify-center gap-3 p-4 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl border border-blue-200 transition-all font-bold shadow-sm">
                         <span class="text-2xl">📂</span> Escolher Arquivo ou PDF
                     </button>
-                    <button type="button" onclick="window._exibirPasso('camera')" class="w-full flex items-center justify-center gap-3 p-4 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl border border-emerald-200 transition-all font-bold">
+                    <button type="button" onclick="window._exibirPasso('camera')" class="w-full flex items-center justify-center gap-3 p-4 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl border border-emerald-200 transition-all font-bold shadow-sm">
                         <span class="text-2xl">📷</span> Tirar Foto Agora
                     </button>
                     <button type="button" onclick="window._exibirPasso('form')" class="mt-4 text-xs font-black text-slate-400 uppercase tracking-widest hover:text-slate-600">Voltar</button>
-                    <input type="file" id="sw-file-input" class="hidden" accept="image/*,application/pdf">
+                    <input type="file" id="sw-file-input" class="hidden" accept="image/*,application/pdf" multiple>
                 </div>
 
                 <div id="sw-step-camera" class="hidden flex flex-col gap-4">
                     <p class="text-sm font-bold text-slate-700">Capture a Foto do Documento</p>
-                    <div class="relative bg-black rounded-2xl overflow-hidden aspect-video shadow-lg">
+                    <div class="relative bg-black rounded-2xl overflow-hidden aspect-[3/4] shadow-lg border-4 border-slate-800">
                         <video id="sw-cam-video" class="w-full h-full object-cover" autoplay playsinline></video>
                         <canvas id="sw-cam-canvas" class="hidden"></canvas>
+                        <div class="absolute inset-0 border-2 border-white/20 pointer-events-none rounded-xl m-4"></div>
                     </div>
                     <div class="flex gap-2">
-                        <button type="button" onclick="window._tirarFotoComunicado()" class="flex-1 py-3 bg-emerald-600 text-white rounded-xl font-bold shadow-md hover:bg-emerald-500 active:scale-95 transition-all">Capturar Foto</button>
-                        <button type="button" onclick="window._exibirPasso('select')" class="px-6 py-3 bg-slate-100 text-slate-600 rounded-xl font-bold hover:bg-slate-200 transition-all">Cancelar</button>
+                        <button type="button" onclick="window._tirarFotoComunicado()" class="flex-1 py-4 bg-emerald-600 text-white rounded-2xl font-black uppercase tracking-widest shadow-lg hover:bg-emerald-500 active:scale-95 transition-all text-xs">Capturar Foto</button>
+                        <button type="button" onclick="window._exibirPasso('select')" class="px-6 py-4 bg-slate-100 text-slate-600 rounded-2xl font-bold hover:bg-slate-200 transition-all text-xs">Voltar</button>
                     </div>
                 </div>
             `,
@@ -2540,6 +3791,7 @@
             confirmButtonText: 'Enviar Comunicado',
             cancelButtonText: 'Cancelar',
             confirmButtonColor: '#d97706',
+            width: '450px',
             didOpen: () => {
                 const stepForm = document.getElementById('sw-step-form');
                 const stepSelect = document.getElementById('sw-step-select');
@@ -2556,6 +3808,7 @@
                         stepForm.classList.remove('hidden');
                         actions.classList.remove('hidden');
                         window._pararCameraComunicado();
+                        window._renderComunicadoFiles();
                     } else if (step === 'select') {
                         stepSelect.classList.remove('hidden');
                     } else if (step === 'camera') {
@@ -2564,21 +3817,18 @@
                     }
                 };
 
-                window._removerAnexoComunicado = () => {
-                    anexoData = null;
-                    document.getElementById('sw-file-input').value = '';
-                    document.getElementById('sw-anexo-preview').classList.add('hidden');
-                    document.querySelector('#sw-anexo-container button').classList.remove('hidden');
-                };
-
                 window._iniciarCameraComunicado = async () => {
                     const video = document.getElementById('sw-cam-video');
                     try {
-                        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                        const stream = await navigator.mediaDevices.getUserMedia({
+                            video: {
+                                facingMode: 'environment'
+                            }
+                        });
                         video.srcObject = stream;
                         window._swCamStream = stream;
                     } catch (e) {
-                        alert('Erro ao acessar câmera: ' + e.message);
+                        Swal.fire('Erro', 'Não foi possível acessar a câmera: ' + e.message, 'error');
                         window._exibirPasso('select');
                     }
                 };
@@ -2596,25 +3846,33 @@
                     canvas.width = video.videoWidth;
                     canvas.height = video.videoHeight;
                     canvas.getContext('2d').drawImage(video, 0, 0);
-                    anexoData = canvas.toDataURL('image/jpeg', 0.8);
-                    
-                    document.getElementById('sw-anexo-preview').classList.remove('hidden');
-                    document.querySelector('#sw-anexo-container button').classList.add('hidden');
+
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                    const file = {
+                        name: 'Foto_' + new Date().toLocaleTimeString().replace(/:/g, '-') + '.jpg',
+                        type: 'image/jpeg',
+                        data: dataUrl
+                    };
+                    window._pendingComunicadoFiles.push(file);
                     window._exibirPasso('form');
                 };
 
                 document.getElementById('sw-file-input').onchange = (e) => {
-                    const file = e.target.files[0];
-                    if (file) {
+                    const files = Array.from(e.target.files);
+                    let processed = 0;
+                    files.forEach(file => {
                         const reader = new FileReader();
-                        reader.onload = (e) => {
-                            anexoData = e.target.result;
-                            document.getElementById('sw-anexo-preview').classList.remove('hidden');
-                            document.querySelector('#sw-anexo-container button').classList.add('hidden');
-                            window._exibirPasso('form');
+                        reader.onload = (ev) => {
+                            window._pendingComunicadoFiles.push({
+                                name: file.name,
+                                type: file.type,
+                                data: ev.target.result
+                            });
+                            processed++;
+                            if (processed === files.length) window._exibirPasso('form');
                         };
                         reader.readAsDataURL(file);
-                    }
+                    });
                 };
             },
             willClose: () => {
@@ -2629,23 +3887,36 @@
                 return {
                     data: document.getElementById('sw-data-comunicado').value,
                     mensagem: msg,
-                    anexo: anexoData
+                    anexos: window._pendingComunicadoFiles.map(f => f.data)
                 }
             }
         });
 
         if (formValues) {
-            Swal.fire({ title: 'Enviando...', didOpen: () => { Swal.showLoading(); }, allowOutsideClick: false });
-            
+            Swal.fire({
+                title: 'Enviando Comunicado...',
+                html: 'Aguarde um momento enquanto processamos seus arquivos.',
+                didOpen: () => {
+                    Swal.showLoading();
+                },
+                allowOutsideClick: false
+            });
+
             if (!window._ultimaMatricula || !window._ultimaSenha) {
-                Swal.fire('Aviso', 'Sessão expirada. Por favor, identifique-se novamente no "Meu Acesso".', 'error');
+                console.error("Erro de sessão: Matrícula ou Senha ausentes.", {
+                    mat: window._ultimaMatricula,
+                    sen: window._ultimaSenha
+                });
+                Swal.fire('Sessão Expirada', 'Por favor, identifique-se novamente no "Meu Acesso".', 'error');
                 return;
             }
 
             try {
                 const res = await fetch('../api/ponto.php', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
                     body: JSON.stringify({
                         action: 'salvar_comunicado',
                         matricula: window._ultimaMatricula,
@@ -2654,23 +3925,27 @@
                     })
                 });
                 const data = await res.json();
-                
+
                 if (data.success) {
-                    Swal.fire('Sucesso!', data.message, 'success').then(() => {
+                    Swal.fire({
+                        title: 'Enviado!',
+                        text: data.message,
+                        icon: 'success',
+                        confirmButtonColor: '#059669'
+                    }).then(() => {
                         if (window.recarregarExtrato) window.recarregarExtrato();
                     });
                 } else {
-                    Swal.fire('Aviso', data.message, 'error').then(() => {
+                    Swal.fire('Erro no Envio', data.message, 'error').then(() => {
                         if (window.recarregarExtrato) window.recarregarExtrato();
                     });
                 }
             } catch (e) {
-                Swal.fire('Aviso', 'Falha na comunicação com o servidor.', 'error').then(() => {
+                Swal.fire('Falha de Conexão', 'Não foi possível completar o envio. Verifique sua internet.', 'error').then(() => {
                     if (window.recarregarExtrato) window.recarregarExtrato();
                 });
             }
         } else {
-            // Se cancelou o modal de comunicado, volta para o extrato
             if (window.recarregarExtrato) window.recarregarExtrato();
         }
     }
@@ -2681,7 +3956,9 @@
             return;
         }
 
-        const { value: formValues } = await Swal.fire({
+        const {
+            value: formValues
+        } = await Swal.fire({
             title: 'Alterar Senha de Acesso',
             html: `
                 <div class="text-left space-y-4 pt-2">
@@ -2711,21 +3988,41 @@
                 const nova = document.getElementById('sw-senha-nova').value;
                 const confirma = document.getElementById('sw-senha-confirma').value;
 
-                if (!antiga) { Swal.showValidationMessage('Informe sua senha atual'); return false; }
-                if (nova.length < 6) { Swal.showValidationMessage('A nova senha deve ter pelo menos 6 caracteres'); return false; }
-                if (nova !== confirma) { Swal.showValidationMessage('As novas senhas não coincidem'); return false; }
+                if (!antiga) {
+                    Swal.showValidationMessage('Informe sua senha atual');
+                    return false;
+                }
+                if (nova.length < 6) {
+                    Swal.showValidationMessage('A nova senha deve ter pelo menos 6 caracteres');
+                    return false;
+                }
+                if (nova !== confirma) {
+                    Swal.showValidationMessage('As novas senhas não coincidem');
+                    return false;
+                }
 
-                return { antiga, nova };
+                return {
+                    antiga,
+                    nova
+                };
             }
         });
 
         if (formValues) {
-            Swal.fire({ title: 'Processando...', didOpen: () => { Swal.showLoading(); }, allowOutsideClick: false });
+            Swal.fire({
+                title: 'Processando...',
+                didOpen: () => {
+                    Swal.showLoading();
+                },
+                allowOutsideClick: false
+            });
 
             try {
                 const res = await fetch('../api/ponto.php', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
                     body: JSON.stringify({
                         action: 'change_password',
                         matricula: window._ultimaMatricula,
@@ -2734,12 +4031,12 @@
                     })
                 });
                 const data = await res.json();
-                
+
                 if (data.success) {
                     // Atualiza a senha na memória da sessão para que outras ações (como comunicado) continuem funcionando
                     window._ultimaSenha = formValues.nova;
                     sessionStorage.setItem('extrato_pendente_senha', formValues.nova);
-                    
+
                     Swal.fire('Sucesso!', 'Senha alterada com sucesso.', 'success').then(() => {
                         if (window.recarregarExtrato) window.recarregarExtrato();
                     });
@@ -2794,6 +4091,336 @@
             renderizarCartaoIndividual(JSON.parse(pendenteDados), pendenteNome);
         }
     };
+
+    // --- NOVO MÓDULO: ACESSO BIOMÉTRICO AOS MEUS PONTOS ---
+    window.abrirAcessoFacialIndividual = async function() {
+        const matPrevia = ''; // Facial Individual sempre opera em modo 1:N global para 'Meus Pontos'
+        const dtIni = document.getElementById('sw-dt-ini')?.value;
+        const dtFim = document.getElementById('sw-dt-fim')?.value;
+
+        // Se o face-api não estiver carregado, tenta carregar
+        if (typeof faceapi === 'undefined' || !faceapi.nets.tinyFaceDetector.params) {
+            Swal.fire({
+                title: 'Carregando Modelos...',
+                didOpen: () => Swal.showLoading()
+            });
+            await loadFaceModels();
+        }
+
+        Swal.fire({
+            title: 'Acesso via Reconhecimento Facial',
+            html: `
+                <div class="flex flex-col items-center gap-4 py-2">
+                    <p class="text-[11px] text-slate-500 uppercase font-black tracking-widest">Posicione seu rosto frente à câmera</p>
+                    <div class="relative w-64 h-64 rounded-full overflow-hidden border-4 border-brand-500 shadow-xl bg-black" id="extrato-container">
+                        <video id="extrato-video" class="w-full h-full object-cover" autoplay playsinline muted style="transform: scaleX(-1);"></video>
+                        <canvas id="extrato-canvas" class="w-full h-full object-cover hidden" style="transform: scaleX(-1);"></canvas>
+                        <div id="extrato-overlay" class="absolute inset-0 border-[12px] border-brand-500/20 rounded-full animate-pulse pointer-events-none"></div>
+                    </div>
+                    <div id="extrato-status" class="text-xs font-bold text-brand-600 animate-pulse">Iniciando câmera...</div>
+                </div>
+            `,
+            showCancelButton: true,
+            cancelButtonText: 'Cancelar',
+            showConfirmButton: false,
+            allowOutsideClick: false,
+            didOpen: async () => {
+                await window.falarBiometria("Iniciando câmera, por favor aguarde");
+                const video = document.getElementById('extrato-video');
+                const status = document.getElementById('extrato-status');
+                let stream = null;
+                let isClosing = false;
+                let framesWellFramed = 0;
+                let isAuthenticating = false;
+
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({
+                        video: {
+                            facingMode: 'user'
+                        }
+                    });
+                    video.srcObject = stream;
+
+                    const detectLoop = async () => {
+                        if (isClosing || !video.srcObject || video.paused || video.ended || isAuthenticating) return;
+
+                        const container = document.getElementById('extrato-container');
+
+                        try {
+                            // Aumentado scoreThreshold para 0.6 para evitar falsos positivos
+                            const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({
+                                    inputSize: 320,
+                                    scoreThreshold: 0.6
+                                }))
+                                .withFaceLandmarks()
+                                .withFaceDescriptor();
+
+                            if (detection) {
+                                const box = detection.detection.box;
+
+                                // 1. Verificar Enquadramento (Cores do Círculo)
+                                const faceWidth = box.width;
+                                const videoWidth = video.videoWidth || 640;
+                                const videoHeight = video.videoHeight || 480;
+                                const faceX = box.x + box.width / 2;
+                                const faceY = box.y + box.height / 2;
+
+                                // Centralização e Tamanho (Mesma lógica do registro)
+                                const isCentered = Math.abs(faceX - videoWidth / 2) < (videoWidth * 0.12) &&
+                                    Math.abs(faceY - videoHeight / 2) < (videoHeight * 0.15);
+                                const isCorrectSize = faceWidth > (videoWidth * 0.35) && faceWidth < (videoWidth * 0.65);
+
+                                const isWellFramed = isCentered && isCorrectSize;
+
+                                if (container) {
+                                    if (isWellFramed) {
+                                        container.classList.remove('border-brand-500', 'border-amber-500');
+                                        container.classList.add('border-emerald-500');
+                                        framesWellFramed++;
+                                    } else {
+                                        container.classList.remove('border-brand-500', 'border-emerald-500', 'border-brand-400');
+                                        container.classList.add('border-amber-500');
+                                        framesWellFramed = 0;
+                                    }
+                                }
+
+                                // 2. Autenticação apenas se houver estabilidade (10 frames enquadrados)
+                                if (!isWellFramed) {
+                                    let msg = "Aguardando...";
+                                    if (!isCentered) msg = "Centralize seu rosto na moldura";
+                                    else if (faceWidth < (videoWidth * 0.35)) msg = "Aproxime-se um pouco mais da câmera";
+                                    else msg = "Afaste-se um pouco da câmera";
+
+                                    status.textContent = msg;
+                                    status.className = "text-xs font-bold text-amber-600 animate-pulse";
+                                    window.falarBiometria(msg);
+                                } else if (framesWellFramed >= 10) {
+                                    // ENQUADRADO E ESTÁVEL: AUTENTICAR
+                                    isAuthenticating = true;
+                                    status.textContent = "Face Validada! Autenticando...";
+                                    status.className = "text-xs font-bold text-emerald-600";
+                                    window.falarBiometria("Aguarde a validação", true);
+
+                                    // Congelar a imagem
+                                    const canvas = document.getElementById('extrato-canvas');
+                                    if (canvas && video) {
+                                        canvas.width = video.videoWidth;
+                                        canvas.height = video.videoHeight;
+                                        canvas.getContext('2d').drawImage(video, 0, 0);
+                                        video.classList.add('hidden');
+                                        canvas.classList.remove('hidden');
+                                    }
+
+                                    const res = await fetch('../api/ponto.php', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json'
+                                        },
+                                        body: JSON.stringify({
+                                            action: 'get_meu_ponto',
+                                            matricula: null,
+                                            facial_descriptor: Array.from(detection.descriptor),
+                                            start_date: dtIni,
+                                            end_date: dtFim
+                                        })
+                                    });
+                                    const json = await res.json();
+
+                                    if (json.success && !isClosing) {
+                                        isClosing = true;
+                                        window._ultimaMatricula = json.matricula || '';
+                                        window._ultimaSenha = 'facial_authenticated';
+
+                                        // Salva no session storage para persistência (Importante para evitar "Sessão Expirada")
+                                        sessionStorage.setItem('extrato_pendente_dados', JSON.stringify(json.data));
+                                        sessionStorage.setItem('extrato_pendente_nome', json.funcionario);
+                                        sessionStorage.setItem('extrato_pendente_mat', window._ultimaMatricula);
+                                        sessionStorage.setItem('extrato_pendente_senha', window._ultimaSenha);
+                                        sessionStorage.setItem('extrato_pendente_ini', dtIni || '');
+                                        sessionStorage.setItem('extrato_pendente_fim', dtFim || '');
+
+                                        window.falarBiometria("Acesso autorizado. Bem-vindo!", true);
+                                        status.textContent = "Acesso Autorizado!";
+                                        status.className = "text-xs font-bold text-emerald-700";
+
+                                        setTimeout(() => {
+                                            pararCamera();
+                                            Swal.close();
+                                            renderizarCartaoIndividual(json.data, json.funcionario, dtIni, dtFim);
+                                        }, 1500);
+                                        return;
+                                    } else if (!isClosing) {
+                                        const msg = json.message || "Face não reconhecida";
+                                        status.textContent = msg;
+                                        status.className = "text-xs font-bold text-red-600 animate-pulse";
+                                        window.falarBiometria(msg, true);
+
+                                        setTimeout(() => {
+                                            if (!isClosing) {
+                                                isAuthenticating = false;
+                                                framesWellFramed = 0;
+
+                                                // Retomar o vídeo
+                                                const canvas = document.getElementById('extrato-canvas');
+                                                if (canvas && video) {
+                                                    canvas.classList.add('hidden');
+                                                    video.classList.remove('hidden');
+                                                }
+
+                                                detectLoop();
+                                            }
+                                        }, 3500);
+                                        return;
+                                    }
+                                }
+                                if (!isClosing) requestAnimationFrame(detectLoop);
+                            } else {
+                                status.textContent = "Ajuste sua posição...";
+                                status.className = "text-xs font-bold text-brand-600 animate-pulse";
+                                if (container) {
+                                    container.classList.remove('border-emerald-500', 'border-amber-500');
+                                    container.classList.add('border-brand-500');
+                                }
+                                if (!isClosing) requestAnimationFrame(detectLoop);
+                            }
+                        } catch (e) {
+                            console.error("Erro no loop do extrato:", e);
+                            if (!isClosing) requestAnimationFrame(detectLoop);
+                        }
+                    };
+
+                    video.onplay = () => detectLoop();
+
+                } catch (err) {
+                    status.textContent = "Erro ao acessar câmera.";
+                    console.error(err);
+                }
+
+                function pararCamera() {
+                    isClosing = true;
+                    if (stream) {
+                        stream.getTracks().forEach(t => t.stop());
+                        video.srcObject = null;
+                    }
+                }
+                window._pararCameraExtrato = pararCamera;
+            },
+            willClose: () => {
+                if (window._pararCameraExtrato) window._pararCameraExtrato();
+            }
+        });
+    };
 </script>
+
+
+<!-- Modal Biometria Unificado (Premium UI - Global Overlay) -->
+<div id="modalBiometria" class="fixed inset-0 z-[9999] hidden" aria-labelledby="modal-title" role="dialog"
+    aria-modal="true">
+    <div class="fixed inset-0 bg-slate-900/95 backdrop-blur-xl transition-opacity"
+        onclick="fecharModalBiometria()"></div>
+    <div class="fixed inset-0 z-10 overflow-y-auto no-scrollbar">
+        <div class="flex min-h-full items-center justify-center p-2 text-center">
+            <div class="relative transform overflow-hidden rounded-[40px] bg-white text-left shadow-2xl transition-all w-full max-w-sm border border-white/20 p-0 flex flex-col my-4">
+
+                <!-- Header Premium (Fixed) -->
+                <div class="px-6 py-4 flex items-center justify-between bg-white border-b border-slate-50 shrink-0">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center text-brand-600 shadow-inner">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4"></path>
+                            </svg>
+                        </div>
+                        <div class="text-left">
+                            <h3 class="text-base font-black text-slate-800 m-0 leading-tight">Acesso Biométrico</h3>
+                            <p class="text-[9px] font-bold text-slate-400 m-0 uppercase tracking-widest">Registrar Ponto</p>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-end mr-4">
+                        <div id="bioClock" class="text-lg font-black text-brand-600 leading-tight">--:--:--</div>
+                        <div id="bioDate" class="text-[8px] font-bold text-slate-400 uppercase tracking-widest leading-none">--/--/----</div>
+                    </div>
+                    <button onclick="fecharModalBiometria()" class="p-2 text-slate-300 hover:text-slate-600 hover:bg-slate-50 rounded-xl transition-all">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <input type="hidden" id="bio_modo" value="facial">
+                <input type="hidden" id="bio_matricula" value="">
+
+                <!-- Área Central (Scrollable if needed) -->
+                <div class="overflow-y-auto no-scrollbar flex-1">
+                    <div id="areaFacial" class="p-6 flex flex-col items-center">
+                        <div class="relative w-full max-w-[280px] aspect-[4/5] bg-slate-50 rounded-[32px] overflow-hidden shadow-lg border-4 border-slate-50 transition-all duration-500" id="videoContainer">
+                            <video id="videoFeed" autoplay playsinline muted class="absolute inset-0 h-full w-full object-cover z-10 hidden" style="transform: scaleX(-1);"></video>
+                            <canvas id="videoCanvas" class="absolute inset-0 h-full w-full object-cover z-10 hidden" style="transform: scaleX(-1);"></canvas>
+
+                            <!-- Scanner Overlay (Partículas Digitais) -->
+                            <div id="scannerLine" class="hidden absolute inset-0 z-20 pointer-events-none overflow-hidden">
+                                <div class="scanner-beam"></div>
+                                <div class="scanner-particle" style="left: 15%; animation-duration: 1.5s; animation-delay: 0.2s;"></div>
+                                <div class="scanner-particle" style="left: 35%; animation-duration: 2.1s; animation-delay: 0.5s;"></div>
+                                <div class="scanner-particle" style="left: 55%; animation-duration: 1.8s; animation-delay: 0.1s;"></div>
+                                <div class="scanner-particle" style="left: 75%; animation-duration: 2.5s; animation-delay: 0.8s;"></div>
+                                <div class="scanner-particle" style="left: 90%; animation-duration: 1.7s; animation-delay: 0.3s;"></div>
+                                <div class="scanner-particle" style="left: 5%; animation-duration: 2.3s; animation-delay: 1.2s;"></div>
+                            </div>
+
+                            <!-- Overlay Circular -->
+                            <div id="guideFacial" class="absolute inset-0 z-20 pointer-events-none flex flex-col items-center justify-center">
+                                <div id="faceOvalBorder" class="w-[85%] h-[80%] border-[3px] border-dashed border-white/50 rounded-[50%] transition-all duration-500 shadow-[0_0_80px_rgba(0,0,0,0.3)]"></div>
+
+                                <!-- Countdown de nova tentativa -->
+                                <div id="countdownOval" class="hidden absolute inset-0 z-30 flex items-center justify-center">
+                                    <div class="relative flex items-center justify-center w-[85%] h-[80%] rounded-[50%] bg-black/75">
+                                        <svg class="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                                            <ellipse cx="50" cy="50" rx="48.5" ry="48.5" fill="none" stroke="rgba(239,68,68,0.25)" stroke-width="3" />
+                                            <ellipse id="countdownRing" cx="50" cy="50" rx="48.5" ry="48.5" fill="none"
+                                                stroke="#ef4444" stroke-width="3"
+                                                stroke-dasharray="304.7" stroke-dashoffset="0"
+                                                transform="rotate(-90 50 50)" />
+                                        </svg>
+                                        <div id="countdownNumber" class="relative z-10 text-white font-black select-none"
+                                            style="font-size:4.5rem;line-height:1;text-shadow:0 2px 24px rgba(239,68,68,0.9);transition:transform 0.12s ease,opacity 0.12s ease;"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Badge de Status Flutuante -->
+                                <div id="faceStatus" class="absolute bottom-6 left-0 right-0 flex justify-center">
+                                    <span class="bg-slate-900/90 text-white text-[9px] font-black px-5 py-2 rounded-full uppercase tracking-widest border border-white/10 shadow-2xl transition-all">Aguardando Face...</span>
+                                </div>
+                            </div>
+
+                            <!-- Loading State -->
+                            <div id="camLoading" class="absolute inset-0 z-0 flex flex-col items-center justify-center bg-slate-50">
+                                <div class="w-10 h-10 border-4 border-brand-100 border-t-brand-600 rounded-full animate-spin"></div>
+                            </div>
+                        </div>
+
+                        <!-- Instruções e Progresso -->
+                        <div class="mt-6 flex flex-col items-center gap-3 w-full max-w-[280px]">
+                            <div class="flex items-center gap-2 text-slate-400">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                </svg>
+                                <p id="instrucaoTexto" class="text-[9px] font-black uppercase tracking-widest m-0">Olhe para a câmera</p>
+                            </div>
+
+                            <!-- Progress Bar -->
+                            <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                <div id="progressBar" class="h-full bg-emerald-500 w-0 transition-all duration-300"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+
+            </div>
+        </div>
+    </div>
+</div>
 
 <?php include 'layout/footer.php'; ?>

@@ -9,7 +9,7 @@ $isSuper = ($user_level == 1) || in_array(strtolower(trim($user_name)), ['corsin
 ?>
 
 <div
-    class="max-w-7xl mx-auto flex flex-col h-full bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+    class="max-w-[1600px] mx-auto flex flex-col h-full bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
 
     <!-- Topbar Interna -->
     <div class="px-6 py-5 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -24,6 +24,12 @@ $isSuper = ($user_level == 1) || in_array(strtolower(trim($user_name)), ['corsin
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                 </svg>
                 Excluir Selecionados (<span id="selectedCount">0</span>)
+            </button>
+            <button onclick="limparFotosOrfas()" class="flex items-center gap-2 px-4 py-2 bg-slate-50 text-slate-600 hover:bg-slate-100 font-semibold rounded-xl border border-slate-200 transition-all shadow-sm" title="Remove fotos faciais não associadas a nenhum funcionário">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+                Limpar Fotos Órfãs
             </button>
             <a href="funcionario_form.php"
                 class="flex items-center gap-2 px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white font-semibold rounded-xl focus:ring-4 focus:ring-brand-500/20 transition-all shadow-sm">
@@ -81,6 +87,7 @@ $isSuper = ($user_level == 1) || in_array(strtolower(trim($user_name)), ['corsin
                     </th>
                     <th class="text-xs font-semibold text-slate-500 uppercase tracking-wider px-4 py-3">Nome</th>
                     <th class="text-xs font-semibold text-slate-500 uppercase tracking-wider px-4 py-3">Matrícula</th>
+                    <th class="text-xs font-semibold text-slate-500 uppercase tracking-wider px-4 py-3">CPF</th>
                     <th class="text-xs font-semibold text-slate-500 uppercase tracking-wider px-4 py-3">Setor</th>
                     <th class="text-xs font-semibold text-slate-500 uppercase tracking-wider px-4 py-3">Horário
                         Vinculado</th>
@@ -273,6 +280,63 @@ $isSuper = ($user_level == 1) || in_array(strtolower(trim($user_name)), ['corsin
         }
     }
 
+    window.updateBulkDeleteButton = function() {
+        const selected = $('.row-checkbox:checked').length;
+        const btn = $('#btnBulkDelete');
+        if (selected > 0) {
+            btn.css('display', 'flex').removeClass('hidden');
+            $('#selectedCount').text(selected);
+        } else {
+            btn.css('display', 'none').addClass('hidden');
+        }
+    }
+
+    window.bulkDelete = function() {
+        const ids = [];
+        $('.row-checkbox:checked').each(function() {
+            ids.push($(this).val());
+        });
+
+        if (ids.length === 0) return;
+
+        Swal.fire({
+            title: 'Excluir Selecionados?',
+            text: `Você está prestes a excluir ${ids.length} funcionários. Esta ação não pode ser desfeita!`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'Sim, Excluir Todos',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const confirmBtn = Swal.getConfirmButton();
+                setLoading(confirmBtn, true);
+
+                fetch('../../api/funcionarios.php', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ids: ids })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    setLoading(confirmBtn, false);
+                    if (data.success) {
+                        Swal.fire('Excluídos!', data.message, 'success');
+                        tableFunc.ajax.reload(null, false);
+                        $('#selectAll').prop('checked', false);
+                    } else {
+                        Swal.fire('Erro', data.message, 'error');
+                    }
+                })
+                .catch(err => {
+                    setLoading(confirmBtn, false);
+                    Swal.fire('Erro', 'Falha na comunicação com o servidor.', 'error');
+                });
+            }
+        });
+    }
+
     $(document).ready(function () {
         // Mostra o overlay ao iniciar
         const overlay = document.getElementById('loadingOverlay');
@@ -324,14 +388,36 @@ $isSuper = ($user_level == 1) || in_array(strtolower(trim($user_name)), ['corsin
                             const dtReturn = new Date(row.data_fim_afastamento + 'T12:00:00');
                             dtReturn.setDate(dtReturn.getDate() + 1);
                             const returnStr = dtReturn.toLocaleDateString('pt-BR');
-                            afastadoBadge = `<span class="ml-2 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-tighter bg-amber-500 text-white rounded-md shadow-sm animate-pulse border border-amber-600" title="Retorno previsto para: ${returnStr}">Afastado</span>`;
+                            const motivoLabel = row.motivo_afastamento || 'Afastado';
+                            afastadoBadge = `<span class="ml-2 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-tighter bg-amber-500 text-white rounded-md shadow-sm animate-pulse border border-amber-600" title="Retorno previsto para: ${returnStr}">${motivoLabel}</span>`;
                         }
 
                         let nameClass = (row.is_exonerado == 1 || row.is_exonerado === true || row.is_exonerado === 't') ? 'text-red-600 font-extrabold' : 'text-slate-800 font-bold';
-                        return `<div class="${nameClass} flex items-center">${data} ${afastadoBadge} ${icons}</div>`;
+                        let exonBadge = (row.is_exonerado == 1 || row.is_exonerado === true || row.is_exonerado === 't') ? `
+                            <div class="mt-1 flex flex-col gap-0.5 px-2 py-1 bg-red-50 border border-red-100 rounded text-[9px] font-bold text-red-600 w-fit">
+                                <div>EXONERADO ${row.data_exoneracao ? 'em ' + row.data_exoneracao.split('-').reverse().join('/') : ''}</div>
+                                ${row.motivo_exoneracao ? `<div class="opacity-75 italic font-medium">Motivo: ${row.motivo_exoneracao}</div>` : ''}
+                            </div>` : '';
+                        
+                        return `<div>
+                            <div class="${nameClass} flex items-center">${data} ${afastadoBadge} ${icons}</div>
+                            ${exonBadge}
+                        </div>`;
                     }
                 },
                 { data: 'matricula', className: 'font-mono text-slate-600' },
+                { 
+                    data: 'cpf', 
+                    className: 'text-slate-600 font-mono text-xs',
+                    render: function(data) {
+                        if (!data) return '<span class="text-slate-400">N/I</span>';
+                        let v = data.replace(/\D/g, '');
+                        if (v.length === 11) {
+                            return v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+                        }
+                        return data;
+                    }
+                },
                 {
                     data: 'setor',
                     render: function (data, type, row) {
@@ -419,188 +505,9 @@ $isSuper = ($user_level == 1) || in_array(strtolower(trim($user_name)), ['corsin
         updateBulkDeleteButton();
     });
 
-    function updateBulkDeleteButton() {
-        const selected = $('.row-checkbox:checked').length;
-        const btn = $('#btnBulkDelete');
-        if (selected > 0) {
-            btn.css('display', 'flex').removeClass('hidden');
-            $('#selectedCount').text(selected);
-        } else {
-            btn.css('display', 'none').addClass('hidden');
-        }
-    }
-
-    window.bulkDelete = function() {
-        const ids = [];
-        $('.row-checkbox:checked').each(function() {
-            ids.push($(this).val());
-        });
-
-        if (ids.length === 0) return;
-
-        Swal.fire({
-            title: 'Excluir Selecionados?',
-            text: `Você está prestes a excluir ${ids.length} funcionários. Esta ação não pode ser desfeita!`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#ef4444',
-            cancelButtonColor: '#64748b',
-            confirmButtonText: 'Sim, Excluir Todos',
-            cancelButtonText: 'Cancelar'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                const confirmBtn = Swal.getConfirmButton();
-                setLoading(confirmBtn, true);
-
-                fetch('../../api/funcionarios.php', {
-                    method: 'DELETE',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ ids: ids })
-                })
-                .then(res => res.json())
-                .then(data => {
-                    setLoading(confirmBtn, false);
-                    if (data.success) {
-                        Swal.fire('Excluídos!', data.message, 'success');
-                        tableFunc.ajax.reload(null, false);
-                        $('#selectAll').prop('checked', false);
-                    } else {
-                        Swal.fire('Erro', data.message, 'error');
-                    }
-                })
-                .catch(err => {
-                    setLoading(confirmBtn, false);
-                    Swal.fire('Erro', 'Falha na comunicação com o servidor.', 'error');
-                });
-            }
-        });
-    }
-
-    window.deletarFuncionario = function (id) {
-        Swal.fire({
-            title: 'Excluir Funcionário?',
-            text: "Deseja realmente remover este cadastro? Esta ação não pode ser desfeita!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#ef4444',
-            cancelButtonColor: '#64748b',
-            confirmButtonText: 'Sim, Excluir',
-            cancelButtonText: 'Cancelar'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                const confirmBtn = Swal.getConfirmButton();
-                setLoading(confirmBtn, true);
-
-                fetch('../../api/funcionarios.php', {
-                    method: 'DELETE',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id: id })
-                })
-                    .then(res => res.json())
-                    .then(data => {
-                        setLoading(confirmBtn, false);
-                        if (data.success) {
-                            Swal.fire('Excluído!', data.message, 'success');
-                            tableFunc.ajax.reload(null, false);
-                        } else {
-                            Swal.fire('Erro', data.message, 'error');
-                        }
-                    })
-                    .catch(err => {
-                        setLoading(confirmBtn, false);
-                        Swal.fire('Erro', 'Falha na comunicação com o servidor.', 'error');
-                    });
-            }
-        });
-    };
-
     // Tailwind forms nos inputs do DT
     $('.dataTables_filter input').addClass('border border-slate-200 rounded-lg px-3 py-1.5 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 ml-2 shadow-sm');
     $('.dataTables_length select').addClass('border border-slate-200 rounded-lg px-2 py-1.5 focus:outline-none shadow-sm mx-1');
-
-    window.exonerarFuncionario = function (id, nome) {
-        Swal.fire({
-            title: 'Motivo da Exoneração',
-            text: `Informe o motivo para efetivar a exoneração de ${nome}:`,
-            input: 'textarea',
-            inputPlaceholder: 'Digite o motivo aqui...',
-            inputAttributes: {
-                'aria-label': 'Digite o motivo aqui'
-            },
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#ef4444',
-            cancelButtonColor: '#64748b',
-            confirmButtonText: 'Confirmar Exoneração',
-            cancelButtonText: 'Cancelar',
-            inputValidator: (value) => {
-                if (!value) {
-                    return 'Você precisa informar um motivo!';
-                }
-            }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                const confirmBtn = Swal.getConfirmButton();
-                setLoading(confirmBtn, true);
-
-                fetch('../../api/funcionarios.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'exonerate', id: id, motivo: result.value })
-                })
-                    .then(res => res.json())
-                    .then(data => {
-                        setLoading(confirmBtn, false);
-                        if (data.success) {
-                            Swal.fire('Exonerado!', data.message, 'success');
-                            tableFunc.ajax.reload(null, false);
-                        } else {
-                            Swal.fire('Erro', data.message, 'error');
-                        }
-                    })
-                    .catch(err => {
-                        Swal.fire('Erro', 'Falha na comunicação com o servidor.', 'error');
-                    });
-            }
-        });
-    };
-
-    window.reintegrarFuncionario = function (id, nome) {
-        Swal.fire({
-            title: 'Reintegrar Funcionário?',
-            text: `Deseja realmente reintegrar ${nome} ao quadro de funcionários? O acesso ao ponto será restaurado imediatamente.`,
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#10b981',
-            cancelButtonColor: '#64748b',
-            confirmButtonText: 'Sim, Reintegrar',
-            cancelButtonText: 'Cancelar'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                const confirmBtn = Swal.getConfirmButton();
-                setLoading(confirmBtn, true);
-
-                fetch('../../api/funcionarios.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'reintegrate', id: id })
-                })
-                    .then(res => res.json())
-                    .then(data => {
-                        setLoading(confirmBtn, false);
-                        if (data.success) {
-                            Swal.fire('Reintegrado!', data.message, 'success');
-                            tableFunc.ajax.reload(null, false);
-                        } else {
-                            Swal.fire('Erro', data.message, 'error');
-                        }
-                    })
-                    .catch(err => {
-                        Swal.fire('Erro', 'Falha na comunicação com o servidor.', 'error');
-                    });
-            }
-        });
-    };
 });
 
     // Funções de Modal removidas - agora em funcionario_form.php
@@ -1188,6 +1095,41 @@ $isSuper = ($user_level == 1) || in_array(strtolower(trim($user_name)), ['corsin
             }
         });
     }
+    async function limparFotosOrfas() {
+        const confirm = await Swal.fire({
+            title: 'Limpar Fotos Órfãs?',
+            text: 'Remove arquivos de foto facial que não estão associados a nenhum funcionário ativo (servidor local e servidor DeepFace).',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#f59e0b',
+            cancelButtonColor: '#94a3b8',
+            confirmButtonText: 'Limpar',
+            cancelButtonText: 'Cancelar'
+        });
+        if (!confirm.isConfirmed) return;
+
+        try {
+            const res = await fetch('../../api/funcionarios.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'cleanup_faces' })
+            });
+            const data = await res.json();
+            if (data.success) {
+                const deepfaceInfo = data.deepface
+                    ? `\nDeepFace: ${data.deepface.kept ?? 0} mantidas, ${(data.deepface.removed ?? []).length} removidas.`
+                    : '\nServidor DeepFace não respondeu.';
+                Swal.fire('Limpeza Concluída',
+                    `Local: ${data.local_kept} fotos mantidas, ${data.local_removed.length} removidas.${deepfaceInfo}`,
+                    'success');
+            } else {
+                Swal.fire('Erro', data.message || 'Falha na limpeza.', 'error');
+            }
+        } catch (e) {
+            Swal.fire('Erro', 'Problema ao executar limpeza: ' + e.message, 'error');
+        }
+    }
+
     function capturarLocalizacaoAdmin(event) {
         if (!navigator.geolocation) {
             Swal.fire("Erro", "Seu navegador não suporta geolocalização.", "error");
@@ -1215,36 +1157,50 @@ $isSuper = ($user_level == 1) || in_array(strtolower(trim($user_name)), ['corsin
     }
 
     async function exonerarFuncionario(id, nome) {
-        const { value: motivo } = await Swal.fire({
+        const { value: formValues } = await Swal.fire({
             title: 'Exonerar ' + nome,
-            input: 'textarea',
-            inputLabel: 'Motivo da Exoneração',
-            inputPlaceholder: 'Digite o motivo...',
-            inputAttributes: { 'aria-label': 'Motivo da exoneração' },
+            html:
+                '<div class="text-left">' +
+                '<label class="block text-xs font-bold text-slate-500 uppercase mb-1">Data da Exoneração</label>' +
+                '<input id="swal-input-data" class="swal2-input !m-0 !w-full mb-4" type="date" value="' + new Date().toISOString().split('T')[0] + '">' +
+                '<label class="block text-xs font-bold text-slate-500 uppercase mb-1">Motivo / Observação</label>' +
+                '<textarea id="swal-input-motivo" class="swal2-textarea !m-0 !w-full" placeholder="Digite o motivo da exoneração..."></textarea>' +
+                '</div>',
+            focusConfirm: false,
             showCancelButton: true,
             confirmButtonText: 'Confirmar Exoneração',
             cancelButtonText: 'Cancelar',
-            confirmButtonColor: '#ef4444'
+            confirmButtonColor: '#ef4444',
+            preConfirm: () => {
+                const data = document.getElementById('swal-input-data').value;
+                const motivo = document.getElementById('swal-input-motivo').value;
+                if (!data) {
+                    Swal.showValidationMessage('Por favor, informe a data.');
+                    return false;
+                }
+                if (!motivo) {
+                    Swal.showValidationMessage('Por favor, informe o motivo.');
+                    return false;
+                }
+                return { data, motivo };
+            }
         });
 
-        if (motivo !== undefined) {
-             if (motivo === '') {
-                Swal.fire('Aviso', 'Por favor, informe um motivo.', 'warning');
-                return;
-            }
+        if (formValues) {
+            const { data, motivo } = formValues;
             try {
                 const res = await fetch('../../api/funcionarios.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'exonerate', id, motivo })
+                    body: JSON.stringify({ action: 'exonerate', id, data, motivo })
                 });
-                const data = await res.json();
-                if (data.success) {
-                    Swal.fire('Sucesso!', data.message, 'success');
+                const dataRes = await res.json();
+                if (dataRes.success) {
+                    Swal.fire('Sucesso!', dataRes.message, 'success');
                     tableFunc.ajax.reload(null, false);
-                    setTimeout(updateCounts, 1000); // Small delay to ensure table data is updated
+                    setTimeout(updateCounts, 1000);
                 } else {
-                    Swal.fire('Erro', data.message, 'error');
+                    Swal.fire('Erro', dataRes.message, 'error');
                 }
             } catch (e) {
                 Swal.fire('Erro', 'Falha ao processar exoneração.', 'error');

@@ -119,9 +119,16 @@ $isAdmin = (($_SESSION['user_level'] ?? '3') == '1');
                         <p class="text-sm text-slate-500 font-medium">Selecione quem receberá as novas coordenadas</p>
                     </div>
                 </div>
-                <div class="flex items-center gap-3 p-3 bg-white rounded-2xl border border-slate-200/80 shadow-sm transition-all hover:border-brand-200">
-                    <input type="checkbox" id="selectAll" onclick="toggleSelectAll()" <?php echo $isAdmin ? '' : 'disabled'; ?> class="w-5 h-5 rounded-md border-slate-300 text-brand-600 focus:ring-brand-500 transition-all cursor-pointer">
-                    <label for="selectAll" class="text-sm font-bold text-slate-700 cursor-pointer select-none">Selecionar Tudo</label>
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-3 p-2 bg-white rounded-2xl border border-slate-200/80 shadow-sm">
+                        <select id="filterArea" onchange="filtrarPorArea()" class="text-sm font-bold text-slate-700 bg-transparent border-none focus:ring-0 cursor-pointer">
+                            <option value="">Todas as Áreas</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center gap-3 p-3 bg-white rounded-2xl border border-slate-200/80 shadow-sm transition-all hover:border-brand-200">
+                        <input type="checkbox" id="selectAll" onclick="toggleSelectAll()" <?php echo $isAdmin ? '' : 'disabled'; ?> class="w-5 h-5 rounded-md border-slate-300 text-brand-600 focus:ring-brand-500 transition-all cursor-pointer">
+                        <label for="selectAll" class="text-sm font-bold text-slate-700 cursor-pointer select-none">Selecionar Tudo</label>
+                    </div>
                 </div>
             </div>
             
@@ -188,7 +195,33 @@ $isAdmin = (($_SESSION['user_level'] ?? '3') == '1');
         });
 
         carregarPresets();
+        carregarListaAreas();
     });
+
+    async function carregarListaAreas() {
+        try {
+            const res = await fetch('../../api/funcionarios.php?action=get_areas');
+            const data = await res.json();
+            if (data.success) {
+                const select = document.getElementById('filterArea');
+                data.data.forEach(a => {
+                    const opt = document.createElement('option');
+                    opt.value = a;
+                    opt.textContent = a;
+                    select.appendChild(opt);
+                });
+            }
+        } catch (e) { console.error("Erro ao carregar áreas"); }
+    }
+
+    function filtrarPorArea() {
+        const area = document.getElementById('filterArea').value;
+        if (area) {
+            tableBulk.column(3).search(area).draw();
+        } else {
+            tableBulk.column(3).search('').draw();
+        }
+    }
 
     let presetsData = [];
 
@@ -260,7 +293,11 @@ $isAdmin = (($_SESSION['user_level'] ?? '3') == '1');
 
     function toggleSelectAll() {
         const checked = document.getElementById('selectAll').checked;
-        $('.emp-checkbox').prop('checked', checked);
+        // Selecionar apenas as linhas visíveis (filtradas)
+        tableBulk.rows({ search: 'applied' }).every(function() {
+            const node = this.node();
+            $(node).find('.emp-checkbox').prop('checked', checked);
+        });
     }
 
     function capturarLocalBulk() {

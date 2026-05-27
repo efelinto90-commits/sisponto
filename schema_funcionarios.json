@@ -1,0 +1,2354 @@
+[
+    {
+        "column_name": "codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "nome",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "matricula",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "setor_codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "trab_segunda",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "trab_terca",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "trab_quarta",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "trab_quinta",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "trab_sexta",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "trab_sabado",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "segunda_manha_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "terca_manha_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "quarta_manha_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "quinta_manha_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "sexta_manha_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "segunda_manha_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "segunda_tarde_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "terca_tarde_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "quarta_tarde_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "quinta_tarde_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "saida_sexta_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "saida_sabado",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "data_cadastro",
+        "data_type": "timestamp without time zone"
+    },
+    {
+        "column_name": "operador_cadastro",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "data_alteracao",
+        "data_type": "timestamp without time zone"
+    },
+    {
+        "column_name": "operador_alteracao",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "excluido",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "data_exclusao",
+        "data_type": "timestamp without time zone"
+    },
+    {
+        "column_name": "operador_exclusao",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "tabela_codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "cargo_funcao_codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "profissao_codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "funcao",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "rg",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "nascimento",
+        "data_type": "date"
+    },
+    {
+        "column_name": "terca_manha_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "quarta_manha_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "quinta_manha_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "sexta_manha_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "terca_tarde_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "quarta_tarde_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "quinta_tarde_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "sexta_tarde_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "segunda_tarde_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "sexta_tarde_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "ativo",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "admissao",
+        "data_type": "date"
+    },
+    {
+        "column_name": "historico",
+        "data_type": "text"
+    },
+    {
+        "column_name": "cpf",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "logradouro_codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "numero",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "telefone",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "vinculo_codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "carga_horaria",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "pis",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "titulo",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "cartaosus",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "conselhoclasse",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "pai",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "mae",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "email",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "hist1",
+        "data_type": "text"
+    },
+    {
+        "column_name": "ano1",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "hist2",
+        "data_type": "text"
+    },
+    {
+        "column_name": "ano2",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "hist3",
+        "data_type": "text"
+    },
+    {
+        "column_name": "ano3",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "hist4",
+        "data_type": "text"
+    },
+    {
+        "column_name": "ano4",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "hist5",
+        "data_type": "text"
+    },
+    {
+        "column_name": "ano5",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "hist6",
+        "data_type": "text"
+    },
+    {
+        "column_name": "ano6",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "hist7",
+        "data_type": "text"
+    },
+    {
+        "column_name": "ano7",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "hist8",
+        "data_type": "text"
+    },
+    {
+        "column_name": "ano8",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "estadocivil",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "carga_horaria_prev",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "nome",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "matricula",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "setor_codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "trab_segunda",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "trab_terca",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "trab_quarta",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "trab_quinta",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "trab_sexta",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "trab_sabado",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "segunda_manha_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "terca_manha_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "quarta_manha_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "quinta_manha_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "sexta_manha_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "segunda_manha_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "segunda_tarde_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "terca_tarde_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "quarta_tarde_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "quinta_tarde_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "saida_sexta_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "saida_sabado",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "data_cadastro",
+        "data_type": "timestamp without time zone"
+    },
+    {
+        "column_name": "operador_cadastro",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "data_alteracao",
+        "data_type": "timestamp without time zone"
+    },
+    {
+        "column_name": "operador_alteracao",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "excluido",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "data_exclusao",
+        "data_type": "timestamp without time zone"
+    },
+    {
+        "column_name": "operador_exclusao",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "tabela_codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "cargo_funcao_codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "profissao_codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "funcao",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "rg",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "nascimento",
+        "data_type": "date"
+    },
+    {
+        "column_name": "terca_manha_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "quarta_manha_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "quinta_manha_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "sexta_manha_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "terca_tarde_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "quarta_tarde_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "quinta_tarde_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "sexta_tarde_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "segunda_tarde_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "sexta_tarde_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "ativo",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "admissao",
+        "data_type": "date"
+    },
+    {
+        "column_name": "historico",
+        "data_type": "text"
+    },
+    {
+        "column_name": "cpf",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "logradouro_codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "numero",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "telefone",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "vinculo_codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "carga_horaria",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "pis",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "titulo",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "cartaosus",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "conselhoclasse",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "pai",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "mae",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "email",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "hist1",
+        "data_type": "text"
+    },
+    {
+        "column_name": "ano1",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "hist2",
+        "data_type": "text"
+    },
+    {
+        "column_name": "ano2",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "hist3",
+        "data_type": "text"
+    },
+    {
+        "column_name": "ano3",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "hist4",
+        "data_type": "text"
+    },
+    {
+        "column_name": "ano4",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "hist5",
+        "data_type": "text"
+    },
+    {
+        "column_name": "ano5",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "hist6",
+        "data_type": "text"
+    },
+    {
+        "column_name": "ano6",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "hist7",
+        "data_type": "text"
+    },
+    {
+        "column_name": "ano7",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "hist8",
+        "data_type": "text"
+    },
+    {
+        "column_name": "ano8",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "estadocivil",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "carga_horaria_prev",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "nome",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "matricula",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "setor_codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "trab_segunda",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "trab_terca",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "trab_quarta",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "trab_quinta",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "trab_sexta",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "trab_sabado",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "segunda_manha_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "terca_manha_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "quarta_manha_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "quinta_manha_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "sexta_manha_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "segunda_manha_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "segunda_tarde_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "terca_tarde_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "quarta_tarde_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "quinta_tarde_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "saida_sexta_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "saida_sabado",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "data_cadastro",
+        "data_type": "timestamp without time zone"
+    },
+    {
+        "column_name": "operador_cadastro",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "data_alteracao",
+        "data_type": "timestamp without time zone"
+    },
+    {
+        "column_name": "operador_alteracao",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "excluido",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "data_exclusao",
+        "data_type": "timestamp without time zone"
+    },
+    {
+        "column_name": "operador_exclusao",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "tabela_codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "cargo_funcao_codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "profissao_codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "funcao",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "rg",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "nascimento",
+        "data_type": "date"
+    },
+    {
+        "column_name": "terca_manha_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "quarta_manha_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "quinta_manha_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "sexta_manha_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "terca_tarde_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "quarta_tarde_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "quinta_tarde_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "sexta_tarde_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "segunda_tarde_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "sexta_tarde_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "ativo",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "admissao",
+        "data_type": "date"
+    },
+    {
+        "column_name": "historico",
+        "data_type": "text"
+    },
+    {
+        "column_name": "cpf",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "logradouro_codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "numero",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "telefone",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "vinculo_codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "carga_horaria",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "pis",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "titulo",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "cartaosus",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "conselhoclasse",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "pai",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "mae",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "email",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "hist1",
+        "data_type": "text"
+    },
+    {
+        "column_name": "ano1",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "hist2",
+        "data_type": "text"
+    },
+    {
+        "column_name": "ano2",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "hist3",
+        "data_type": "text"
+    },
+    {
+        "column_name": "ano3",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "hist4",
+        "data_type": "text"
+    },
+    {
+        "column_name": "ano4",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "hist5",
+        "data_type": "text"
+    },
+    {
+        "column_name": "ano5",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "hist6",
+        "data_type": "text"
+    },
+    {
+        "column_name": "ano6",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "hist7",
+        "data_type": "text"
+    },
+    {
+        "column_name": "ano7",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "hist8",
+        "data_type": "text"
+    },
+    {
+        "column_name": "ano8",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "estadocivil",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "carga_horaria_prev",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "nome",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "matricula",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "setor_codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "trab_segunda",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "trab_terca",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "trab_quarta",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "trab_quinta",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "trab_sexta",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "trab_sabado",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "segunda_manha_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "terca_manha_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "quarta_manha_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "quinta_manha_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "sexta_manha_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "segunda_manha_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "segunda_tarde_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "terca_tarde_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "quarta_tarde_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "quinta_tarde_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "saida_sexta_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "saida_sabado",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "data_cadastro",
+        "data_type": "timestamp without time zone"
+    },
+    {
+        "column_name": "operador_cadastro",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "data_alteracao",
+        "data_type": "timestamp without time zone"
+    },
+    {
+        "column_name": "operador_alteracao",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "excluido",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "data_exclusao",
+        "data_type": "timestamp without time zone"
+    },
+    {
+        "column_name": "operador_exclusao",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "tabela_codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "cargo_funcao_codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "profissao_codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "funcao",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "rg",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "nascimento",
+        "data_type": "date"
+    },
+    {
+        "column_name": "terca_manha_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "quarta_manha_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "quinta_manha_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "sexta_manha_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "terca_tarde_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "quarta_tarde_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "quinta_tarde_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "sexta_tarde_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "segunda_tarde_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "sexta_tarde_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "ativo",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "admissao",
+        "data_type": "date"
+    },
+    {
+        "column_name": "historico",
+        "data_type": "text"
+    },
+    {
+        "column_name": "cpf",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "logradouro_codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "numero",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "telefone",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "vinculo_codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "carga_horaria",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "pis",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "titulo",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "cartaosus",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "conselhoclasse",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "pai",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "mae",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "email",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "hist1",
+        "data_type": "text"
+    },
+    {
+        "column_name": "ano1",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "hist2",
+        "data_type": "text"
+    },
+    {
+        "column_name": "ano2",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "hist3",
+        "data_type": "text"
+    },
+    {
+        "column_name": "ano3",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "hist4",
+        "data_type": "text"
+    },
+    {
+        "column_name": "ano4",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "hist5",
+        "data_type": "text"
+    },
+    {
+        "column_name": "ano5",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "hist6",
+        "data_type": "text"
+    },
+    {
+        "column_name": "ano6",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "hist7",
+        "data_type": "text"
+    },
+    {
+        "column_name": "ano7",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "hist8",
+        "data_type": "text"
+    },
+    {
+        "column_name": "ano8",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "estadocivil",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "carga_horaria_prev",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "nome",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "matricula",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "setor_codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "trab_segunda",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "trab_terca",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "trab_quarta",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "trab_quinta",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "trab_sexta",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "trab_sabado",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "segunda_manha_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "terca_manha_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "quarta_manha_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "quinta_manha_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "sexta_manha_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "segunda_manha_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "segunda_tarde_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "terca_tarde_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "quarta_tarde_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "quinta_tarde_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "saida_sexta_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "saida_sabado",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "data_cadastro",
+        "data_type": "timestamp without time zone"
+    },
+    {
+        "column_name": "operador_cadastro",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "data_alteracao",
+        "data_type": "timestamp without time zone"
+    },
+    {
+        "column_name": "operador_alteracao",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "excluido",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "data_exclusao",
+        "data_type": "timestamp without time zone"
+    },
+    {
+        "column_name": "operador_exclusao",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "tabela_codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "cargo_funcao_codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "profissao_codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "funcao",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "rg",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "nascimento",
+        "data_type": "date"
+    },
+    {
+        "column_name": "terca_manha_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "quarta_manha_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "quinta_manha_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "sexta_manha_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "terca_tarde_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "quarta_tarde_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "quinta_tarde_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "sexta_tarde_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "segunda_tarde_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "sexta_tarde_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "ativo",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "admissao",
+        "data_type": "date"
+    },
+    {
+        "column_name": "historico",
+        "data_type": "text"
+    },
+    {
+        "column_name": "cpf",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "logradouro_codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "numero",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "telefone",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "vinculo_codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "carga_horaria",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "pis",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "titulo",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "cartaosus",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "conselhoclasse",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "pai",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "mae",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "email",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "hist1",
+        "data_type": "text"
+    },
+    {
+        "column_name": "ano1",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "hist2",
+        "data_type": "text"
+    },
+    {
+        "column_name": "ano2",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "hist3",
+        "data_type": "text"
+    },
+    {
+        "column_name": "ano3",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "hist4",
+        "data_type": "text"
+    },
+    {
+        "column_name": "ano4",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "hist5",
+        "data_type": "text"
+    },
+    {
+        "column_name": "ano5",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "hist6",
+        "data_type": "text"
+    },
+    {
+        "column_name": "ano6",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "hist7",
+        "data_type": "text"
+    },
+    {
+        "column_name": "ano7",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "hist8",
+        "data_type": "text"
+    },
+    {
+        "column_name": "ano8",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "estadocivil",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "carga_horaria_prev",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "nome",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "matricula",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "setor_codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "trab_segunda",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "trab_terca",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "trab_quarta",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "trab_quinta",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "trab_sexta",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "trab_sabado",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "segunda_manha_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "terca_manha_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "quarta_manha_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "quinta_manha_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "sexta_manha_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "segunda_manha_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "segunda_tarde_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "terca_tarde_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "quarta_tarde_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "quinta_tarde_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "saida_sexta_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "saida_sabado",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "data_cadastro",
+        "data_type": "timestamp without time zone"
+    },
+    {
+        "column_name": "operador_cadastro",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "data_alteracao",
+        "data_type": "timestamp without time zone"
+    },
+    {
+        "column_name": "operador_alteracao",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "excluido",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "data_exclusao",
+        "data_type": "timestamp without time zone"
+    },
+    {
+        "column_name": "operador_exclusao",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "tabela_codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "cargo_funcao_codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "profissao_codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "funcao",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "rg",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "nascimento",
+        "data_type": "date"
+    },
+    {
+        "column_name": "terca_manha_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "quarta_manha_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "quinta_manha_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "sexta_manha_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "terca_tarde_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "quarta_tarde_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "quinta_tarde_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "sexta_tarde_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "segunda_tarde_saida",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "sexta_tarde_entrada",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "ativo",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "admissao",
+        "data_type": "date"
+    },
+    {
+        "column_name": "historico",
+        "data_type": "text"
+    },
+    {
+        "column_name": "cpf",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "logradouro_codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "numero",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "telefone",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "vinculo_codobj",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "carga_horaria",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "pis",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "titulo",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "cartaosus",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "conselhoclasse",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "pai",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "mae",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "email",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "hist1",
+        "data_type": "text"
+    },
+    {
+        "column_name": "ano1",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "hist2",
+        "data_type": "text"
+    },
+    {
+        "column_name": "ano2",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "hist3",
+        "data_type": "text"
+    },
+    {
+        "column_name": "ano3",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "hist4",
+        "data_type": "text"
+    },
+    {
+        "column_name": "ano4",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "hist5",
+        "data_type": "text"
+    },
+    {
+        "column_name": "ano5",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "hist6",
+        "data_type": "text"
+    },
+    {
+        "column_name": "ano6",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "hist7",
+        "data_type": "text"
+    },
+    {
+        "column_name": "ano7",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "hist8",
+        "data_type": "text"
+    },
+    {
+        "column_name": "ano8",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "estadocivil",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "carga_horaria_prev",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "id",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "nome",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "setor",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "matricula",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "carga_horaria",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "data_nascimento",
+        "data_type": "date"
+    },
+    {
+        "column_name": "rg",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "cpf",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "pis_pasep",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "titulo_eleitor",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "cartao_sus",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "mae",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "pai",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "celular",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "bairro",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "rua",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "numero",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "cidade",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "uf",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "cep",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "estado_civil",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "email",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "id_cargo",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "id_horario",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "sexo",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "deficiente",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "id_dia_da_semana",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone"
+    },
+    {
+        "column_name": "updated_at",
+        "data_type": "timestamp without time zone"
+    },
+    {
+        "column_name": "biometria",
+        "data_type": "text"
+    },
+    {
+        "column_name": "foto_perfil",
+        "data_type": "text"
+    },
+    {
+        "column_name": "codigo_qr",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "biometria_facial",
+        "data_type": "text"
+    },
+    {
+        "column_name": "webauthn_id",
+        "data_type": "text"
+    },
+    {
+        "column_name": "webauthn_pk",
+        "data_type": "text"
+    },
+    {
+        "column_name": "webauthn_counter",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "facial_descriptor",
+        "data_type": "text"
+    },
+    {
+        "column_name": "metodos_acesso",
+        "data_type": "text"
+    },
+    {
+        "column_name": "senha",
+        "data_type": "text"
+    },
+    {
+        "column_name": "lat_permitida",
+        "data_type": "numeric"
+    },
+    {
+        "column_name": "long_permitida",
+        "data_type": "numeric"
+    },
+    {
+        "column_name": "distancia_max_permitida",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "area_geofencing",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "nome_social",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "unidade_trabalho",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "tipo_contratacao",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "cargo_funcao",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "turno_trabalho",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "data_admissao",
+        "data_type": "date"
+    },
+    {
+        "column_name": "data_exercicio",
+        "data_type": "date"
+    },
+    {
+        "column_name": "endereco",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "endereco_numero",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "endereco_complemento",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "endereco_cep",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "endereco_bairro",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "endereco_municipio",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "endereco_uf",
+        "data_type": "character"
+    },
+    {
+        "column_name": "telefone_fixo",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "endereco_email",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "naturalidade",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "naturalidade_uf",
+        "data_type": "character"
+    },
+    {
+        "column_name": "nacionalidade",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "raca_cor",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "deficiencia",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "deficiencia_tipo",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "deficiencia_cid",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "tipo_sanguineo",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "escolaridade",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "carteira_conselheiro",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "rg_numero",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "rg_orgao",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "rg_data_emissao",
+        "data_type": "date"
+    },
+    {
+        "column_name": "cnh_numero",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "cnh_categoria",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "cnh_validade",
+        "data_type": "date"
+    },
+    {
+        "column_name": "titulo_eleitor_numero",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "titulo_eleitor_zona",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "titulo_eleitor_secao",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "reservista_numero",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "reservista_serie",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "ctps_numero",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "ctps_serie",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "ctps_data_emissao",
+        "data_type": "date"
+    },
+    {
+        "column_name": "ctps_uf",
+        "data_type": "character"
+    },
+    {
+        "column_name": "nome_pai",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "nome_mae",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "nome_conjuge",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "nacionalidade_conjuge",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "naturalidade_conjuge",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "naturalidade_uf_conjuge",
+        "data_type": "character"
+    },
+    {
+        "column_name": "data_nascimento_conjuge",
+        "data_type": "date"
+    },
+    {
+        "column_name": "filhos_menores",
+        "data_type": "jsonb"
+    },
+    {
+        "column_name": "dependentes_ir",
+        "data_type": "jsonb"
+    },
+    {
+        "column_name": "banco_nome",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "banco_agencia",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "banco_conta",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "observacoes_complementares",
+        "data_type": "text"
+    },
+    {
+        "column_name": "deficiencia_grau",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "termo_dados",
+        "data_type": "jsonb"
+    },
+    {
+        "column_name": "grade_horarios",
+        "data_type": "jsonb"
+    },
+    {
+        "column_name": "setor2",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "is_exonerado",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "motivo_exoneracao",
+        "data_type": "text"
+    },
+    {
+        "column_name": "turno1_inicio",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "turno1_fim",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "turno2_inicio",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "turno2_fim",
+        "data_type": "time without time zone"
+    },
+    {
+        "column_name": "lat_permitida_2",
+        "data_type": "numeric"
+    },
+    {
+        "column_name": "long_permitida_2",
+        "data_type": "numeric"
+    },
+    {
+        "column_name": "distancia_max_permitida_2",
+        "data_type": "integer"
+    },
+    {
+        "column_name": "area_geofencing_2",
+        "data_type": "character varying"
+    },
+    {
+        "column_name": "ficha_atualizada",
+        "data_type": "boolean"
+    },
+    {
+        "column_name": "data_exoneracao",
+        "data_type": "date"
+    },
+    {
+        "column_name": "ferias_periodos",
+        "data_type": "json"
+    }
+]

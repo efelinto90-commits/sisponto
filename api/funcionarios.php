@@ -1,9 +1,14 @@
 <?php
 session_start();
 header('Content-Type: application/json');
+
+date_default_timezone_set('America/Sao_Paulo');
+
 require_once '../config/Database.php';
 
 use Config\Database;
+require_once 'FaceCache.php';
+use Api\FaceCache;
 
 /**
  * Salva uma imagem base64 em disco
@@ -27,6 +32,11 @@ function saveBase64Image($base64Data, $directory, $prefix, $id) {
             $absolutePath = "../" . $relativePath;
             
             if (file_put_contents($absolutePath, $data)) {
+                // Se for imagem facial, limpar cache do DeepFace (.pkl)
+                if ($prefix === 'facial') {
+                    $pkl = "../" . $directory . "representations_vgg_face.pkl";
+                    if (file_exists($pkl)) unlink($pkl);
+                }
                 return $relativePath;
             }
         }
@@ -34,6 +44,100 @@ function saveBase64Image($base64Data, $directory, $prefix, $id) {
         error_log("Erro ao salvar imagem em disco: " . $e->getMessage());
     }
     return null;
+}
+
+if (!function_exists('autoGerarSequenciaFerias')) {
+    /**
+     * Gera automaticamente a sequência do próximo período de férias caso o funcionário
+     * não possua nenhum período 'aberto' com saldo disponível.
+     */
+    function autoGerarSequenciaFerias($conn, $funcId) {
+        try {
+            $stmt = $conn->prepare("SELECT data_admissao, ferias_periodos FROM ponto.funcionarios WHERE id = :id");
+            $stmt->execute([':id' => $funcId]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$row) return false;
+
+            $dataAdmissao = $row['data_admissao'] ?? null;
+            $periodosJson = $row['ferias_periodos'] ?? '';
+            $periodos = json_decode($periodosJson ?: '[]', true) ?: [];
+
+            // Verifica se possui pelo menos um período aberto com saldo maior que 0
+            $hasActiveAberto = false;
+            foreach ($periodos as $p) {
+                if (($p['status'] ?? 'aberto') === 'aberto' && (int)($p['dias'] ?? 0) > 0) {
+                    $hasActiveAberto = true;
+                    break;
+                }
+            }
+
+            if ($hasActiveAberto) {
+                return false; // Já possui período ativo com saldo, não precisa gerar
+            }
+
+            $newPeriodStr = null;
+            if (empty($periodos)) {
+                // Lista vazia: usa a data de admissão
+                if ($dataAdmissao && preg_match('/^(\d{4})-\d{2}-\d{2}$/', $dataAdmissao, $m)) {
+                    $y = (int)$m[1];
+                } else {
+                    $y = (int)date('Y');
+                }
+                $newPeriodStr = $y . '/' . ($y + 1);
+            } else {
+                // Encontra o maior ano de início entre os períodos cadastrados
+                $highestYear = null;
+                foreach ($periodos as $p) {
+                    $pName = $p['periodo'] ?? '';
+                    if (preg_match('/^(\d{4})\/(\d{4})$/', $pName, $matches)) {
+                        $startYear = (int)$matches[1];
+                        if ($highestYear === null || $startYear > $highestYear) {
+                            $highestYear = $startYear;
+                        }
+                    }
+                }
+
+                if ($highestYear !== null) {
+                    $newPeriodStr = ($highestYear + 1) . '/' . ($highestYear + 2);
+                } else {
+                    // Fallback se não encontrar padrão YYYY/YYYY
+                    if ($dataAdmissao && preg_match('/^(\d{4})-\d{2}-\d{2}$/', $dataAdmissao, $m)) {
+                        $y = (int)$m[1];
+                    } else {
+                        $y = (int)date('Y');
+                    }
+                    $newPeriodStr = $y . '/' . ($y + 1);
+                }
+            }
+
+            // Evitar duplicações
+            foreach ($periodos as $p) {
+                if (($p['periodo'] ?? '') === $newPeriodStr) {
+                    return false;
+                }
+            }
+
+            // Adiciona o novo período
+            $periodos[] = [
+                'periodo' => $newPeriodStr,
+                'dias' => 30,
+                'status' => 'aberto',
+                'operador' => 'Sistema'
+            ];
+
+            // Atualiza no banco
+            $stmtUpd = $conn->prepare("UPDATE ponto.funcionarios SET ferias_periodos = :fp, updated_at = NOW() WHERE id = :id");
+            $stmtUpd->execute([
+                ':fp' => json_encode($periodos),
+                ':id' => $funcId
+            ]);
+
+            return $newPeriodStr;
+        } catch (Exception $e) {
+            error_log("Erro em autoGerarSequenciaFerias: " . $e->getMessage());
+            return false;
+        }
+    }
 }
 
 $method = $_SERVER['REQUEST_METHOD'];
@@ -46,6 +150,8 @@ try {
     $user_setor = $_SESSION['user_setor'] ?? '';
     $user_level = $_SESSION['user_level'] ?? 3;
     $is_super = ($user_level == 1) || in_array(strtolower(trim($user_name)), ['corsin', 'crh']) || in_array(strtolower(trim($user_setor)), ['corsin', 'crh']);
+    // Libera o bloqueio do arquivo de sessão para permitir requisições simultâneas
+    session_write_close();
 
     switch ($method) {
         case 'GET':
@@ -61,7 +167,7 @@ try {
                     exit;
                 }
 
-                $sql = "SELECT id, nome FROM funcionarios WHERE {$campo} = :valor";
+                $sql = "SELECT id, nome FROM funcionarios WHERE {$campo} = :valor AND (is_exonerado IS FALSE OR is_exonerado IS NULL)";
                 $params = [':valor' => $valor];
                 if ($excl) {
                     $sql .= " AND id != :excl";
@@ -80,11 +186,177 @@ try {
                 exit;
             }
 
+            if (isset($_GET['action']) && $_GET['action'] == 'generate_matricula') {
+                $stmt = $conn->query("SELECT matricula FROM funcionarios WHERE matricula LIKE '%-%'");
+                $matriculas = $stmt->fetchAll(PDO::FETCH_COLUMN);
+                
+                $maxBase = 0;
+                foreach ($matriculas as $m) {
+                    $parts = explode('-', $m);
+                    if (count($parts) >= 1 && is_numeric($parts[0])) {
+                        $base = (int)$parts[0];
+                        if ($base > $maxBase) $maxBase = $base;
+                    }
+                }
+                
+                $nextBase = $maxBase + 1;
+                
+                // Calculate DV (Modulo 11)
+                $number = (string)$nextBase;
+                $weights = [2, 3, 4, 5, 6, 7, 8, 9];
+                $sum = 0;
+                $digits = str_split(strrev($number));
+                foreach ($digits as $i => $digit) {
+                    $sum += (int)$digit * ($weights[$i % count($weights)]);
+                }
+                $remainder = $sum % 11;
+                $dv = 11 - $remainder;
+                if ($dv >= 10) $dv = 0;
+                
+                $newMatricula = $nextBase . '-' . $dv;
+                echo json_encode(['success' => true, 'matricula' => $newMatricula]);
+                exit;
+            }
+
+            if (isset($_GET['action']) && $_GET['action'] == 'get_areas') {
+                $stmt = $conn->query("
+                    SELECT DISTINCT area_geofencing FROM funcionarios WHERE area_geofencing IS NOT NULL AND area_geofencing <> ''
+                    UNION
+                    SELECT DISTINCT nome_area FROM geofencing_presets
+                    ORDER BY area_geofencing ASC
+                ");
+                $areas = $stmt->fetchAll(PDO::FETCH_COLUMN);
+                echo json_encode(['success' => true, 'data' => array_values(array_unique(array_filter($areas)))]);
+                exit;
+            }
+
+            if (isset($_GET['action']) && $_GET['action'] == 'get_setores') {
+                $stmt = $conn->query("
+                    SELECT DISTINCT setor FROM funcionarios WHERE setor IS NOT NULL AND setor <> ''
+                    UNION
+                    SELECT DISTINCT setor2 FROM funcionarios WHERE setor2 IS NOT NULL AND setor2 <> ''
+                    ORDER BY 1 ASC
+                ");
+                $setores = $stmt->fetchAll(PDO::FETCH_COLUMN);
+                echo json_encode(['success' => true, 'data' => array_values(array_unique(array_filter($setores)))]);
+                exit;
+            }
+
+            if (isset($_GET['action']) && $_GET['action'] == 'relatorio_profissional') {
+                if (!$is_super) {
+                    http_response_code(403);
+                    echo json_encode(['success' => false, 'message' => 'Acesso negado. Apenas administradores e gestores autorizados do CRH podem visualizar este relatório.']);
+                    exit;
+                }
+                
+                $status = $_GET['filtro_status'] ?? 'ativos';
+                $whereClauses = [];
+                
+                if ($status === 'ativos') {
+                    $whereClauses[] = "(f.is_exonerado IS FALSE OR f.is_exonerado IS NULL)";
+                } elseif ($status === 'exonerados') {
+                    $whereClauses[] = "f.is_exonerado IS TRUE";
+                }
+                
+                $params = [];
+                
+                if (!empty($user_name) && !$is_super) {
+                    if (!empty($user_setor)) {
+                        $whereClauses[] = "(TRIM(f.setor) ILIKE TRIM(:user_setor) OR TRIM(f.setor2) ILIKE TRIM(:user_setor))";
+                        $params[':user_setor'] = trim($user_setor);
+                    } else {
+                        $whereClauses[] = "(f.setor IS NULL OR TRIM(f.setor) = '')";
+                    }
+                }
+                
+                if (!empty($_GET['filtro_nome'])) {
+                    $whereClauses[] = "f.nome ILIKE :filtro_nome";
+                    $params[':filtro_nome'] = '%' . trim($_GET['filtro_nome']) . '%';
+                }
+                if (!empty($_GET['filtro_cpf'])) {
+                    $cleanCpf = preg_replace('/\D/', '', $_GET['filtro_cpf']);
+                    if (!empty($cleanCpf)) {
+                        $whereClauses[] = "REGEXP_REPLACE(f.cpf, '\D', '', 'g') = :filtro_cpf";
+                        $params[':filtro_cpf'] = $cleanCpf;
+                    }
+                }
+                if (!empty($_GET['filtro_setor'])) {
+                    $whereClauses[] = "(f.setor = :filtro_setor OR f.setor2 = :filtro_setor)";
+                    $params[':filtro_setor'] = trim($_GET['filtro_setor']);
+                }
+                
+                $whereStr = count($whereClauses) > 0 ? "WHERE " . implode(" AND ", $whereClauses) : "";
+                
+                $sql = "
+                    SELECT f.id, f.nome, f.cpf, f.setor, f.setor2, f.cargo_funcao, f.endereco_email, f.telefone_fixo, f.celular,
+                           f.endereco, f.endereco_numero, f.endereco_complemento, f.endereco_cep, f.endereco_bairro, f.endereco_municipio, f.endereco_uf,
+                           f.data_admissao, f.is_exonerado, f.tipo_contratacao, f.data_exoneracao
+                    FROM funcionarios f
+                    $whereStr
+                    ORDER BY f.nome ASC
+                ";
+                
+                $stmt = $conn->prepare($sql);
+                $stmt->execute($params);
+                $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                
+                echo json_encode(['success' => true, 'data' => $data]);
+                exit;
+            }
+
             if (isset($_GET['id'])) {
                 // Get One
                 $stmt = $conn->prepare("SELECT * FROM funcionarios WHERE id = :id");
                 $stmt->execute([':id' => $_GET['id']]);
-                $func = $stmt->fetch();
+                $func = $stmt->fetch(PDO::FETCH_ASSOC);
+                
+                if ($func) {
+                    // Lógica de fallback para arquivos físicos ausentes devido a compartilhamento de banco multi-ambiente
+                    $basePath = dirname(__DIR__) . '/';
+                    
+                    if (!empty($func['foto_perfil'])) {
+                        $fullPath = $basePath . $func['foto_perfil'];
+                        if (!file_exists($fullPath)) {
+                            $pattern = $basePath . 'uploads/perfil/perfil_' . $func['id'] . '_*';
+                            $matches = glob($pattern);
+                            if (!empty($matches)) {
+                                $func['foto_perfil'] = 'uploads/perfil/' . basename($matches[0]);
+                            }
+                        }
+                    }
+                    
+                    if (!empty($func['biometria_facial'])) {
+                        $fullPath = $basePath . $func['biometria_facial'];
+                        if (!file_exists($fullPath)) {
+                            $pattern = $basePath . 'uploads/facial/facial_' . $func['id'] . '_*';
+                            $matches = glob($pattern);
+                            if (!empty($matches)) {
+                                $func['biometria_facial'] = 'uploads/facial/' . basename($matches[0]);
+                            }
+                        }
+                    }
+
+                    $pleitos = json_decode($func['folgas_eleitorais'] ?? '[]', true) ?: [];
+                    if (!empty($pleitos)) {
+                        // Calcula dias gozados por pleito
+                        $stmtGozo = $conn->prepare("
+                            SELECT periodo_aquisitivo, SUM(data_fim - data_inicio + 1) as dias_gozados 
+                            FROM ponto.ferias 
+                            WHERE id_funcionario = :id AND status != 'indeferido' AND tipo_afastamento = 'folga eleitoral'
+                            GROUP BY periodo_aquisitivo
+                        ");
+                        $stmtGozo->execute([':id' => $_GET['id']]);
+                        $gozos = $stmtGozo->fetchAll(PDO::FETCH_KEY_PAIR) ?: [];
+                        
+                        foreach ($pleitos as &$p) {
+                            $nome = trim($p['nome']);
+                            $p['dias_gozados'] = (int)($gozos[$nome] ?? 0);
+                            $p['saldo'] = $p['dias'] - $p['dias_gozados'];
+                        }
+                    }
+                    $func['folgas_eleitorais'] = json_encode($pleitos, JSON_UNESCAPED_UNICODE);
+                }
+                
                 echo json_encode(['success' => true, 'data' => $func]);
             } else {
                 // Get All com Nome do Cargo e Dia da Semana
@@ -102,8 +374,8 @@ try {
                 // Se estiver logado, aplica filtro de setor. Se for público (relógio), mostra todos.
                 if (!empty($user_name) && !$is_super_list) {
                     if (!empty($user_setor)) {
-                        $baseWhereClause .= " AND (f.setor = :setor OR f.setor2 = :setor)";
-                        $params[':setor'] = $user_setor;
+                        $baseWhereClause .= " AND (TRIM(f.setor) ILIKE TRIM(:setor) OR TRIM(f.setor2) ILIKE TRIM(:setor))";
+                        $params[':setor'] = trim($user_setor);
                     } else {
                         // Se logado mas sem setor, visualiza apenas funcionários sem setor.
                         $baseWhereClause .= " AND (f.setor IS NULL OR TRIM(f.setor) = '')";
@@ -121,6 +393,8 @@ try {
                               AND EXISTS (SELECT 1 FROM ferias WHERE id_funcionario = f.id AND CURRENT_DATE BETWEEN data_inicio AND data_fim LIMIT 1)";
                 } elseif ($status === 'exonerados') {
                     $whereClause .= " AND f.is_exonerado IS TRUE";
+                } elseif ($status === 'todos' || $status === 'ativos_e_afastados') {
+                    $whereClause .= " AND (f.is_exonerado IS FALSE OR f.is_exonerado IS NULL)";
                 }
 
                 $stmt = $conn->prepare("
@@ -135,8 +409,10 @@ try {
                            (CASE WHEN f.codigo_qr IS NOT NULL AND f.codigo_qr <> '' THEN 1 ELSE 0 END) as tem_qr,
                            f.grade_horarios,
                            f.is_exonerado,
+                           f.data_exoneracao,
                            f.motivo_exoneracao,
-                           (SELECT data_fim FROM ferias WHERE id_funcionario = f.id AND CURRENT_DATE BETWEEN data_inicio AND data_fim LIMIT 1) as data_fim_afastamento
+                           (SELECT data_fim FROM ferias WHERE id_funcionario = f.id AND CURRENT_DATE BETWEEN data_inicio AND data_fim LIMIT 1) as data_fim_afastamento,
+                           (SELECT tipo_afastamento FROM ferias WHERE id_funcionario = f.id AND CURRENT_DATE BETWEEN data_inicio AND data_fim LIMIT 1) as motivo_afastamento
                     FROM funcionarios f
                     LEFT JOIN horarios h ON f.id_horario = h.id
                     $whereClause
@@ -204,6 +480,61 @@ try {
                 exit;
             }
 
+            // Ação de Limpeza de Fotos Faciais Órfãs
+            if (isset($input['action']) && $input['action'] === 'cleanup_faces') {
+                if (!$is_super) {
+                    echo json_encode(['success' => false, 'message' => 'Permissão negada.']);
+                    exit;
+                }
+
+                // Buscar todos os caminhos de biometria_facial ativos no banco
+                $stmtFaces = $conn->query("SELECT biometria_facial FROM funcionarios WHERE biometria_facial IS NOT NULL AND biometria_facial != ''");
+                $validPaths = $stmtFaces->fetchAll(PDO::FETCH_COLUMN);
+                $validSet = [];
+                foreach ($validPaths as $p) {
+                    $validSet[strtolower(basename($p))] = true;
+                }
+
+                // Limpar arquivos órfãos na pasta local uploads/facial/
+                $facialDir = realpath(__DIR__ . '/../uploads/facial/');
+                $localRemoved = [];
+                if ($facialDir && is_dir($facialDir)) {
+                    foreach (glob($facialDir . DIRECTORY_SEPARATOR . '*.*') as $filepath) {
+                        $fname = strtolower(basename($filepath));
+                        if (substr($fname, -4) === '.pkl') {
+                            unlink($filepath);
+                            continue;
+                        }
+                        if (!isset($validSet[$fname])) {
+                            unlink($filepath);
+                            $localRemoved[] = $fname;
+                        }
+                    }
+                }
+
+                // Chamar o servidor DeepFace para limpar também
+                $deepfaceResult = null;
+                $ch = curl_init("http://funad.ddns.net:5000/cleanup");
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($ch, CURLOPT_POST, true);
+                curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['valid_filenames' => array_keys($validSet)]));
+                curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+                curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+                $raw = curl_exec($ch);
+                curl_close($ch);
+                if ($raw) {
+                    $deepfaceResult = json_decode($raw, true);
+                }
+
+                echo json_encode([
+                    'success' => true,
+                    'local_removed' => $localRemoved,
+                    'local_kept' => count($validSet),
+                    'deepface' => $deepfaceResult
+                ]);
+                exit;
+            }
+
             // Ações Especiais Câmera Mobile
             if (isset($input['action']) && in_array($input['action'], ['save_foto_perfil', 'save_codigo_qr', 'save_biometria_facial'])) {
                 if (empty($input['id']) || empty($input['image_data'])) {
@@ -253,6 +584,23 @@ try {
                 $stmt = $conn->prepare($sql);
                 $stmt->execute($params);
 
+                FaceCache::refresh();
+
+                // Sincronizar face com o servidor DeepFace remoto
+                if ($input['action'] === 'save_biometria_facial') {
+                    $ch = curl_init("http://funad.ddns.net:5000/save_face");
+                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                    curl_setopt($ch, CURLOPT_POST, true);
+                    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
+                        'image_data' => $input['image_data'],
+                        'filename'   => basename($path)
+                    ]));
+                    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+                    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+                    curl_exec($ch);
+                    curl_close($ch);
+                }
+
                 echo json_encode(['success' => true, 'message' => $msg, 'path' => $path]);
                 exit;
             }
@@ -268,9 +616,10 @@ try {
                     exit;
                 }
                 // Marca como exonerado e limpa métodos de acesso para garantir bloqueio
-                $stmt = $conn->prepare("UPDATE funcionarios SET is_exonerado = TRUE, motivo_exoneracao = :motivo, updated_at = NOW() WHERE id = :id");
+                $stmt = $conn->prepare("UPDATE funcionarios SET is_exonerado = TRUE, data_exoneracao = :data, motivo_exoneracao = :motivo, updated_at = NOW() WHERE id = :id");
                 $stmt->execute([
                     ':id' => $input['id'],
+                    ':data' => $input['data'] ?? date('Y-m-d'),
                     ':motivo' => $input['motivo'] ?? 'Não informado'
                 ]);
                 echo json_encode(['success' => true, 'message' => 'Funcionário exonerado com sucesso!']);
@@ -287,8 +636,8 @@ try {
                     echo json_encode(['success' => false, 'message' => 'ID ausente.']);
                     exit;
                 }
-                // Remove status de exonerado e limpa o motivo
-                $stmt = $conn->prepare("UPDATE funcionarios SET is_exonerado = FALSE, motivo_exoneracao = NULL, updated_at = NOW() WHERE id = :id");
+                // Remove status de exonerado e limpa o motivo e a data
+                $stmt = $conn->prepare("UPDATE funcionarios SET is_exonerado = FALSE, data_exoneracao = NULL, motivo_exoneracao = NULL, updated_at = NOW() WHERE id = :id");
                 $stmt->execute([':id' => $input['id']]);
                 echo json_encode(['success' => true, 'message' => 'Funcionário reintegrado com sucesso!']);
                 exit;
@@ -318,7 +667,74 @@ try {
                     exit;
                 }
 
-                echo json_encode(['success' => true, 'message' => 'Geolocalização aplicada com sucesso!']);
+                echo json_encode(['success' => true, 'message' => 'Geolocalização atualizada para os funcionários selecionados.']);
+                exit;
+            }
+
+            // Ações para Folga Eleitoral (Pleitos)
+            if (isset($input['action']) && $input['action'] === 'salvar_pleito') {
+                if (!$is_super) {
+                    echo json_encode(['success' => false, 'message' => 'Permissão negada.']);
+                    exit;
+                }
+                $id = $input['id'] ?? null;
+                $nome = trim($input['nome'] ?? '');
+                $dias = (int)($input['dias'] ?? 0);
+                if (!$id || !$nome || $dias <= 0) {
+                    echo json_encode(['success' => false, 'message' => 'Dados inválidos para pleito.']);
+                    exit;
+                }
+                
+                $stmt = $conn->prepare("SELECT folgas_eleitorais FROM funcionarios WHERE id = :id");
+                $stmt->execute([':id' => $id]);
+                $json = $stmt->fetchColumn() ?: '[]';
+                $pleitos = json_decode($json, true) ?: [];
+                
+                // Atualiza se existir, senão adiciona
+                $found = false;
+                foreach ($pleitos as &$p) {
+                    if (strtolower(trim($p['nome'])) === strtolower($nome)) {
+                        $p['dias'] = $dias;
+                        $found = true;
+                        break;
+                    }
+                }
+                if (!$found) {
+                    $pleitos[] = ['nome' => $nome, 'dias' => $dias];
+                }
+                
+                $stmt = $conn->prepare("UPDATE funcionarios SET folgas_eleitorais = :pleitos WHERE id = :id");
+                $stmt->execute([':pleitos' => json_encode($pleitos, JSON_UNESCAPED_UNICODE), ':id' => $id]);
+                
+                echo json_encode(['success' => true, 'message' => 'Pleito salvo com sucesso.', 'pleitos' => $pleitos]);
+                exit;
+            }
+
+            if (isset($input['action']) && $input['action'] === 'excluir_pleito') {
+                if (!$is_super) {
+                    echo json_encode(['success' => false, 'message' => 'Permissão negada.']);
+                    exit;
+                }
+                $id = $input['id'] ?? null;
+                $nome = trim($input['nome'] ?? '');
+                if (!$id || !$nome) {
+                    echo json_encode(['success' => false, 'message' => 'Dados inválidos.']);
+                    exit;
+                }
+                
+                $stmt = $conn->prepare("SELECT folgas_eleitorais FROM funcionarios WHERE id = :id");
+                $stmt->execute([':id' => $id]);
+                $json = $stmt->fetchColumn() ?: '[]';
+                $pleitos = json_decode($json, true) ?: [];
+                
+                $pleitos = array_filter($pleitos, function($p) use ($nome) {
+                    return strtolower(trim($p['nome'])) !== strtolower($nome);
+                });
+                
+                $stmt = $conn->prepare("UPDATE funcionarios SET folgas_eleitorais = :pleitos WHERE id = :id");
+                $stmt->execute([':pleitos' => json_encode(array_values($pleitos), JSON_UNESCAPED_UNICODE), ':id' => $id]);
+                
+                echo json_encode(['success' => true, 'message' => 'Pleito removido.']);
                 exit;
             }
 
@@ -355,8 +771,8 @@ try {
                     'nome_pai', 'nome_mae', 'nome_conjuge', 'data_nascimento_conjuge', 'nacionalidade_conjuge',
                     'naturalidade_conjuge', 'naturalidade_uf_conjuge',
                     'filhos_menores', 'dependentes_ir', 'banco_nome', 'banco_agencia', 'banco_conta',
-                    'grade_horarios', 'setor', 'setor2', 'is_exonerado', 'observacoes_complementares',
-                    'termo_dados', 'metodos_acesso'
+                    'grade_horarios', 'setor', 'setor2', 'is_exonerado', 'data_exoneracao', 'motivo_exoneracao', 'observacoes_complementares',
+                    'termo_dados', 'metodos_acesso', 'ferias_periodos'
                 ];
 
                 $sql_parts = [];
@@ -368,7 +784,7 @@ try {
                         $val = $input[$field];
                         
                         // Special handling for JSON fields
-                        if (in_array($field, ['filhos_menores', 'dependentes_ir', 'metodos_acesso', 'grade_horarios', 'termo_dados'])) {
+                        if (in_array($field, ['filhos_menores', 'dependentes_ir', 'metodos_acesso', 'grade_horarios', 'termo_dados', 'ferias_periodos'])) {
                             $params[":{$field}"] = !empty($val) ? json_encode($val) : null;
                         } else if ($field === 'deficiencia' || $field === 'is_exonerado') {
                             $params[":{$field}"] = ($val === 'true' || $val === true || $val === '1' || $val === 1) ? 1 : 0;
@@ -387,6 +803,7 @@ try {
                 $stmt = $conn->prepare($sql);
                 $stmt->execute($params);
 
+                FaceCache::refresh();
                 echo json_encode(['success' => true, 'message' => 'Ficha cadastral atualizada com sucesso!']);
                 exit;
             }
@@ -415,7 +832,8 @@ try {
                         nacionalidade_conjuge, naturalidade_conjuge, naturalidade_uf_conjuge, 
                         data_nascimento_conjuge, filhos_menores, dependentes_ir, banco_nome, 
                         banco_agencia, banco_conta, observacoes_complementares, termo_dados,
-                        grade_horarios, is_exonerado, motivo_exoneracao,
+                        grade_horarios, is_exonerado, data_exoneracao, motivo_exoneracao,
+                        ferias_periodos,
                         created_at, updated_at
                     ) VALUES (
                         :nome, :matricula, :setor, :setor2, :cpf, :celular, :id_horario, :metodos_acesso, :senha, 
@@ -436,7 +854,8 @@ try {
                         :nacionalidade_conjuge, :naturalidade_conjuge, :naturalidade_uf_conjuge, 
                         :data_nascimento_conjuge, :filhos_menores, :dependentes_ir, :banco_nome, 
                         :banco_agencia, :banco_conta, :observacoes_complementares, :termo_dados,
-                        :grade_horarios, :is_exonerado, :motivo_exoneracao,
+                        :grade_horarios, :is_exonerado, :data_exoneracao, :motivo_exoneracao,
+                        :ferias_periodos,
                         NOW(), NOW()
                     )";
             
@@ -529,12 +948,22 @@ try {
                 ':termo_dados' => $helper_json($input['termo_dados'] ?? null),
                 ':grade_horarios' => $helper_json($input['grade_horarios'] ?? null),
                 ':is_exonerado' => $helper_bool($input['is_exonerado'] ?? false),
-                ':motivo_exoneracao' => $input['motivo_exoneracao'] ?? null
+                ':data_exoneracao' => $helper_null($input['data_exoneracao'] ?? null),
+                ':motivo_exoneracao' => $helper_null($input['motivo_exoneracao'] ?? null),
+                ':ferias_periodos' => $helper_json($input['ferias_periodos'] ?? null)
             ];
 
             $stmt->execute($params);
 
-            echo json_encode(['success' => true, 'message' => 'Funcionário cadastrado com sucesso!', 'id' => $conn->lastInsertId()]);
+            $newFuncId = $conn->lastInsertId();
+            $novoPeriodo = autoGerarSequenciaFerias($conn, $newFuncId);
+
+            FaceCache::refresh();
+            $msg = 'Funcionário cadastrado com sucesso!';
+            if ($novoPeriodo) {
+                $msg .= " 📅 Período aquisitivo inicial gerado automaticamente: {$novoPeriodo}.";
+            }
+            echo json_encode(['success' => true, 'message' => $msg, 'id' => $newFuncId]);
             break;
 
         case 'PUT':
@@ -670,7 +1099,9 @@ try {
                 ':termo_dados' => $helper_json($input['termo_dados'] ?? null),
                 ':grade_horarios' => $helper_json($input['grade_horarios'] ?? null),
                 ':is_exonerado' => $helper_bool($input['is_exonerado'] ?? false),
-                ':motivo_exoneracao' => $input['motivo_exoneracao'] ?? null,
+                ':data_exoneracao' => $helper_null($input['data_exoneracao'] ?? null),
+                ':motivo_exoneracao' => $helper_null($input['motivo_exoneracao'] ?? null),
+                ':ferias_periodos' => $helper_json($input['ferias_periodos'] ?? null),
                 ':id' => $input['id']
             ];
 
@@ -735,13 +1166,21 @@ try {
                     banco_nome = :banco_nome, banco_agencia = :banco_agencia, 
                     banco_conta = :banco_conta, observacoes_complementares = :observacoes_complementares,
                     termo_dados = :termo_dados, grade_horarios = :grade_horarios,
-                    is_exonerado = :is_exonerado, motivo_exoneracao = :motivo_exoneracao
+                    is_exonerado = :is_exonerado, data_exoneracao = :data_exoneracao, motivo_exoneracao = :motivo_exoneracao,
+                    ferias_periodos = :ferias_periodos
                     {$extraSql}, updated_at = NOW() 
                     WHERE id = :id";
             $stmt = $conn->prepare($sql);
             $stmt->execute($params);
 
-            echo json_encode(['success' => true, 'message' => 'Funcionário atualizado com sucesso!']);
+            $novoPeriodo = autoGerarSequenciaFerias($conn, $input['id']);
+
+            FaceCache::refresh();
+            $msg = 'Funcionário atualizado com sucesso!';
+            if ($novoPeriodo) {
+                $msg .= " 📅 Nova sequência de período gerada automaticamente: {$novoPeriodo}.";
+            }
+            echo json_encode(['success' => true, 'message' => $msg]);
             break;
 
         case 'DELETE':
@@ -768,6 +1207,7 @@ try {
                 // Single Delete
                 $stmt = $conn->prepare("DELETE FROM funcionarios WHERE id = :id");
                 $stmt->execute([':id' => $input['id']]);
+                FaceCache::refresh();
                 echo json_encode(['success' => true, 'message' => 'Funcionário removido com sucesso!']);
             } else {
                 echo json_encode(['success' => false, 'message' => 'ID não informado.']);
@@ -787,3 +1227,5 @@ try {
         echo json_encode(['success' => false, 'message' => 'Erro de banco de dados: ' . $e->getMessage()]);
     }
 }
+
+

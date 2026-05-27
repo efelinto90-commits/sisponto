@@ -40,6 +40,14 @@ $isSuper = $isAdmin || in_array(strtolower(trim($_SESSION['user_name'] ?? '')), 
                 class="py-5 px-1 text-sm font-black border-b-2 border-transparent text-slate-400 hover:text-slate-600 transition-all uppercase tracking-widest leading-none">
                 Termo de Autorização
             </button>
+            <button type="button" onclick="switchTab('tab-ferias')" id="btn-tab-ferias"
+                class="py-5 px-1 text-sm font-black border-b-2 border-transparent text-slate-400 hover:text-slate-600 transition-all uppercase tracking-widest leading-none">
+                Controle de Férias
+            </button>
+            <button type="button" onclick="switchTab('tab-folga')" id="btn-tab-folga"
+                class="py-5 px-1 text-sm font-black border-b-2 border-transparent text-slate-400 hover:text-slate-600 transition-all uppercase tracking-widest leading-none">
+                Controle de Folga Eleitoral
+            </button>
         </div>
 
         <form id="formFuncionario" onsubmit="salvarFuncionario(event)" class="px-8 py-8 space-y-6">
@@ -119,7 +127,13 @@ $isSuper = $isAdmin || in_array(strtolower(trim($_SESSION['user_name'] ?? '')), 
                                             class="w-full px-5 py-4 bg-slate-50/50 border border-slate-200 rounded-2xl focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all text-slate-800 font-medium outline-none placeholder:text-slate-400" placeholder="Nome completo do colaborador">
                                     </div>
                                     <div class="md:col-span-2">
-                                        <label class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Matrícula</label>
+                                        <div class="flex items-center justify-between mb-2">
+                                            <label class="block text-xs font-black text-slate-400 uppercase tracking-widest">Matrícula</label>
+                                            <button type="button" id="btn_gerar_matricula" onclick="gerarMatricula(this)" class="text-[10px] font-bold text-brand-600 hover:text-brand-700 uppercase tracking-tighter transition-colors flex items-center gap-1">
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                                                Gerar
+                                            </button>
+                                        </div>
                                         <input type="text" id="func_matricula" required
                                             class="w-full px-5 py-4 bg-slate-50/50 border border-slate-200 rounded-2xl focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all text-slate-800 font-bold outline-none uppercase placeholder:text-slate-400" placeholder="ID-000">
                                         <div id="feedback_matricula" class="hidden mt-1.5 flex items-center gap-1.5 text-xs font-bold"></div>
@@ -200,12 +214,23 @@ $isSuper = $isAdmin || in_array(strtolower(trim($_SESSION['user_name'] ?? '')), 
                                 <?php endforeach; ?>
 
                                 <label class="relative flex flex-col items-center gap-3 p-4 bg-white border border-slate-200 rounded-2xl cursor-pointer transition-all hover:bg-slate-50 hover:border-red-200 has-[:checked]:bg-red-50/50 has-[:checked]:border-red-500 has-[:checked]:ring-1 has-[:checked]:ring-red-500 shadow-sm group <?php echo !$isSuper ? 'opacity-60 cursor-not-allowed pointer-events-none' : ''; ?>">
-                                    <input type="checkbox" id="func_is_exonerado" <?php echo !$isSuper ? 'disabled' : ''; ?> class="absolute top-3 right-3 w-4 h-4 text-red-600 rounded border-slate-300 focus:ring-red-500">
+                                    <input type="checkbox" id="func_is_exonerado" onchange="toggleExoneracaoFields()" <?php echo !$isSuper ? 'disabled' : ''; ?> class="absolute top-3 right-3 w-4 h-4 text-red-600 rounded border-slate-300 focus:ring-red-500">
                                     <svg class="w-6 h-6 text-slate-400 group-hover:text-red-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
                                     </svg>
                                     <span class="text-xs font-black text-slate-700 uppercase tracking-wider text-center">Exonerado / Desativado</span>
                                 </label>
+                            </div>
+
+                            <div id="wrapper_exoneracao" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-4 p-5 bg-red-50/30 border border-red-100 rounded-2xl animate-fade-in mt-2">
+                                <div>
+                                    <label class="block text-[10px] font-black text-red-600 uppercase tracking-widest mb-1.5 ml-1">Data da Exoneração</label>
+                                    <input type="date" id="func_data_exoneracao" class="w-full px-4 py-3 bg-white rounded-xl border border-red-100 focus:ring-4 focus:ring-red-500/10 focus:border-red-500 transition-all outline-none text-sm font-bold text-slate-700 shadow-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-black text-red-600 uppercase tracking-widest mb-1.5 ml-1">Motivo / Observação</label>
+                                    <textarea id="func_motivo_exoneracao" rows="1" class="w-full px-4 py-3 bg-white rounded-xl border border-red-100 focus:ring-4 focus:ring-red-500/10 focus:border-red-500 transition-all outline-none text-sm font-bold text-slate-700 shadow-sm placeholder:text-slate-400" placeholder="Motivo da saída..."></textarea>
+                                </div>
                             </div>
 
                             <div id="containerSenha" class="hidden">
@@ -217,7 +242,7 @@ $isSuper = $isAdmin || in_array(strtolower(trim($_SESSION['user_name'] ?? '')), 
                                     <input type="password" id="func_senha" maxlength="8"
                                         class="w-full pl-14 pr-16 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all text-slate-800 font-bold tracking-[0.5em] outline-none"
                                         placeholder="******">
-                                    <button type="button" onclick="toggleSenhaVisual(this)" class="absolute inset-y-0 right-0 pr-5 flex items-center text-slate-400 hover:text-brand-600 transition-colors">
+                                    <button type="button" onclick="toggleSenhaVisual(this)" class="absolute inset-y-0 right-0 pr-5 flex items-center text-slate-400 hover:text-brand-600 transition-colors z-10">
                                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                                     </button>
                                 </div>
@@ -1132,9 +1157,168 @@ Estou ciente de que o tratamento poderá ocorrer independentemente do consentime
                 </button>
                 <?php endif; ?>
             </div>
+
+            <!-- Aba 4: Controle de Férias -->
+            <div id="tab-ferias" class="tab-content hidden">
+                <div class="px-10 py-10">
+                    <div class="flex items-center justify-between mb-8">
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-800">Histórico de Férias</h3>
+                            <p class="text-sm text-slate-500">Acompanhamento de períodos de descanso e afastamentos por férias.</p>
+                        </div>
+                    </div>
+
+                    <!-- Seção: Períodos Aquisitivos (Direito) -->
+                    <section class="mb-12">
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <h4 class="text-sm font-black text-slate-700 uppercase tracking-widest flex items-center gap-2">
+                                    <div class="w-2 h-2 rounded-full bg-amber-500"></div>
+                                    Períodos Aquisitivos (Direito)
+                                </h4>
+                                <p class="text-[11px] text-slate-500 mt-1">Registre aqui os períodos que dão direito ao gozo de férias.</p>
+                            </div>
+                            <button type="button" onclick="adicionarLinhaPeriodo()" class="px-4 py-2 bg-amber-50 text-amber-600 hover:bg-amber-100 rounded-xl font-bold transition-all text-xs flex items-center gap-2 border border-amber-200 shadow-sm">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                                Adicionar Período
+                            </button>
+                        </div>
+                        
+                        <div class="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-50/50 border-b border-slate-100">
+                                        <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Período Aquisitivo</th>
+                                        <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center w-32">Dias de Férias</th>
+                                        <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest w-40">Status</th>
+                                        <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center w-24">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="lista-periodos-corpo">
+                                    <!-- Linhas dinâmicas via JS -->
+                                </tbody>
+                            </table>
+                            <datalist id="periodos-presets">
+                                <option value="2018/2019"></option>
+                                <option value="2019/2020"></option>
+                                <option value="2020/2021"></option>
+                                <option value="2021/2022"></option>
+                                <option value="2022/2023"></option>
+                                <option value="2023/2024"></option>
+                                <option value="2024/2025"></option>
+                                <option value="2025/2026"></option>
+                                <option value="2026/2027"></option>
+                            </datalist>
+                            <div id="msg-periodos-vazio" class="py-12 text-center text-slate-400 text-sm hidden">
+                                Nenhum período aquisitivo registrado.
+                            </div>
+                        </div>
+                    </section>
+
+                    <div class="flex items-center justify-between mb-8 border-t border-slate-100 pt-10">
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-800">Período de Gozo (Histórico)</h3>
+                            <p class="text-sm text-slate-500">Histórico de afastamentos e férias efetivamente gozadas.</p>
+                        </div>
+                        <button type="button" onclick="abrirFerias($('#func_id').val(), $('#func_nome').val()); setTimeout(() => $('#ferias_tipo').val('ferias').trigger('change'), 100)"
+                            class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-bold shadow-sm transition-all text-sm flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                            Registrar Férias
+                        </button>
+                    </div>
+                    
+                    <div id="lista-ferias-tab" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <!-- Carregado via AJAX -->
+                        <div class="col-span-full py-12 text-center bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200">
+                            <p class="text-slate-400 font-medium">Nenhum registro encontrado.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aba 5: Controle de Folga Eleitoral -->
+            <div id="tab-folga" class="tab-content hidden">
+                <div class="px-10 py-10">
+                    <div class="flex items-center justify-between mb-8">
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-800">Folgas Eleitorais</h3>
+                            <p class="text-sm text-slate-500">Gestão de compensações por serviços prestados à Justiça Eleitoral.</p>
+                        </div>
+                        <button type="button" onclick="abrirFerias($('#func_id').val(), $('#func_nome').val()); setTimeout(() => $('#ferias_tipo').val('folga eleitoral').trigger('change'), 100)"
+                            class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow-sm transition-all text-sm flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                            Registrar Folga
+                        </button>
+                    </div>
+
+                    <div class="mb-10 p-6 bg-slate-50 rounded-2xl border border-slate-200">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="text-sm font-black text-slate-600 uppercase tracking-widest">Gerenciar Pleitos</h4>
+                            <button type="button" onclick="abrirModalPleitosPresets()" class="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg font-bold transition-all text-[10px] uppercase tracking-wider flex items-center gap-1.5 shadow-sm">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                Configurar Pleitos
+                            </button>
+                        </div>
+                        <div class="flex items-end gap-4">
+                            <div class="flex-1">
+                                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Nome do Pleito</label>
+                                <input type="text" id="novo_pleito_nome" class="w-full h-10 px-3 bg-white border border-slate-300 rounded-lg text-sm font-bold text-slate-700" placeholder="Ex: Eleições 2024" list="pleitos-presets">
+                                <datalist id="pleitos-presets"></datalist>
+                            </div>
+                            <div class="w-32">
+                                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Dias Adquiridos</label>
+                                <input type="number" id="novo_pleito_dias" class="w-full h-10 px-3 bg-white border border-slate-300 rounded-lg text-sm font-bold text-slate-700" min="1" step="1">
+                            </div>
+                            <button type="button" onclick="salvarPleito()" class="h-10 px-5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-sm shadow-sm transition-all flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                Adicionar
+                            </button>
+                        </div>
+                        <div class="mt-6">
+                            <table class="w-full text-left text-sm" id="tabela-pleitos">
+                                <thead>
+                                    <tr class="border-b-2 border-slate-200 text-slate-400 uppercase tracking-widest text-[10px] font-black">
+                                        <th class="py-2">Pleito</th>
+                                        <th class="py-2 text-center w-32">Adquiridos</th>
+                                        <th class="py-2 text-center w-32">Gozados</th>
+                                        <th class="py-2 text-center w-32">Saldo</th>
+                                        <th class="py-2 text-right w-20">Ação</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="lista-pleitos-body" class="divide-y divide-slate-100">
+                                    <!-- JS ira preencher -->
+                                </tbody>
+                            </table>
+                            <div id="msg-pleitos-vazio" class="py-8 text-center text-slate-400 text-sm hidden">
+                                Nenhum pleito cadastrado para este servidor.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between mb-8 border-t border-slate-100 pt-10">
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-800">Histórico de Gozo</h3>
+                            <p class="text-sm text-slate-500">Histórico das folgas eleitorais efetivamente gozadas.</p>
+                        </div>
+                    </div>
+
+                    <div id="lista-folga-tab" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <!-- Carregado via AJAX -->
+                        <div class="col-span-full py-12 text-center bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200">
+                            <p class="text-slate-400 font-medium">Nenhum registro encontrado.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </form>
     </div>
 </div>
+
+<?php include 'ferias_modal.php'; ?>
+<script>
+    const isAdminOrCRH = <?php echo $isSuper ? 'true' : 'false'; ?>;
+    const loggedInOperator = <?php echo json_encode($_SESSION['user_name'] ?? 'Operador'); ?>;
+</script>
 
 <script>
     $(function() {
@@ -1147,6 +1331,9 @@ Estou ciente de que o tratamento poderá ocorrer independentemente do consentime
         // Bloqueio de campos de matrícula/cpf duplicados
         $('#func_cpf').on('blur', function() { verificarDuplicado('cpf', $(this).val(), 'feedback_cpf'); });
         $('#func_matricula').on('blur', function() { verificarDuplicado('matricula', $(this).val(), 'feedback_matricula'); });
+
+        // Carregar os presets de pleitos eleitorais dinamicamente
+        carregarPleitosPresets();
     });
 
     function toggleDeficienciaFields() {
@@ -1168,10 +1355,18 @@ Estou ciente de que o tratamento poderá ocorrer independentemente do consentime
         }
         
         // Update buttons
-        $('#btn-tab-acesso, #btn-tab-ficha, #btn-tab-termo').removeClass('border-brand-600 text-brand-600').addClass('border-transparent text-slate-400');
+        $('#btn-tab-acesso, #btn-tab-ficha, #btn-tab-termo, #btn-tab-ferias, #btn-tab-folga').removeClass('border-brand-600 text-brand-600').addClass('border-transparent text-slate-400');
         if (tabId === 'tab-acesso') $('#btn-tab-acesso').addClass('border-brand-600 text-brand-600').removeClass('border-transparent text-slate-400');
         else if (tabId === 'tab-ficha') $('#btn-tab-ficha').addClass('border-brand-600 text-brand-600').removeClass('border-transparent text-slate-400');
         else if (tabId === 'tab-termo') $('#btn-tab-termo').addClass('border-brand-600 text-brand-600').removeClass('border-transparent text-slate-400');
+        else if (tabId === 'tab-ferias') {
+            $('#btn-tab-ferias').addClass('border-brand-600 text-brand-600').removeClass('border-transparent text-slate-400');
+            if ($('#func_id').val()) carregarHistoricoTab('ferias', 'lista-ferias-tab');
+        }
+        else if (tabId === 'tab-folga') {
+            $('#btn-tab-folga').addClass('border-brand-600 text-brand-600').removeClass('border-transparent text-slate-400');
+            if ($('#func_id').val()) carregarHistoricoTab('folga eleitoral', 'lista-folga-tab');
+        }
     }
 
     // Flags de bloqueio de duplicidade
@@ -1229,6 +1424,54 @@ Estou ciente de que o tratamento poderá ocorrer independentemente do consentime
             }
         } catch (e) {
             fb.addClass('hidden').html('');
+        }
+    }
+
+    async function carregarHistoricoTab(tipo, containerId) {
+        const container = $('#' + containerId);
+        container.html('<div class="col-span-full py-12 text-center"><div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-slate-200 border-t-brand-600"></div></div>');
+
+        try {
+            const funcId = $('#func_id').val();
+            const res = await fetch(`../../api/ferias.php?func_id=${funcId}`);
+            const data = await res.json();
+
+            if (data.success) {
+                const filtered = data.data.filter(f => f.tipo_afastamento === tipo);
+                
+                if (filtered.length === 0) {
+                    container.html('<div class="col-span-full py-12 text-center bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200"><p class="text-slate-400 font-medium">Nenhum registro encontrado para esta categoria.</p></div>');
+                    return;
+                }
+
+                container.html(filtered.map(f => {
+                    const dtIni = f.data_inicio.split('-').reverse().join('/');
+                    const dtFim = f.data_fim.split('-').reverse().join('/');
+                    
+                    let statusClass = 'bg-amber-100 text-amber-700 border-amber-200';
+                    if (f.status === 'deferido') statusClass = 'bg-emerald-100 text-emerald-700 border-emerald-200';
+                    if (f.status === 'indeferido') statusClass = 'bg-rose-100 text-rose-700 border-rose-200';
+
+                    return `
+                        <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm hover:shadow-md transition-all group">
+                            <div class="flex justify-between items-start mb-3">
+                                <span class="px-2 py-1 text-[10px] font-black uppercase rounded border ${statusClass}">${f.status}</span>
+                                <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button type="button" onclick="editarFerias(${f.id}, '${f.data_inicio}', '${f.data_fim}', '${f.tipo_afastamento}', '${(f.motivo_especifico || '').replace(/'/g, "\\'")}', '${(f.anexo || '').replace(/'/g, "\\'")}', '${(f.observacao || '').replace(/'/g, "\\'")}')" class="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="text-lg font-bold text-slate-800 mb-1">${dtIni} - ${dtFim}</div>
+                            ${f.periodo_aquisitivo ? `<p class="text-xs font-semibold text-slate-600 mb-1">Período: ${f.periodo_aquisitivo}</p>` : ''}
+                            ${f.gestor_solicitante ? `<p class="text-[10px] text-slate-400 mb-1">Solicitado por: ${f.gestor_solicitante} ${f.gestor_setor ? `- ${f.gestor_setor}` : ''}</p>` : ''}
+                            <p class="text-xs text-slate-500 line-clamp-2 mt-2">${f.observacao || 'Sem observações'}</p>
+                        </div>
+                    `;
+                }).join(''));
+            }
+        } catch (e) {
+            container.html('<div class="col-span-full py-12 text-center text-red-500 font-bold">Erro ao carregar dados.</div>');
         }
     }
 
@@ -1402,6 +1645,48 @@ Estou ciente de que o tratamento poderá ocorrer independentemente do consentime
             printWindow.print();
             printWindow.close();
         }, 500);
+    }
+
+    function adicionarLinhaPeriodo(dados = null) {
+        const corpo = $('#lista-periodos-corpo');
+        $('#msg-periodos-vazio').addClass('hidden');
+        
+        const valPeriodo = dados ? (dados.periodo || ((dados.inicio && dados.fim) ? (dados.inicio.substring(0, 4) + '/' + dados.fim.substring(0, 4)) : (dados.inicio || ''))) : '';
+        const valDias = dados ? dados.dias : '30';
+        const valOperador = dados ? (dados.operador || 'Sistema') : loggedInOperator;
+        
+        const row = $(`
+            <tr class="border-b border-slate-50 hover:bg-slate-50/50 transition-colors group">
+                <td class="px-6 py-4">
+                    <div class="flex items-center gap-2">
+                        <input type="text" list="periodos-presets" class="periodo-aquisitivo w-full bg-white border border-slate-200 rounded-lg text-sm font-bold text-slate-700 px-3 py-1.5 focus:border-amber-500 outline-none" placeholder="Ex: 2022/2023" value="${valPeriodo}">
+                        <span class="text-[11px] font-semibold text-slate-400 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-md whitespace-nowrap flex items-center gap-1 shadow-sm shrink-0" title="Operador que cadastrou o período">
+                            <svg class="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                            ${valOperador}
+                        </span>
+                        <input type="hidden" class="periodo-operador-val" value="${valOperador}">
+                    </div>
+                </td>
+                <td class="px-6 py-4 text-center">
+                    <input type="number" class="periodo-dias w-24 bg-white border border-slate-200 rounded-lg text-center text-xs font-bold py-1.5 focus:border-amber-500 outline-none" value="${valDias}">
+                </td>
+                <td class="px-6 py-4">
+                    <select class="periodo-status bg-white border border-slate-200 rounded-lg text-[10px] font-black uppercase px-2 py-1.5 outline-none focus:border-amber-500 transition-all w-full">
+                        <option value="aberto" ${dados && dados.status === 'aberto' ? 'selected' : ''}>Aberto</option>
+                        <option value="vencido" ${dados && dados.status === 'vencido' ? 'selected' : ''}>Vencido</option>
+                        <option value="quitado" ${dados && dados.status === 'quitado' ? 'selected' : ''}>Quitado</option>
+                    </select>
+                </td>
+                <td class="px-6 py-4 text-center">
+                    <button type="button" onclick="$(this).closest('tr').remove(); if($('#lista-periodos-corpo tr').length === 0) $('#msg-periodos-vazio').removeClass('hidden');" class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    </button>
+                </td>
+            </tr>
+        `);
+        corpo.append(row);
     }
 
     function replicarHorarioPrimeiroDia() {
@@ -1658,6 +1943,39 @@ Estou ciente de que o tratamento poderá ocorrer independentemente do consentime
         });
     }
 
+    async function gerarMatricula(btn) {
+        try {
+            if (!btn) btn = event.currentTarget;
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<svg class="animate-spin h-3 w-3" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
+            btn.disabled = true;
+
+            const res = await fetch('../../api/funcionarios.php?action=generate_matricula');
+            const data = await res.json();
+
+            if (data.success) {
+                $('#func_matricula').val(data.matricula);
+                $('#func_matricula_2').val(data.matricula);
+                $('#termo_matricula').text(data.matricula);
+                
+                // Feedback visual
+                $('#func_matricula').addClass('ring-4 ring-emerald-500/20 border-emerald-500');
+                setTimeout(() => {
+                    $('#func_matricula').removeClass('ring-4 ring-emerald-500/20 border-emerald-500');
+                }, 1000);
+
+                // Forçar verificação de duplicidade por segurança
+                verificarDuplicado('matricula', data.matricula, 'feedback_matricula');
+            }
+
+            btn.innerHTML = originalHtml;
+            btn.disabled = false;
+        } catch (e) {
+            console.error("Erro ao gerar matrícula:", e);
+            Swal.fire('Erro', 'Falha ao gerar nova matrícula.', 'error');
+        }
+    }
+
     async function carregarFuncionario(id) {
         try {
             const res = await fetch(`../../api/funcionarios.php?id=${id}`);
@@ -1669,6 +1987,11 @@ Estou ciente de que o tratamento poderá ocorrer independentemente do consentime
                 // Aba 1
                 $('#func_nome').val(func.nome);
                 $('#func_matricula').val(func.matricula);
+                if (func.matricula) {
+                    $('#btn_gerar_matricula').addClass('hidden');
+                } else {
+                    $('#btn_gerar_matricula').removeClass('hidden');
+                }
                 $('#func_setor').val(func.setor);
                 $('#func_setor2').val(func.setor2 || '');
                 $('#func_cpf').val(func.cpf);
@@ -1712,7 +2035,10 @@ Estou ciente de que o tratamento poderá ocorrer independentemente do consentime
                         console.error("Erro ao processar metodos_acesso:", e);
                     }
                 }
-                $('#func_is_exonerado').prop('checked', func.is_exonerado == 1);
+                $('#func_is_exonerado').prop('checked', func.is_exonerado == 1 || func.is_exonerado === true || func.is_exonerado === 't');
+                $('#func_data_exoneracao').val(func.data_exoneracao || '');
+                $('#func_motivo_exoneracao').val(func.motivo_exoneracao || '');
+                toggleExoneracaoFields();
 
                 let photoData = func.foto_perfil || func.biometria_facial;
                 if (photoData) {
@@ -1721,18 +2047,29 @@ Estou ciente de que o tratamento poderá ocorrer independentemente do consentime
                     if (photoData.startsWith('uploads/')) {
                         displayPath = '../../' + photoData;
                     }
-                    
-                    $('#func_foto_preview').attr('src', displayPath).removeClass('hidden');
-                    $('#func_foto_placeholder').addClass('hidden');
-                    
-                    // Mostrar controles de edição para foto existente
-                    $('#post_capture_controls').removeClass('hidden');
-                    $('#pre_capture_controls').addClass('hidden');
-                    $('#btn_ativar_camera').addClass('hidden');
 
-                    // Sync with Termo tab
-                    $('#termo_foto_preview').attr('src', displayPath).removeClass('hidden');
-                    $('#termo_foto_placeholder').addClass('hidden');
+                    // Testa se a imagem existe; se não, mostra placeholder limpo
+                    const img = new Image();
+                    img.onload = function() {
+                        $('#func_foto_preview').attr('src', displayPath).removeClass('hidden');
+                        $('#func_foto_placeholder').addClass('hidden');
+                        $('#termo_foto_preview').attr('src', displayPath).removeClass('hidden');
+                        $('#termo_foto_placeholder').addClass('hidden');
+                        $('#post_capture_controls').removeClass('hidden');
+                        $('#pre_capture_controls').addClass('hidden');
+                        $('#btn_ativar_camera').addClass('hidden');
+                    };
+                    img.onerror = function() {
+                        // Arquivo não encontrado localmente — exibe placeholder
+                        $('#func_foto_preview').addClass('hidden');
+                        $('#func_foto_placeholder').removeClass('hidden');
+                        $('#termo_foto_preview').addClass('hidden');
+                        $('#termo_foto_placeholder').removeClass('hidden');
+                        $('#post_capture_controls').addClass('hidden');
+                        $('#pre_capture_controls').removeClass('hidden');
+                        $('#btn_ativar_camera').removeClass('hidden');
+                    };
+                    img.src = displayPath;
                 }
 
                 // Aba 2
@@ -1875,6 +2212,28 @@ Estou ciente de que o tratamento poderá ocorrer independentemente do consentime
                 } catch (e) {
                     console.error("Erro ao processar dados da aba Termo:", e);
                 }
+
+                // Férias - Períodos Aquisitivos
+                if (func.ferias_periodos) {
+                    try {
+                        const periodos = typeof func.ferias_periodos === 'string' ? JSON.parse(func.ferias_periodos) : func.ferias_periodos;
+                        if (Array.isArray(periodos)) {
+                            $('#lista-periodos-corpo').empty();
+                            if (periodos.length > 0) {
+                                periodos.forEach(p => adicionarLinhaPeriodo(p));
+                            } else {
+                                $('#msg-periodos-vazio').removeClass('hidden');
+                            }
+                        }
+                    } catch (e) {
+                        console.error("Erro ao processar ferias_periodos:", e);
+                    }
+                } else {
+                    $('#msg-periodos-vazio').removeClass('hidden');
+                }
+
+                // Pleitos de Folga Eleitoral
+                carregarPleitosUI(func.folgas_eleitorais || '[]');
 
                 // Grade de Horários
                 if (func.grade_horarios) {
@@ -2280,6 +2639,8 @@ Estou ciente de que o tratamento poderá ocorrer independentemente do consentime
             
             grade_horarios: grade,
             is_exonerado: $('#func_is_exonerado').is(':checked') ? 1 : 0,
+            data_exoneracao: $('#func_data_exoneracao').val(),
+            motivo_exoneracao: $('#func_motivo_exoneracao').val(),
             
             foto_base64: $('#func_foto_base64').val(),
             facial_descriptor: $('#func_facial_descriptor').val(),
@@ -2386,7 +2747,17 @@ Estou ciente de que o tratamento poderá ocorrer independentemente do consentime
                 },
 
                 // Grade de Horários (Já calculada acima)
-                grade_horarios: grade
+                grade_horarios: grade,
+
+                // Períodos Aquisitivos de Férias
+                ferias_periodos: $('#lista-periodos-corpo tr').map(function() {
+                    return {
+                        periodo: $(this).find('.periodo-aquisitivo').val(),
+                        dias: $(this).find('.periodo-dias').val(),
+                        status: $(this).find('.periodo-status').val(),
+                        operador: $(this).find('.periodo-operador-val').val() || 'Sistema'
+                    };
+                }).get().filter(p => p.periodo)
             };
 
         try {
@@ -2427,17 +2798,22 @@ Estou ciente de que o tratamento poderá ocorrer independentemente do consentime
         }
     });
 
-    function toggleSenhaVisual(btn) {
+    window.toggleSenhaVisual = function(btn) {
         const input = document.getElementById('func_senha');
+        if (!input) return;
         const icon = btn.querySelector('svg');
         if (input.type === 'password') {
             input.type = 'text';
-            icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />`;
+            if (icon) {
+                icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />`;
+            }
         } else {
             input.type = 'password';
-            icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />`;
+            if (icon) {
+                icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />`;
+            }
         }
-    }
+    };
 
     function capturarLocalizacaoAdmin(e) {
         e.preventDefault();
@@ -2686,6 +3062,269 @@ Estou ciente de que o tratamento poderá ocorrer independentemente do consentime
             $('#func_deficiencia_cid').val('');
         }
     };
+
+    window.toggleExoneracaoFields = function() {
+        const isExonerado = $('#func_is_exonerado').is(':checked');
+        if (isExonerado) {
+            $('#wrapper_exoneracao').removeClass('hidden');
+            if (!$('#func_data_exoneracao').val()) {
+                $('#func_data_exoneracao').val(new Date().toISOString().split('T')[0]);
+            }
+        } else {
+            $('#wrapper_exoneracao').addClass('hidden');
+        }
+    };
+
+    // --- LÓGICA DE PLEITOS (FOLGA ELEITORAL) ---
+    window._pleitosCarregados = [];
+
+    window.carregarPleitosUI = function(pleitosStr) {
+        let pleitos = [];
+        try {
+            pleitos = typeof pleitosStr === 'string' ? JSON.parse(pleitosStr || '[]') : (pleitosStr || []);
+        } catch(e) {}
+        
+        window._pleitosCarregados = pleitos;
+        const tbody = document.getElementById('lista-pleitos-body');
+        const emptyMsg = document.getElementById('msg-pleitos-vazio');
+        
+        tbody.innerHTML = '';
+        if (pleitos.length === 0) {
+            emptyMsg.classList.remove('hidden');
+        } else {
+            emptyMsg.classList.add('hidden');
+            pleitos.forEach(p => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50 transition-colors group';
+                
+                const saldoClass = p.saldo > 0 ? 'text-emerald-600 bg-emerald-50 border-emerald-200' : 'text-slate-500 bg-slate-100 border-slate-200';
+                
+                tr.innerHTML = `
+                    <td class="py-3 font-bold text-slate-700">${esc(p.nome)}</td>
+                    <td class="py-3 text-center font-bold text-slate-600">${p.dias}</td>
+                    <td class="py-3 text-center font-bold text-slate-500">${p.dias_gozados || 0}</td>
+                    <td class="py-3 text-center">
+                        <span class="inline-flex items-center justify-center min-w-[32px] h-6 px-2 text-[11px] font-black rounded-md border ${saldoClass}">${p.saldo}</span>
+                    </td>
+                    <td class="py-3 text-right">
+                        <button type="button" onclick="excluirPleito('${esc(p.nome).replace(/'/g, "\\'")}')" class="text-slate-300 hover:text-red-500 transition-colors p-1" title="Excluir Pleito">
+                            <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+    };
+
+    window.salvarPleito = async function() {
+        const id = document.getElementById('func_id').value;
+        if (!id) {
+            Swal.fire('Atenção', 'Salve o funcionário primeiro antes de adicionar pleitos.', 'warning');
+            return;
+        }
+        const nome = document.getElementById('novo_pleito_nome').value.trim();
+        const dias = document.getElementById('novo_pleito_dias').value;
+        
+        if (!nome || !dias || dias <= 0) {
+            Swal.fire('Atenção', 'Preencha o nome do pleito e a quantidade de dias (> 0).', 'warning');
+            return;
+        }
+        
+        try {
+            const res = await fetch('../../api/funcionarios.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'salvar_pleito', id, nome, dias })
+            });
+            const data = await res.json();
+            if (data.success) {
+                document.getElementById('novo_pleito_nome').value = '';
+                document.getElementById('novo_pleito_dias').value = '';
+                // Recarregar os dados do funcionário para atualizar o saldo
+                carregarFuncionario(id);
+                Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Pleito salvo!', showConfirmButton: false, timer: 1500 });
+            } else {
+                Swal.fire('Erro', data.message, 'error');
+            }
+        } catch(e) {
+            Swal.fire('Erro', 'Falha na comunicação com o servidor.', 'error');
+        }
+    };
+
+    window.excluirPleito = async function(nome) {
+        const id = document.getElementById('func_id').value;
+        const res = await Swal.fire({
+            title: 'Excluir pleito?',
+            text: `Deseja excluir o pleito "${nome}"?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sim, excluir',
+            cancelButtonText: 'Cancelar'
+        });
+        
+        if (res.isConfirmed) {
+            try {
+                const res = await fetch('../../api/funcionarios.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'excluir_pleito', id, nome })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    carregarFuncionario(id);
+                    Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Excluído!', showConfirmButton: false, timer: 1500 });
+                } else {
+                    Swal.fire('Erro', data.message, 'error');
+                }
+            } catch(e) {
+                Swal.fire('Erro', 'Falha na comunicação com o servidor.', 'error');
+            }
+        }
+    };
+
+    window.abrirModalPleitosPresets = function() {
+        document.getElementById('modalPleitosPresets').classList.remove('hidden');
+        carregarPleitosPresets();
+    };
+
+    window.fecharModalPleitosPresets = function() {
+        document.getElementById('modalPleitosPresets').classList.add('hidden');
+    };
+
+    window.carregarPleitosPresets = async function() {
+        try {
+            const res = await fetch('../../api/pleitos_presets.php');
+            const data = await res.json();
+            if (data.success) {
+                // Preenche o datalist
+                const datalist = document.getElementById('pleitos-presets');
+                if (datalist) {
+                    datalist.innerHTML = data.data.map(p => `<option value="${esc(p.nome)}"></option>`).join('');
+                }
+                
+                // Preenche a lista no modal
+                const container = document.getElementById('lista-presets-container');
+                if (container) {
+                    if (data.data.length === 0) {
+                        container.innerHTML = `<div class="text-sm text-slate-400 text-center py-6 bg-slate-50 border border-dashed border-slate-200 rounded-2xl">Nenhum preset cadastrado.</div>`;
+                    } else {
+                        container.innerHTML = data.data.map(p => {
+                            const nameEscaped = p.nome.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+                            return `
+                            <div class="flex items-center justify-between p-3 bg-slate-50 border border-slate-200/60 rounded-xl hover:border-slate-300 hover:bg-slate-100/50 transition-all">
+                                <span class="text-sm font-bold text-slate-700 truncate max-w-[240px]">${esc(p.nome)}</span>
+                                <div class="flex gap-1.5">
+                                    <button type="button" onclick="editarPresetPleito(${p.id}, '${nameEscaped}')" class="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg border border-transparent hover:border-indigo-100 transition-colors shadow-sm bg-white" title="Editar">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                    </button>
+                                    <button type="button" onclick="excluirPresetPleito(${p.id}, '${nameEscaped}')" class="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg border border-transparent hover:border-rose-100 transition-colors shadow-sm bg-white" title="Excluir">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    </button>
+                                </div>
+                            </div>
+                            `;
+                        }).join('');
+                    }
+                }
+            } else {
+                console.error('Falha ao carregar presets:', data.message);
+            }
+        } catch(e) {
+            console.error('Erro de conexão ao buscar presets:', e);
+        }
+    };
+
+    window.salvarPresetPleito = async function(event) {
+        event.preventDefault();
+        const nome = document.getElementById('preset_nome').value.trim();
+        if (!nome) return;
+
+        try {
+            const res = await fetch('../../api/pleitos_presets.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nome })
+            });
+            const data = await res.json();
+            if (data.success) {
+                document.getElementById('preset_nome').value = '';
+                await carregarPleitosPresets();
+                Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: data.message, showConfirmButton: false, timer: 2000 });
+            } else {
+                Swal.fire('Erro', data.message, 'error');
+            }
+        } catch(e) {
+            Swal.fire('Erro', 'Falha na comunicação com o servidor.', 'error');
+        }
+    };
+
+    window.editarPresetPleito = async function(id, currentNome) {
+        const { value: novoNome } = await Swal.fire({
+            title: 'Editar Nome do Pleito',
+            input: 'text',
+            inputValue: currentNome,
+            showCancelButton: true,
+            confirmButtonText: 'Salvar',
+            cancelButtonText: 'Cancelar',
+            inputValidator: (value) => {
+                if (!value || !value.trim()) {
+                    return 'O nome do pleito não pode ser vazio!';
+                }
+            }
+        });
+
+        if (novoNome && novoNome.trim() !== currentNome) {
+            try {
+                const res = await fetch('../../api/pleitos_presets.php', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id, nome: novoNome.trim() })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    await carregarPleitosPresets();
+                    Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: data.message, showConfirmButton: false, timer: 2000 });
+                } else {
+                    Swal.fire('Erro', data.message, 'error');
+                }
+            } catch(e) {
+                Swal.fire('Erro', 'Falha na comunicação com o servidor.', 'error');
+            }
+        }
+    };
+
+    window.excluirPresetPleito = async function(id, nome) {
+        const res = await Swal.fire({
+            title: 'Excluir Preset?',
+            text: `Deseja realmente excluir o preset "${nome}"?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#94a3b8',
+            confirmButtonText: 'Sim, excluir',
+            cancelButtonText: 'Cancelar'
+        });
+
+        if (res.isConfirmed) {
+            try {
+                const res = await fetch('../../api/pleitos_presets.php', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    await carregarPleitosPresets();
+                    Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: data.message, showConfirmButton: false, timer: 2000 });
+                } else {
+                    Swal.fire('Erro', data.message, 'error');
+                }
+            } catch(e) {
+                Swal.fire('Erro', 'Falha na comunicação com o servidor.', 'error');
+            }
+        }
+    };
 </script>
 
 <!-- Modal Cropper -->
@@ -2742,6 +3381,54 @@ Estou ciente de que o tratamento poderá ocorrer independentemente do consentime
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
                 Confirmar Local
             </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Pleitos Presets -->
+<div id="modalPleitosPresets" class="fixed inset-0 z-[100] hidden flex items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity" onclick="fecharModalPleitosPresets()"></div>
+    <div class="fixed inset-0 z-10 overflow-y-auto flex items-center justify-center p-4">
+        <div class="relative transform overflow-hidden rounded-3xl bg-white text-left shadow-2xl transition-all w-full max-w-md border border-slate-100">
+            <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-indigo-600 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    Configurar Pleitos Presets
+                </h3>
+                <button onclick="fecharModalPleitosPresets()"
+                    class="text-slate-400 hover:text-slate-600 transition-colors bg-white hover:bg-slate-100 p-2 rounded-lg border border-slate-200 shadow-sm">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <div class="p-6">
+                <form id="formAdicionarPreset" onsubmit="salvarPresetPleito(event)" class="space-y-4 mb-6">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Novo Nome do Pleito</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="preset_nome" required
+                                class="flex-1 h-10 px-3 bg-slate-50 border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 focus:bg-white focus:border-indigo-500 outline-none transition-all"
+                                placeholder="Ex: Eleições 2026">
+                            <button type="submit"
+                                class="h-10 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold text-sm shadow-sm transition-all flex items-center gap-1.5">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                Adicionar
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="border-t border-slate-100 pt-4">
+                    <h4 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Pleitos Cadastrados</h4>
+                    <div class="max-h-[300px] overflow-y-auto pr-1 space-y-2" id="lista-presets-container">
+                        <!-- Renderizado via JS -->
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

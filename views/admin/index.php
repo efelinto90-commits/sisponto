@@ -19,7 +19,7 @@
     </div>
 
     <!-- Stats Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
 
         <!-- Total de Funcionários -->
         <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex items-start gap-4">
@@ -64,6 +64,66 @@
             <div>
                 <p class="text-sm font-semibold text-slate-500">Atrasos Detectados</p>
                 <h3 id="statAtrasos" class="text-3xl font-black text-slate-800 mt-1">--</h3>
+            </div>
+        </div>
+
+        <!-- Funcionários Afastados -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col justify-start relative overflow-hidden transition-all duration-300 h-fit" id="cardAfastados">
+            <div class="flex items-start justify-between gap-2 cursor-pointer" onclick="toggleAfastadosDetalles()">
+                <div class="flex items-start gap-4">
+                    <div class="p-3 bg-amber-50 text-amber-600 rounded-xl">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-slate-500">Funcionários Afastados</p>
+                        <h3 id="statAfastados" class="text-3xl font-black text-slate-800 mt-1">--</h3>
+                    </div>
+                </div>
+                <div class="text-slate-400 hover:text-slate-600 transition-colors p-1" id="chevronAfastados">
+                    <svg class="w-5 h-5 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+            </div>
+            
+            <!-- Expandable Panel -->
+            <div id="afastadosListContainer" class="max-h-0 overflow-hidden transition-all duration-500 ease-in-out">
+                <div id="afastadosList" class="space-y-3 mt-3 text-xs max-h-60 overflow-y-auto pr-1">
+                    <p class="text-slate-400 italic text-center py-2 bg-slate-50 rounded-lg animate-pulse">Carregando...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Justificativas com Anexo -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col justify-start relative overflow-hidden transition-all duration-300 h-fit" id="cardJustificativas">
+            <div class="flex items-start justify-between gap-2 cursor-pointer" onclick="toggleJustificativasDetalles()">
+                <div class="flex items-start gap-4">
+                    <div class="p-3 bg-indigo-50 text-indigo-600 rounded-xl">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-slate-500">Justificativas com Anexo</p>
+                        <h3 id="statJustificativas" class="text-3xl font-black text-slate-800 mt-1">--</h3>
+                    </div>
+                </div>
+                <div class="text-slate-400 hover:text-slate-600 transition-colors p-1" id="chevronJustificativas">
+                    <svg class="w-5 h-5 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+            </div>
+            
+            <!-- Expandable Panel -->
+            <div id="justificativasListContainer" class="max-h-0 overflow-hidden transition-all duration-500 ease-in-out">
+                <div id="justificativasList" class="space-y-3 mt-3 text-xs max-h-60 overflow-y-auto pr-1">
+                    <p class="text-slate-400 italic text-center py-2 bg-slate-50 rounded-lg animate-pulse">Carregando...</p>
+                </div>
             </div>
         </div>
 
@@ -132,6 +192,93 @@
                 document.getElementById('statRegistrosHoje').textContent = data.stats.total_registros_hoje;
                 document.getElementById('statAtrasos').textContent = data.stats.total_atrasos_hoje;
 
+                // Atualizar card de afastados
+                document.getElementById('statAfastados').textContent = data.stats.total_afastados_hoje ?? 0;
+                
+                const afastadosList = document.getElementById('afastadosList');
+                afastadosList.innerHTML = '';
+                
+                if (!data.afastados_hoje || data.afastados_hoje.length === 0) {
+                    afastadosList.innerHTML = '<p class="text-slate-400 italic text-center py-2 bg-slate-50/50 border border-slate-100 rounded-lg">Nenhum afastado hoje.</p>';
+                } else {
+                    data.afastados_hoje.forEach(af => {
+                        const motivo = af.tipo_afastamento === 'outros' ? (af.motivo_especifico || 'Outros') : (af.tipo_afastamento || 'Não especificado');
+                        const dtIniParts = af.data_inicio.split('-');
+                        const dtFimParts = af.data_fim.split('-');
+                        const dtIniStr = `${dtIniParts[2]}/${dtIniParts[1]}/${dtIniParts[0]}`;
+                        const dtFimStr = `${dtFimParts[2]}/${dtFimParts[1]}/${dtFimParts[0]}`;
+                        
+                        afastadosList.innerHTML += `
+                            <div class="p-2.5 bg-slate-50/70 border border-slate-100 hover:bg-amber-50/20 hover:border-amber-100 rounded-xl transition-all flex flex-col gap-1">
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="font-bold text-slate-800 truncate" title="${af.nome}">${af.nome}</span>
+                                    <span class="px-2 py-0.5 text-[9px] font-black uppercase bg-amber-50 text-amber-700 rounded border border-amber-200 shrink-0">${motivo}</span>
+                                </div>
+                                <span class="text-[10px] text-slate-500 font-medium">Período: ${dtIniStr} - ${dtFimStr}</span>
+                            </div>
+                        `;
+                    });
+                }
+
+                // Atualizar card de justificativas com anexo
+                window.currentJustificativasAnexo = data.justificativas_anexo ?? [];
+                document.getElementById('statJustificativas').textContent = data.stats.total_justificativas_anexo ?? 0;
+                
+                const justificativasList = document.getElementById('justificativasList');
+                justificativasList.innerHTML = '';
+                
+                if (!data.justificativas_anexo || data.justificativas_anexo.length === 0) {
+                    justificativasList.innerHTML = '<p class="text-slate-400 italic text-center py-2 bg-slate-50/50 border border-slate-100 rounded-lg">Nenhuma justificativa pendente.</p>';
+                } else {
+                    data.justificativas_anexo.forEach(j => {
+                        const dataParts = j.data.split('-');
+                        const dataStr = `${dataParts[2]}/${dataParts[1]}/${dataParts[0]}`;
+                        
+                        let anexosHtml = '';
+                        if (j.anexos && j.anexos.length > 0) {
+                            j.anexos.forEach((path, idx) => {
+                                anexosHtml += `
+                                    <a href="../../${path}" target="_blank" class="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-indigo-50 text-indigo-600 border border-indigo-100 rounded text-[9px] font-black hover:bg-indigo-100 transition-colors" title="Ver anexo ${idx + 1}">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
+                                        </svg>
+                                        Doc ${idx + 1}
+                                    </a>
+                                `;
+                            });
+                        }
+                        
+                        justificativasList.innerHTML += `
+                            <div class="p-2.5 bg-slate-50/70 border border-slate-100 hover:bg-indigo-50/10 hover:border-indigo-100 rounded-xl transition-all flex flex-col gap-1">
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="font-bold text-slate-800 truncate" title="${j.nome}">${j.nome}</span>
+                                    <span class="px-2 py-0.5 text-[9px] font-black uppercase bg-indigo-50 text-indigo-700 rounded border border-indigo-200 shrink-0">${j.tipo_justificativa}</span>
+                                </div>
+                                <div class="flex justify-between items-center gap-2 mt-0.5">
+                                    <span class="text-[10px] text-slate-500 font-medium">${dataStr}</span>
+                                    <div class="flex gap-1 shrink-0">
+                                        ${anexosHtml}
+                                    </div>
+                                </div>
+                                ${j.justificativa ? `<p class="text-[10px] text-slate-600 bg-white/50 p-1.5 rounded-lg border border-slate-100 italic mt-0.5 leading-tight truncate" title="${j.justificativa}">${j.justificativa}</p>` : ''}
+                            </div>
+                        `;
+                    });
+
+                    // Add full view button at the bottom of the list
+                    justificativasList.innerHTML += `
+                        <div class="pt-2 border-t border-slate-100/50">
+                            <button onclick="abrirModalJustificativas()" class="w-full text-center py-2 text-xs font-bold text-indigo-600 bg-indigo-50/50 hover:bg-indigo-100 hover:text-indigo-700 rounded-xl transition-all flex items-center justify-center gap-1.5 border border-indigo-100/40">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                </svg>
+                                Visualização Plena
+                            </button>
+                        </div>
+                    `;
+                }
+
                 const tbody = document.getElementById('registrosList');
                 tbody.innerHTML = '';
 
@@ -176,6 +323,140 @@
             console.error(e);
             Swal.fire('Opa', 'Erro ao carregar os dados do dashboard.', 'error');
         }
+    }
+
+    function toggleAfastadosDetalles() {
+        const container = document.getElementById('afastadosListContainer');
+        const chevron = document.getElementById('chevronAfastados').querySelector('svg');
+        
+        if (container.classList.contains('max-h-0')) {
+            container.classList.remove('max-h-0');
+            container.classList.add('max-h-96', 'mt-3', 'pt-3', 'border-t', 'border-slate-100');
+            chevron.classList.add('rotate-180');
+        } else {
+            container.classList.remove('max-h-96', 'mt-3', 'pt-3', 'border-t', 'border-slate-100');
+            container.classList.add('max-h-0');
+            chevron.classList.remove('rotate-180');
+        }
+    }
+
+    function toggleJustificativasDetalles() {
+        const container = document.getElementById('justificativasListContainer');
+        const chevron = document.getElementById('chevronJustificativas').querySelector('svg');
+        
+        if (container.classList.contains('max-h-0')) {
+            container.classList.remove('max-h-0');
+            container.classList.add('max-h-96', 'mt-3', 'pt-3', 'border-t', 'border-slate-100');
+            chevron.classList.add('rotate-180');
+        } else {
+            container.classList.remove('max-h-96', 'mt-3', 'pt-3', 'border-t', 'border-slate-100');
+            container.classList.add('max-h-0');
+            chevron.classList.remove('rotate-180');
+        }
+    }
+
+    function abrirModalJustificativas() {
+        if (!window.currentJustificativasAnexo || window.currentJustificativasAnexo.length === 0) {
+            Swal.fire({
+                title: 'Nenhuma justificativa',
+                text: 'Não há justificativas com anexo pendentes para hoje.',
+                icon: 'info',
+                confirmButtonColor: '#4f46e5'
+            });
+            return;
+        }
+
+        let rowsHtml = '';
+        window.currentJustificativasAnexo.forEach(j => {
+            const dataParts = j.data.split('-');
+            const dataStr = `${dataParts[2]}/${dataParts[1]}/${dataParts[0]}`;
+            
+            let anexosHtml = '';
+            if (j.anexos && j.anexos.length > 0) {
+                j.anexos.forEach((path, idx) => {
+                    anexosHtml += `
+                        <a href="../../${path}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 hover:text-indigo-800 border border-indigo-200 rounded-lg text-xs font-black transition-colors" title="Abrir Documento ${idx + 1}">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
+                            </svg>
+                            Anexo ${idx + 1}
+                        </a>
+                    `;
+                });
+            }
+
+            rowsHtml += `
+                <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="px-4 py-4 whitespace-normal">
+                        <div class="flex items-center">
+                            <div class="h-9 w-9 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs ring-2 ring-white">
+                                ${j.nome.substring(0, 2).toUpperCase()}
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-bold text-slate-800">${j.nome}</p>
+                                <p class="text-[10px] text-slate-400 font-mono">Matrícula: ${j.matricula}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-4 py-4 whitespace-nowrap text-sm font-bold text-slate-600">${dataStr}</td>
+                    <td class="px-4 py-4 whitespace-nowrap">
+                        <span class="px-2 py-0.5 text-[10px] font-black uppercase bg-indigo-100 text-indigo-700 rounded-md border border-indigo-200">${j.tipo_justificativa}</span>
+                    </td>
+                    <td class="px-4 py-4 text-slate-600 text-xs font-medium italic">
+                        <div class="bg-slate-50/70 p-3 rounded-xl border border-slate-100 leading-relaxed whitespace-normal break-words">
+                            "${j.justificativa}"
+                        </div>
+                    </td>
+                    <td class="px-4 py-4 whitespace-nowrap">
+                        <div class="flex flex-wrap gap-1.5">
+                            ${anexosHtml || '<span class="text-slate-300 italic text-xs">Sem documentos</span>'}
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+
+        Swal.fire({
+            title: `
+                <div class="flex items-center gap-3 text-left pb-4 border-b border-slate-100">
+                    <div class="p-3 bg-indigo-50 text-indigo-600 rounded-2xl">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-800">Visualização Plena das Justificativas</h2>
+                        <p class="text-xs text-slate-400 font-semibold mt-0.5">Listagem detalhada das justificativas com anexos recebidas hoje.</p>
+                    </div>
+                </div>
+            `,
+            html: `
+                <div class="overflow-x-auto max-h-[60vh] mt-4 border border-slate-100 rounded-2xl">
+                    <table class="w-full text-left border-collapse table-fixed min-w-[1100px]">
+                        <thead>
+                            <tr class="bg-slate-50/70 border-b border-slate-200">
+                                <th class="px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider w-[26%]">Colaborador</th>
+                                <th class="px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider w-[10%]">Data do Ponto</th>
+                                <th class="px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider w-[11%]">Tipo</th>
+                                <th class="px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider w-[38%]">Explicação/Texto</th>
+                                <th class="px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider w-[15%]">Documentos Anexados</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 bg-white">
+                            ${rowsHtml}
+                        </tbody>
+                    </table>
+                </div>
+            `,
+            width: '90%',
+            showConfirmButton: true,
+            confirmButtonText: 'Fechar Painel',
+            confirmButtonColor: '#4f46e5',
+            customClass: {
+                popup: 'rounded-3xl shadow-2xl p-6 bg-white border border-slate-100 max-w-[1350px]',
+                confirmButton: 'rounded-xl px-6 py-2.5 font-bold text-sm transition-all hover:bg-indigo-700'
+            }
+        });
     }
 </script>
 

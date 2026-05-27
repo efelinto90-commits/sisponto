@@ -85,21 +85,21 @@ function hasPerm($mod)
 
     <!-- Sidebar -->
     <aside
-        class="w-64 bg-slate-900 text-white flex flex-col transition-all duration-300 shadow-2xl z-20 hidden md:flex">
+        class="w-64 bg-slate-900 text-white flex flex-col h-screen transition-all duration-300 shadow-2xl z-20 hidden md:flex">
 
-        <div class="p-6 flex items-center gap-3 border-b border-white/10">
-            <div class="w-8 h-8 rounded-lg bg-brand-500 flex items-center justify-center">
-                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="p-8 flex items-center gap-4 border-b border-white/5">
+            <div class="w-10 h-10 rounded-xl bg-brand-500 flex items-center justify-center shadow-lg shadow-brand-500/20">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
             </div>
-            <span class="text-xl font-bold tracking-tight">SisPonto</span>
+            <span class="text-2xl font-black tracking-tight">SisPonto</span>
         </div>
 
-        <nav class="flex-1 p-4 space-y-1 overflow-y-auto no-scrollbar">
+        <nav class="flex-1 p-4 space-y-1 overflow-y-auto sidebar-scroll">
 
-            <p class="px-2 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 mt-4">Menu Principal</p>
+            <p class="px-2 text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-4 mt-8">Menu Principal</p>
 
             <a href="index.php"
                 class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-white/10 hover:text-white transition-colors <?php echo basename($_SERVER['PHP_SELF']) == 'index.php' ? 'bg-brand-600 text-white' : 'text-slate-300'; ?>">
@@ -130,7 +130,7 @@ function hasPerm($mod)
                         d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
                     </path>
                 </svg>
-                Cartão de Ponto Diário
+                Cartão de Ponto<br>Diário
             </a>
 
             <a href="ponto_justificado.php"
@@ -180,6 +180,17 @@ function hasPerm($mod)
                     </svg>
                     Relatórios Ponto
                 </a>
+                <?php if ($is_crh_viewer): ?>
+                <a href="relatorio_profissional.php"
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-white/10 hover:text-white transition-colors <?php echo basename($_SERVER['PHP_SELF']) == 'relatorio_profissional.php' ? 'bg-brand-600 text-white' : 'text-slate-300'; ?>">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
+                        </path>
+                    </svg>
+                    Relatório Profissional
+                </a>
+                <?php endif; ?>
             <?php endif; ?>
 
             <a href="geolocalizacao.php"
@@ -195,7 +206,10 @@ function hasPerm($mod)
 
             <p class="px-2 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 mt-6">Configurações</p>
 
-            <?php if (hasPerm('horarios')): ?>
+            <?php 
+            $is_admin_or_crh_config = (($_SESSION['user_level'] ?? '') == '1' || in_array(strtolower(trim($_SESSION['user_name'] ?? '')), ['corsin', 'crh']) || in_array(strtolower(trim($_SESSION['user_setor'] ?? '')), ['corsin', 'crh']));
+            if ($is_admin_or_crh_config && hasPerm('horarios')): 
+            ?>
                 <a href="horarios.php"
                     class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-white/10 hover:text-white transition-colors <?php echo basename($_SERVER['PHP_SELF']) == 'horarios.php' ? 'bg-brand-600 text-white' : 'text-slate-300'; ?>">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -206,7 +220,7 @@ function hasPerm($mod)
                 </a>
             <?php endif; ?>
 
-            <?php if (hasPerm('cargos')): ?>
+            <?php if ($is_admin_or_crh_config && hasPerm('cargos')): ?>
                 <a href="cargos.php"
                     class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-white/10 hover:text-white transition-colors <?php echo basename($_SERVER['PHP_SELF']) == 'cargos.php' ? 'bg-brand-600 text-white' : 'text-slate-300'; ?>">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -249,16 +263,16 @@ function hasPerm($mod)
 
         </nav>
 
-        <div class="p-4 border-t border-white/10">
-            <div class="flex items-center gap-3 mb-4">
-                <div class="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-sm font-bold">
-                    <?php echo substr($_SESSION['user_name'], 0, 1); ?>
+        <div class="p-4 border-t border-white/5 bg-slate-900/50">
+            <div class="flex items-center gap-3 mb-6 px-2">
+                <div class="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center text-white text-xl font-bold border border-white/10 shadow-inner">
+                    <?php echo strtolower(substr($_SESSION['user_name'] ?? 'U', 0, 1)); ?>
                 </div>
                 <div class="flex-1 min-w-0">
-                    <p class="text-sm font-medium text-white truncate">
-                        <?php echo htmlspecialchars($_SESSION['user_name']); ?>
+                    <p class="text-sm font-bold text-white truncate">
+                        <?php echo htmlspecialchars($_SESSION['user_name'] ?? 'Usuário'); ?>
                     </p>
-                    <p class="text-xs text-slate-400 truncate">
+                    <p class="text-xs text-slate-400 truncate font-medium">
                         <?php
                         $lvlNames = ['1' => 'Administrador', '2' => 'Gestor', '3' => 'Usuário'];
                         echo $lvlNames[$_SESSION['user_level'] ?? '3'] ?? 'Usuário';
@@ -266,10 +280,10 @@ function hasPerm($mod)
                     </p>
                 </div>
             </div>
-            <div class="space-y-2">
+            <div class="flex flex-col gap-2">
                 <button onclick="openChangePasswordModal()"
-                    class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-white/5 hover:bg-brand-500/20 text-slate-300 hover:text-brand-400 text-sm font-medium transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    class="w-full flex items-center justify-center gap-3 px-4 py-2.5 rounded-xl bg-slate-800/50 hover:bg-slate-800 text-slate-300 hover:text-white transition-all text-sm font-bold border border-white/5 shadow-sm group">
+                    <svg class="w-4 h-4 transition-transform group-hover:rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z">
                         </path>
@@ -277,8 +291,8 @@ function hasPerm($mod)
                     Trocar Senha
                 </button>
                 <button onclick="logout()"
-                    class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-white/5 hover:bg-red-500/20 text-slate-300 hover:text-red-400 text-sm font-medium transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    class="w-full flex items-center justify-center gap-3 px-4 py-2.5 rounded-xl bg-slate-800/50 hover:bg-slate-800 text-slate-300 hover:text-white transition-all text-sm font-bold border border-white/5 shadow-sm group">
+                    <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1">
                         </path>
